@@ -157,27 +157,27 @@ Resources:
           - ErrorCode: 400
             ErrorCachingMinTTL: 5
             ResponseCode: 400
-            ResponsePagePath: '/error_pages/400.html'
+            ResponsePagePath: '/S3_Content/error_pages/400.html'
           - ErrorCode: 403
             ErrorCachingMinTTL: 5
             ResponseCode: 403
-            ResponsePagePath: '/error_pages/403.html'
+            ResponsePagePath: '/S3_Content/error_pages/403.html'
           - ErrorCode: 404
             ErrorCachingMinTTL: 5
             ResponseCode: 404
-            ResponsePagePath: '/error_pages/404.html'
+            ResponsePagePath: '/S3_Content/error_pages/404.html'
           - ErrorCode: 500
             ErrorCachingMinTTL: 5
             ResponseCode: 500
-            ResponsePagePath: '/error_pages/500.html'
+            ResponsePagePath: '/S3_Content/error_pages/500.html'
           - ErrorCode: 502
             ErrorCachingMinTTL: 5
             ResponseCode: 502
-            ResponsePagePath: '/error_pages/502.html'
+            ResponsePagePath: '/S3_Content/error_pages/502.html'
           - ErrorCode: 504
             ErrorCachingMinTTL: 5
             ResponseCode: 504
-            ResponsePagePath: '/error_pages/504.html'
+            ResponsePagePath: '/S3_Content/error_pages/504.html'
         DefaultCacheBehavior:
           AllowedMethods:
             - 'GET'
