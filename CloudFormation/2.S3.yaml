@@ -1,0 +1,296 @@
+# Create a [waf-myblog] in advance
+# Create a stack with the name [s3-myblog]
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: My Blog Configuration
+        Parameters:
+          - S3Name
+          - IndexDocumentFileName
+          - ErrorDocumentFileName
+          - OriginAccessControlName
+          - SigningSetting
+          - ACM
+          - UseCloudFrontAlias
+          - Route53HostZoneID
+          - Route53RecordName
+          - CloudFrontHostedZoneID
+          - WAFName
+          - IPSetName
+          - DefaultPage
+          - WAFarn
+      -
+        Label:
+          default: For Deleting S3 Bucket Configuration
+        Parameters:
+          - LambdaName
+          - CloudWatchLogsName
+          - IAMRoleName
+          - IAMPolicyName
+
+
+
+Parameters:
+  S3Name:
+    Type: String
+    Default: 'metalmental-myblog'
+
+  LambdaName:
+    Type: String
+    Default: 'ForDeletingS3Object'
+
+  CloudWatchLogsName:
+    Type: String
+    Default: 'ForDeletingS3Object'
+
+  IAMRoleName:
+    Type: String
+    Default: 'ForDeletingS3Object'
+
+  IAMPolicyName:
+    Type: String
+    Default: 'ForDeletingS3Object'
+
+  IndexDocumentFileName:
+    Type: String
+    Default: 'index.html'
+
+  ErrorDocumentFileName:
+    Type: String
+    Default: 'error.html'
+
+  OriginAccessControlName:
+    Type: String
+    Default: 'metalmental-myblog'
+
+  SigningSetting:
+    Type: String
+    Default: 'always'
+    AllowedValues:
+      - 'always'
+      - 'never'
+      - 'no-override'
+
+  ACM:
+    Type: String
+
+  UseCloudFrontAlias:
+    Type: String
+    Default: 'True'
+    AllowedValues:
+      - 'True'
+      - 'False'
+
+  Route53HostZoneID:
+    Type: String
+    Default: 'Z057146116IR75PLD6YV1'
+
+  Route53RecordName:
+    Type: String
+    Default: 'www.metalmental.net'
+
+  CloudFrontHostedZoneID:
+    Type: String
+    Default: 'Z2FDTNDATAQYW2'
+
+  WAFName:
+    Type: String
+    Default: 'metalmental-myblog'
+
+  IPSetName:
+    Type: String
+    Default: 'Custom-ipaddress-blacklist'
+
+  DefaultPage:
+    Type: String
+    Default: 'S3_Content/index.html'
+
+  WAFarn:
+    Type: String
+
+
+
+Conditions:
+  IsCloudFrontAlias: !Equals [ !Ref UseCloudFrontAlias, 'True' ]
+
+
+
+Resources:
+  # If CloudFront is used, Static Website Hosting does not need to be configured
+  S3ForMyBlog:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3Name
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: FALSE
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3ForMyBlog
+      PolicyDocument:
+        Version: 2008-10-17 # old version
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource:
+              - !Sub ${S3ForMyBlog.Arn}/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - !Ref Route53RecordName
+        # ContinuousDeploymentPolicyId: String # CI/CD
+        CustomErrorResponses:
+          - ErrorCode: 400
+            ErrorCachingMinTTL: 5
+            ResponseCode: 400
+            ResponsePagePath: '/error_pages/400.html'
+          - ErrorCode: 403
+            ErrorCachingMinTTL: 5
+            ResponseCode: 403
+            ResponsePagePath: '/error_pages/403.html'
+          - ErrorCode: 404
+            ErrorCachingMinTTL: 5
+            ResponseCode: 404
+            ResponsePagePath: '/error_pages/404.html'
+          - ErrorCode: 500
+            ErrorCachingMinTTL: 5
+            ResponseCode: 500
+            ResponsePagePath: '/error_pages/500.html'
+          - ErrorCode: 502
+            ErrorCachingMinTTL: 5
+            ResponseCode: 502
+            ResponsePagePath: '/error_pages/502.html'
+          - ErrorCode: 504
+            ErrorCachingMinTTL: 5
+            ResponseCode: 504
+            ResponsePagePath: '/error_pages/504.html'
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - 'GET'
+            - 'HEAD'
+          CachedMethods:
+            - 'GET'
+            - 'HEAD'
+          CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'  # CachingOptimized (Recommended for S3)
+          Compress: true
+          TargetOriginId: 'S3Origin'
+          ViewerProtocolPolicy: 'redirect-to-https'
+        DefaultRootObject: !Ref DefaultPage
+        Enabled: true
+        HttpVersion: 'http2and3'
+        IPV6Enabled: true
+        Origins:
+          - DomainName: !GetAtt S3ForMyBlog.RegionalDomainName
+            Id: 'S3Origin'
+            OriginAccessControlId: !GetAtt OAC.Id
+            OriginShield:
+              Enabled: false
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        PriceClass: 'PriceClass_All'
+        Staging: false
+        ViewerCertificate:
+          AcmCertificateArn: !Ref ACM
+          MinimumProtocolVersion: 'TLSv1.2_2021'
+          SslSupportMethod: 'sni-only'
+        WebACLId: !Ref WAFarn
+
+  OAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Ref OriginAccessControlName
+        OriginAccessControlOriginType: 's3'
+        SigningBehavior: !Ref SigningSetting # Set if you want to control access
+        SigningProtocol: 'sigv4'
+
+  Route53CloudFrontAlias:
+    Type: AWS::Route53::RecordSet
+    Condition: IsCloudFrontAlias
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: !Ref CloudFrontHostedZoneID
+      HostedZoneId: !Ref Route53HostZoneID
+      Name: !Ref Route53RecordName
+      Type: "A"
+
+
+
+  LambdaForDeletingS3Object:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaName
+      Handler: index.lambda_handler
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Runtime: python3.12
+      Timeout: 300
+      LoggingConfig:
+        LogGroup: !Ref CloudWatchLogs
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          def lambda_handler(event, context):
+              s3 = boto3.resource('s3')
+              try:
+                  if event['RequestType'] == 'Delete':
+                      bucket = s3.Bucket(event['ResourceProperties']['BucketName'])
+                      bucket.objects.all().delete()
+                      bucket.object_versions.all().delete()
+                      s3.Bucket(event['ResourceProperties']['BucketName']).delete()
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print("Error: ", e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+
+  InvokeLambda:
+    Type: Custom::EmptyS3Bucket
+    Properties:
+      ServiceToken: !GetAtt LambdaForDeletingS3Object.Arn
+      BucketName: !Ref S3ForMyBlog
+
+  IAMRoleForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref IAMRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Ref IAMPolicyName
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - logs:*
+                Resource:
+                  - !Sub ${S3ForMyBlog.Arn}
+                  - !Sub ${S3ForMyBlog.Arn}/*
+
+  CloudWatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref CloudWatchLogsName
+      LogGroupClass: INFREQUENT_ACCESS
+      RetentionInDays: 1

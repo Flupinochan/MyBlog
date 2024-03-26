@@ -1,0 +1,153 @@
+# Create a stack with the name [waf-myblog]
+# ★Caution
+# For CLOUDFRONT, you must create your WAFv2 resources in the US East (N. Virginia) Region, us-east-1.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: My Blog Configuration
+        Parameters:
+          - S3Name
+          - WAFName
+          - IPSetName
+
+
+
+Parameters:
+  S3Name:
+    Type: String
+    Default: 'metalmental-myblog'
+
+  WAFName:
+    Type: String
+    Default: 'metalmental-myblog'
+
+  IPSetName:
+    Type: String
+    Default: 'Custom-ipaddress-blacklist'
+
+
+
+Resources:
+# AWS Managed Rules List
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html
+  WAFacl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      # CaptchaConfig:
+      # ChallengeConfig:
+      DefaultAction:
+        Allow: {}
+      Name: !Ref WAFName
+      Rules:
+        - Name: 'AWS-AWSManagedRulesAmazonIpReputationList'
+          OverrideAction:
+            Count: {}
+          Priority: 1
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: 'AWSManagedRulesAmazonIpReputationList'
+              VendorName: 'AWS'
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: 'AWSManagedRulesAmazonIpReputationList'
+            SampledRequestsEnabled: true
+        - Name: 'AWS-AWSManagedRulesCommonRuleSet'
+          OverrideAction:
+            Count: {}
+          Priority: 2
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: 'AWSManagedRulesCommonRuleSet'
+              VendorName: 'AWS'
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: 'AWSManagedRulesCommonRuleSet'
+            SampledRequestsEnabled: true
+        - Name: 'AWS-AWSManagedRulesAdminProtectionRuleSet'
+          OverrideAction:
+            Count: {}
+          Priority: 3
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: 'AWSManagedRulesAdminProtectionRuleSet'
+              VendorName: 'AWS'
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: 'AWSManagedRulesAdminProtectionRuleSet'
+            SampledRequestsEnabled: true
+        - Name: 'AWS-AWSManagedRulesKnownBadInputsRuleSet'
+          OverrideAction:
+            Count: {}
+          Priority: 4
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: 'AWSManagedRulesKnownBadInputsRuleSet'
+              VendorName: 'AWS'
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: 'AWSManagedRulesKnownBadInputsRuleSet'
+            SampledRequestsEnabled: true
+        - Name: 'AWS-AWSManagedRulesSQLiRuleSet'
+          OverrideAction:
+            Count: {}
+          Priority: 5
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: 'AWSManagedRulesSQLiRuleSet'
+              VendorName: 'AWS'
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: 'AWSManagedRulesSQLiRuleSet'
+            SampledRequestsEnabled: true
+        - Name: 'AWS-AWSManagedRulesLinuxRuleSet'
+          OverrideAction:
+            Count: {}
+          Priority: 6
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: 'AWSManagedRulesLinuxRuleSet'
+              VendorName: 'AWS'
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: 'AWSManagedRulesLinuxRuleSet'
+            SampledRequestsEnabled: true
+        # - Name: 'AWS-AWSManagedRulesUnixRuleSet' # Total WCUs exceed 1500 and are subject to additional costs.
+        #   OverrideAction:
+        #     Count: {}
+        #   Priority: 7
+        #   Statement:
+        #     ManagedRuleGroupStatement:
+        #       Name: 'AWSManagedRulesUnixRuleSet'
+        #       VendorName: 'AWS'
+        #   VisibilityConfig:
+        #     CloudWatchMetricsEnabled: true
+        #     MetricName: 'AWSManagedRulesUnixRuleSet'
+        #     SampledRequestsEnabled: true
+        - Name: !Ref IPSetName
+          Action:
+            Count: {}
+          Priority: 8
+          Statement:
+            IPSetReferenceStatement:
+              Arn: !GetAtt IPBlackList.Arn
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: !Ref IPSetName
+            SampledRequestsEnabled: true
+      Scope: 'CLOUDFRONT'
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref S3Name
+        SampledRequestsEnabled: true
+
+  IPBlackList:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Name: !Ref IPSetName
+      Scope: 'CLOUDFRONT'
+      IPAddressVersion: 'IPV4'
+      Addresses:
+        - '111.111.111.111/32'
