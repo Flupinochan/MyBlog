@@ -1,5 +1,7 @@
 # Create a [s3-myblog] in advance
 # Create a stack with the name [codepipeline-myblog]
+# ★Caution
+# After creating the CloudFormation Stack, please authenticate the connection for CodeStar Connection.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
