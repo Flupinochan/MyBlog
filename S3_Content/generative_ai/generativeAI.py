@@ -2,7 +2,7 @@ import json
 import boto3
 from botocore.config import Config
 
-region = 'ap-northeast-1'
+region = 'us-east-1'
 config = Config(
     region_name=region,
     retries={
@@ -12,7 +12,7 @@ config = Config(
 )
 client = boto3.client('bedrock-runtime')
 
-model_id = 'anthropic.claude-v2:1'
+model_id = 'anthropic.claude-3-sonnet-20240229-v1:0'
 
 def lambda_handler(event, context):
     format = {
