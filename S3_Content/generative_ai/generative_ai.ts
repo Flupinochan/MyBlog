@@ -36,23 +36,30 @@ class GenerativeAI {
         };
 
         // npm install --save @types/jquery
-        $.ajax({
-            // invoke Lambda named generativeAI
-            url: 'https://yxwhufw84i.execute-api.ap-northeast-1.amazonaws.com/prod/sentenceGeneration',
-            type: 'POST',
-            data: JSON.stringify(inputData),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            async: true,
-            success: function (response) {
-                const message = JSON.parse(response.body).key;
-                $('#outputField').text(message);
-            },
-            error: function (_1, _2, error) {
-                $('#outputField').text(`${error}`);
-            }
+        try {
+            $.ajax({
+                // invoke Lambda named generativeAI
+                url: 'https://yxwhufw84i.execute-api.ap-northeast-1.amazonaws.com/prod/sentenceGeneration',
+                type: 'POST',
+                data: JSON.stringify(inputData),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: true,
+                timeout: 500,
+                success: function (response) {
+                    console.log("test");
+                    const message = JSON.parse(response.body).key;
+                    $('#outputField').text(message);
+                },
+                error: function (_1, _2, error) {
+                    console.log("test");
+                    $('#outputField').text(`${error}`);
+                }
+            })
+        } catch (error) {
+            console.log("error");
+        }
 
-        });
     }
 }
 
