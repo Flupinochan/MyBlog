@@ -32,7 +32,7 @@ class GenerativeAI {
         event.preventDefault();
         const value = this.inputFieldElement.value;
         const inputData = {
-            key: value
+            prompt: value
         };
 
         // npm install --save @types/jquery
@@ -45,14 +45,11 @@ class GenerativeAI {
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 async: true,
-                timeout: 500,
                 success: function (response) {
-                    console.log("test");
-                    const message = JSON.parse(response.body).key;
+                    const message = JSON.parse(response.body).prompt;
                     $('#outputField').text(message);
                 },
                 error: function (_1, _2, error) {
-                    console.log("test");
                     $('#outputField').text(`${error}`);
                 }
             })
