@@ -54,7 +54,7 @@ class GenerativeAI {
                 }
             })
         } catch (error) {
-            console.log("error");
+            $('#outputField').text(`${error}`);
         }
 
     }

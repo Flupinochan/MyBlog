@@ -15,9 +15,8 @@ client = boto3.client('bedrock-runtime')
 model_id = 'anthropic.claude-v2:1'
 
 def lambda_handler(event, context):
-    prompt_str = str(event['prompt'])
     format = {
-        'prompt': f'\n\nHuman: {prompt_str}\nAssistant:',
+        'prompt': f'\n\nHuman: {event['prompt']}\nAssistant:',
         'max_tokens_to_sample': 4000
     }
 
