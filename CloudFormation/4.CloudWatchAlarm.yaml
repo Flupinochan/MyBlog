@@ -1,0 +1,90 @@
+# Create a stack with the name [alarm-myblog]
+# ★Caution
+# The CloudWatch Alarm for CloudFront needs to be created in us-east-1.
+# After creating the CloudFormation stack, please subscribe to SNS.
+
+Parameters:
+  CloudWatchMetricName:
+    Type: String
+    Default: 'TotalErrorRate'
+  CloudWatchMetricNamespace:
+    Type: String
+    Default: 'AWS/CloudFront'
+  SNSBody:
+    Type: String
+    Default: 'Errors are occurring frequently on metalmental-myblog'
+  SNSSubject:
+    Type: String
+    Default: 'An error has occurred on metalmental-myblog'
+  SNSTopicName:
+    Type: String
+    Default: 'metalmental-myblog'
+  EmailAddress:
+    Type: String
+    Default: 'flupino@metalmental.net'
+  CloudFrontID:
+    Type: String
+    Default: 'E392B62NFG9IBQ'
+  Region:
+    Type: String
+    Default: 'Global'
+
+
+
+Resources:
+  CloudWatchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmActions:
+        - !Ref SNSTopic
+      AlarmDescription: !Ref SNSBody
+      AlarmName: !Ref SNSSubject
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: 'DistributionId'
+          Value: !Ref CloudFrontID
+        - Name: 'Region'
+          Value: !Ref Region
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: !Ref CloudWatchMetricName
+      Namespace: !Ref CloudWatchMetricNamespace
+      Period: 86400
+      Statistic: Sum
+      Threshold: 10000
+      TreatMissingData: notBreaching
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Ref SNSTopicName
+      FifoTopic: false
+  SNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Sid: __default_statement_ID
+            Effect: Allow
+            Principal:
+              AWS: '*'
+            Action:
+              - SNS:GetTopicAttributes
+              - SNS:SetTopicAttributes
+              - SNS:AddPermission
+              - SNS:RemovePermission
+              - SNS:DeleteTopic
+              - SNS:Subscribe
+              - SNS:ListSubscriptionsByTopic
+              - SNS:Publish
+            Resource: !Ref SNSTopic
+            Condition:
+              StringEquals:
+                AWS:SourceOwner: !Ref AWS::AccountId
+      Topics:
+        - !Ref SNSTopic
+  SNSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref EmailAddress
+      Protocol: email
+      TopicArn: !Ref SNSTopic
