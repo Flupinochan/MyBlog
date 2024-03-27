@@ -21,7 +21,7 @@ class GenerativeAI {
             dataType: 'json',
             async: true,
             success: function (response) {
-                const message = response.message;
+                const message = JSON.parse(response.body).message;
                 $('#outputField').text(message);
             },
             error: function (_1, _2, error) {
