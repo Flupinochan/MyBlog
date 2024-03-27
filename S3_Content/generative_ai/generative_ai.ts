@@ -1,17 +1,41 @@
+function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    const adjDescriptor: PropertyDescriptor = {
+        configurable: true,
+        enumerable: false,
+        get() {
+            const boundFn = originalMethod.bind(this);
+            return boundFn;
+        },
+    };
+    return adjDescriptor;
+}
+
 class GenerativeAI {
 
+    inputFormElement: HTMLFormElement;
+    inputFieldElement: HTMLInputElement;
+
     constructor() {
-        // npm install --save @types/jquery
-        $('#inputForm').on('submit', this.submitHandler);
+        this.inputFormElement = document.getElementById('inputForm')! as HTMLFormElement;
+        this.inputFieldElement = this.inputFormElement.querySelector('#inputField')! as HTMLInputElement;
+
+        this.configure();
     }
 
+    private configure() {
+        this.inputFormElement.addEventListener('submit', this.submitHandler);
+    }
+
+    @Autobind
     private submitHandler(event: Event) {
         event.preventDefault();
-        const value = $('#inputField').val() as string;
+        const value = this.inputFieldElement.value;
         const inputData = {
             key: value
         };
 
+        // npm install --save @types/jquery
         $.ajax({
             // invoke Lambda named generativeAI
             url: 'https://yxwhufw84i.execute-api.ap-northeast-1.amazonaws.com/prod/sentenceGeneration',
