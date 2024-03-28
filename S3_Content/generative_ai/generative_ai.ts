@@ -50,7 +50,7 @@ class GenerativeAI {
                     const marked = require('marked');
                     const htmlMessage = marked(message);
                     // $('#outputField').text(message);
-                    $('#outputField').html(message);
+                    $('#outputField').html(htmlMessage);
                 },
                 error: function (_1, _2, error) {
                     $('#outputField').text(`${error}`);
