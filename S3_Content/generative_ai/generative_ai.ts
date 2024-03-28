@@ -1,3 +1,4 @@
+import marked from 'marked';
 
 function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
@@ -48,7 +49,6 @@ class GenerativeAI {
                 async: true,
                 success: function (response) {
                     const message = JSON.parse(response.body).prompt;
-                    const marked = require('marked');
                     const htmlMessage = marked(message);
                     // $('#outputField').text(message);
                     $('#outputField').html(htmlMessage);
