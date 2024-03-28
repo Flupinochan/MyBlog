@@ -42,9 +42,7 @@ class GenerativeAI {
                 async: true,
                 success: function (response) {
                     const message = JSON.parse(response.body).prompt;
-                    const marked = require('marked');
-                    const htmlMessage = marked(message);
-                    $('#outputField').html(htmlMessage);
+                    $('#outputField').text(message);
                 },
                 error: function (_1, _2, error) {
                     $('#outputField').text(`${error}`);
