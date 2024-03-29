@@ -44,11 +44,12 @@ a:hover {
 h2 {
     opacity: 0;
     padding: 0.5em 1em;
+    color: #4c54c0;
     background-color: #e1e4f5;
     box-shadow: 5px -5px #4c54c0;
     position: relative;
     animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
-    animation-delay: 0.9s;
+    animation-delay: 1.2s;
     animation-fill-mode: forwards;
 }
 
@@ -57,14 +58,14 @@ h2 {
     list-style: none;
     padding: 0;
     animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
-    animation-delay: 0.9s;
+    animation-delay: 1.3s;
     animation-fill-mode: forwards;
 }
 
 #list-home li {
     opacity: 0;
-    background: #ebf4f8;
-    border-left: 12px solid #99BDDE;
+    background: #ebebf8;
+    border-left: 12px solid #9b99de;
     margin-bottom: 3px;
     padding: .5em;
     animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
@@ -72,13 +73,29 @@ h2 {
     animation-fill-mode: forwards;
 }
 
+@keyframes slideUp {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY();
+        opacity: 1;
+    }
+}
+
 #headerMenu {
+    opacity: 0;
     display: flex;
     justify-content: space-around;
     background-color: #e5deff;
     border-bottom: 3px solid #e9ecef;
     flex-wrap: wrap;
     padding: 10px;
+    animation: slideUp 0.5s cubic-bezier(0, 0, 0.01, 1);
+    animation-delay: 0.8s;
+    animation-fill-mode: forwards;
 }
 
 #headerMenu a {
@@ -101,4 +118,10 @@ h2 {
 
 #headerMenu a:hover::after {
     background-color: #4c54c0;
+}
+
+#headerMenu a img {
+    height: 1em;
+    position: relative;
+    top: 1px;
 }
