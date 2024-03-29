@@ -34,7 +34,7 @@ class GenerativeAI {
         };
         try {
             $.ajax({
-                url: 'https://www.metalmental.net/sentenceGeneration',
+                url: 'https://yxwhufw84i.execute-api.ap-northeast-1.amazonaws.com/prod/sentenceGeneration',
                 type: 'POST',
                 data: JSON.stringify(inputData),
                 contentType: 'application/json; charset=utf-8',

@@ -39,8 +39,8 @@ class GenerativeAI {
         try {
             $.ajax({
                 // invoke Lambda named generativeAI
-                // url: 'https://yxwhufw84i.execute-api.ap-northeast-1.amazonaws.com/prod/sentenceGeneration',
-                url: 'https://www.metalmental.net/sentenceGeneration',
+                url: 'https://yxwhufw84i.execute-api.ap-northeast-1.amazonaws.com/prod/sentenceGeneration',
+                // url: 'https://www.metalmental.net/sentenceGeneration',
                 type: 'POST',
                 data: JSON.stringify(inputData),
                 contentType: 'application/json; charset=utf-8',
