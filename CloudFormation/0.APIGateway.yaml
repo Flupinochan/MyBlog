@@ -1,0 +1,53 @@
+# Resources:
+#   ApiGatewayRestApi00yxwhufw84i00HBaT5:
+#     UpdateReplacePolicy: "Retain"
+#     Type: "AWS::ApiGateway::RestApi"
+#     DeletionPolicy: "Retain"
+#     Properties:
+#       ApiKeySourceType: "HEADER"
+#       EndpointConfiguration:
+#         Types:
+#         - "REGIONAL"
+#       DisableExecuteApiEndpoint: false
+#       Name: "myblog-test"
+#   ApiGatewayStage00prod004VkZ4:
+#     UpdateReplacePolicy: "Retain"
+#     Type: "AWS::ApiGateway::Stage"
+#     DeletionPolicy: "Retain"
+#     Properties:
+#       DeploymentId:
+#         Fn::GetAtt:
+#         - "ApiGatewayDeployment00tq4jb400xf4tU"
+#         - "DeploymentId"
+#       StageName: "prod"
+#       TracingEnabled: false
+#       RestApiId:
+#         Ref: "ApiGatewayRestApi00yxwhufw84i00HBaT5"
+#       MethodSettings:
+#       - CacheTtlInSeconds: 300
+#         LoggingLevel: "INFO"
+#         ResourcePath: "/*"
+#         CacheDataEncrypted: false
+#         DataTraceEnabled: true
+#         ThrottlingBurstLimit: 5000
+#         CachingEnabled: false
+#         MetricsEnabled: true
+#         HttpMethod: "*"
+#         ThrottlingRateLimit: 10000
+#       AccessLogSetting:
+#         DestinationArn: "arn:aws:logs:ap-northeast-1:247574246160:log-group:API-Gateway-Execution-Logs_yxwhufw84i/prod"
+#         Format: "{ \"requestId\":\"$context.requestId\", \"ip\": \"$context.identity.sourceIp\"\
+#           , \"caller\":\"$context.identity.caller\", \"user\":\"$context.identity.user\"\
+#           ,\"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\"\
+#           ,\"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\"\
+#           , \"errorMessage\": \"$context.error.message\", \"protocol\":\"$context.protocol\"\
+#           , \"responseLength\":\"$context.responseLength\" }"
+#       CacheClusterSize: "0.5"
+#       CacheClusterEnabled: false
+#   ApiGatewayDeployment00fp6z6d0028uIw:
+#     UpdateReplacePolicy: "Retain"
+#     Type: "AWS::ApiGateway::Deployment"
+#     DeletionPolicy: "Retain"
+#     Properties:
+#       RestApiId:
+#         Ref: "ApiGatewayRestApi00yxwhufw84i00HBaT5"
