@@ -11,8 +11,6 @@
 }
 
 #header {
-    max-width: 100%;
-    height: auto;
     opacity: 0;
     display: flex;
     justify-content: center;
@@ -20,6 +18,11 @@
     animation: slidedown 0.5s cubic-bezier(0, 0, 0.01, 1);
     animation-delay: 0.5s;
     animation-fill-mode: forwards;
+}
+
+#header img {
+    max-width: 100%;
+    height: auto;
 }
 
 a:hover {
@@ -71,17 +74,17 @@ h2 {
 
 #headerMenu {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     background-color: #e5deff;
-    padding: 13px 0;
     border-bottom: 3px solid #e9ecef;
+    flex-wrap: wrap;
+    padding: 10px;
 }
 
 #headerMenu a {
     text-decoration: none;
     color: #4c54c0;
     font-size: 18px;
-    margin: 0 60px;
     position: relative;
 }
 
