@@ -25,8 +25,12 @@
     height: auto;
 }
 
+a:link, a:visited{
+    color: dodgerblue;
+}
+
 a:hover {
-    color: darkturquoise
+    color: turquoise;
 }
 
 @keyframes slideFadeIn {
@@ -52,6 +56,25 @@ h2 {
     animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
     animation-delay: 1.2s;
     animation-fill-mode: forwards;
+}
+
+h3 {
+    font-family: 'Meiryo', 'メイリオ', sans-serif;
+    padding: 0.7em 0.7em;
+    color: #4c54c0;
+    background-color: #e1e4f5;
+    border-left: solid 5px #516ab6;
+    position: relative;
+}
+
+h4 {
+    font-size: large;
+    font-family: 'Meiryo', 'メイリオ', sans-serif;
+    padding: 0.4em 0.4em;
+    color: #4c54c0;
+    /* background-color: #e1e4f5; */
+    border-bottom: solid 3px #516ab6;
+    position: relative;
 }
 
 #list-home {
@@ -147,8 +170,8 @@ h2 {
     padding: 0px 20px 10px 15px;
     border: 1px solid rgba(76, 84, 192, 0.1);
     opacity: 0;
-    animation: fadeIn 1s;
-    animation-delay: 1.6s;
+    animation: fadeIn 0.6s;
+    animation-delay: 1.4s;
     animation-fill-mode: forwards;
 }
 
@@ -168,4 +191,19 @@ h2 {
     margin-left: 5px;
     font-family: 'メイリオ', 'Meiryo', sans-serif;
     color: #979797;
+}
+
+P {
+    font-family: 'メイリオ', 'Meiryo', serif;
+    color: #4c54c0;
+}
+
+b {
+    font-family: 'メイリオ', 'Meiryo', serif;
+    color: #4c54c0;
+}
+
+.normalImage{
+    max-width: 100%;
+    height: auto;
 }
