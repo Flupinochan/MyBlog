@@ -64,6 +64,7 @@ h2 {
 }
 
 #list-home li {
+    font-family: 'メイリオ', 'Meiryo', serif;
     opacity: 0;
     background: #ebebf8;
     border-left: 12px solid #9b99de;
