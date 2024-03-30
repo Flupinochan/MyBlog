@@ -151,3 +151,21 @@ h2 {
     animation-delay: 1.6s;
     animation-fill-mode: forwards;
 }
+
+#blogDay {
+    display: flex;
+    align-items: center;
+    margin-top: 11px;
+}
+
+#dayIcon {
+    width: 20px;
+    height: auto;
+}
+
+#yyyymmdd {
+    margin-top: 2px;
+    margin-left: 5px;
+    font-family: 'メイリオ', 'Meiryo', sans-serif;
+    color: #979797;
+}
