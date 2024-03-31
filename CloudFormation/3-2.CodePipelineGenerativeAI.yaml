@@ -7,10 +7,8 @@ Metadata:
         Parameters:
           - S3NameForCodePipeline
           - S3NameForMyBlog
-          - CodeStarConnectionName
-          - GitHubRepositoryName
+          - S3PrefixNameGenAI
           - CodePipelineName
-          - MainBranchName
           - CodePipelineIAMRoleName
           - CodePipelineIAMPolicyName
           - EventBridgeRuleName
@@ -56,7 +54,7 @@ Parameters:
 
   S3PrefixNameGenAI:
     Type: String
-    Default: "S3_Content/generative_ai/dummy.zip"
+    Default: "S3_Content/generative_ai/template.zip"
 
   CodePipelineName:
     Type: String
@@ -100,7 +98,7 @@ Parameters:
 
   SourceS3Prefix:
     Type: String
-    Default: "metalmental-myblog/S3_Content/generative_ai/"
+    Default: "metalmental-myblog/S3_Content/generative_ai/template.zip"
 
 Resources:
   S3:
@@ -165,7 +163,7 @@ Resources:
       ServiceRole: !Ref CodeBuildIAMRole
       Source:
         Type: "S3"
-        Location: !Ref SourceS3Prefix
+        Location: !Ref SourceS3Prefix # When using an S3 Bucket as the source, the Location needs to be a zip file.
       Artifacts:
         Type: "NO_ARTIFACTS"
       Environment:
@@ -182,7 +180,6 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Ref CodeBuildCloudWatchLogsName
-      LogGroupClass: INFREQUENT_ACCESS
       RetentionInDays: 1
 
   CodePipelineIAMRole:
