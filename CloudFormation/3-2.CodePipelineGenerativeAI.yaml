@@ -56,7 +56,7 @@ Parameters:
 
   S3PrefixNameGenAI:
     Type: String
-    Default: "S3_Content/generative_ai/generativeAI.py"
+    Default: "S3_Content/generative_ai/dummy.zip"
 
   CodePipelineName:
     Type: String
@@ -207,6 +207,7 @@ Resources:
                 Action:
                   - codestar-connections:*
                   - "codedeploy:*"
+                  - "codebuild:*"
                   - "s3:*"
                   - "cloudwatch:*"
                   - "sns:*"

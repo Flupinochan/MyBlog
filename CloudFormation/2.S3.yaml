@@ -4,8 +4,7 @@
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: My Blog Configuration
         Parameters:
           - S3Name
@@ -22,8 +21,7 @@ Metadata:
           - IPSetName
           - DefaultPage
           - WAFarn
-      -
-        Label:
+      - Label:
           default: For Deleting S3 Bucket Configuration
         Parameters:
           - LambdaName
@@ -31,92 +29,86 @@ Metadata:
           - IAMRoleName
           - IAMPolicyName
 
-
-
 Parameters:
   S3Name:
     Type: String
-    Default: 'metalmental-myblog'
+    Default: "metalmental-myblog"
 
   LambdaName:
     Type: String
-    Default: 'ForDeletingS3Object'
+    Default: "ForDeletingS3Object"
 
   CloudWatchLogsName:
     Type: String
-    Default: 'ForDeletingS3Object'
+    Default: "ForDeletingS3Object"
 
   IAMRoleName:
     Type: String
-    Default: 'ForDeletingS3Object'
+    Default: "ForDeletingS3Object"
 
   IAMPolicyName:
     Type: String
-    Default: 'ForDeletingS3Object'
+    Default: "ForDeletingS3Object"
 
   IndexDocumentFileName:
     Type: String
-    Default: 'index.html'
+    Default: "index.html"
 
   ErrorDocumentFileName:
     Type: String
-    Default: 'error.html'
+    Default: "error.html"
 
   OriginAccessControlName:
     Type: String
-    Default: 'metalmental-myblog'
+    Default: "metalmental-myblog"
 
   SigningSetting:
     Type: String
-    Default: 'always'
+    Default: "always"
     AllowedValues:
-      - 'always'
-      - 'never'
-      - 'no-override'
+      - "always"
+      - "never"
+      - "no-override"
 
   ACM:
     Type: String
 
   UseCloudFrontAlias:
     Type: String
-    Default: 'True'
+    Default: "True"
     AllowedValues:
-      - 'True'
-      - 'False'
+      - "True"
+      - "False"
 
   Route53HostZoneID:
     Type: String
-    Default: 'Z057146116IR75PLD6YV1'
+    Default: "Z057146116IR75PLD6YV1"
 
   Route53RecordName:
     Type: String
-    Default: 'www.metalmental.net'
+    Default: "www.metalmental.net"
 
   CloudFrontHostedZoneID:
     Type: String
-    Default: 'Z2FDTNDATAQYW2'
+    Default: "Z2FDTNDATAQYW2"
 
   WAFName:
     Type: String
-    Default: 'metalmental-myblog'
+    Default: "metalmental-myblog"
 
   IPSetName:
     Type: String
-    Default: 'Custom-ipaddress-blacklist'
+    Default: "Custom-ipaddress-blacklist"
 
   DefaultPage:
     Type: String
-    Default: 'S3_Content/index.html'
+    Default: "S3_Content/index.html"
 
   WAFarn:
     Type: String
 
-
-
 Conditions:
-  IsCloudFrontAlias: !Equals [ !Ref UseCloudFrontAlias, 'True' ]
-
-
+  IsCloudFrontAlias: !Equals [!Ref UseCloudFrontAlias, "True"]
 
 Resources:
   # If CloudFront is used, Static Website Hosting does not need to be configured
@@ -127,6 +119,8 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - BucketKeyEnabled: FALSE
+      VersioningConfiguration: # When specifying an S3 Bucket as the source in CodePipeline, it is necessary to enable versioning.
+        Status: "Enabled"
 
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -157,56 +151,56 @@ Resources:
           - ErrorCode: 400
             ErrorCachingMinTTL: 5
             ResponseCode: 400
-            ResponsePagePath: '/S3_Content/error_pages/400.html'
+            ResponsePagePath: "/S3_Content/error_pages/400.html"
           - ErrorCode: 403
             ErrorCachingMinTTL: 5
             ResponseCode: 403
-            ResponsePagePath: '/S3_Content/error_pages/403.html'
+            ResponsePagePath: "/S3_Content/error_pages/403.html"
           - ErrorCode: 404
             ErrorCachingMinTTL: 5
             ResponseCode: 404
-            ResponsePagePath: '/S3_Content/error_pages/404.html'
+            ResponsePagePath: "/S3_Content/error_pages/404.html"
           - ErrorCode: 500
             ErrorCachingMinTTL: 5
             ResponseCode: 500
-            ResponsePagePath: '/S3_Content/error_pages/500.html'
+            ResponsePagePath: "/S3_Content/error_pages/500.html"
           - ErrorCode: 502
             ErrorCachingMinTTL: 5
             ResponseCode: 502
-            ResponsePagePath: '/S3_Content/error_pages/502.html'
+            ResponsePagePath: "/S3_Content/error_pages/502.html"
           - ErrorCode: 504
             ErrorCachingMinTTL: 5
             ResponseCode: 504
-            ResponsePagePath: '/S3_Content/error_pages/504.html'
+            ResponsePagePath: "/S3_Content/error_pages/504.html"
         DefaultCacheBehavior:
           AllowedMethods:
-            - 'GET'
-            - 'HEAD'
+            - "GET"
+            - "HEAD"
           CachedMethods:
-            - 'GET'
-            - 'HEAD'
-          CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'  # CachingOptimized (Recommended for S3)
+            - "GET"
+            - "HEAD"
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6" # CachingOptimized (Recommended for S3)
           Compress: true
-          TargetOriginId: 'S3Origin'
-          ViewerProtocolPolicy: 'redirect-to-https'
+          TargetOriginId: "S3Origin"
+          ViewerProtocolPolicy: "redirect-to-https"
         DefaultRootObject: !Ref DefaultPage
         Enabled: true
-        HttpVersion: 'http2and3'
+        HttpVersion: "http2and3"
         IPV6Enabled: true
         Origins:
           - DomainName: !GetAtt S3ForMyBlog.RegionalDomainName
-            Id: 'S3Origin'
+            Id: "S3Origin"
             OriginAccessControlId: !GetAtt OAC.Id
             OriginShield:
               Enabled: false
             S3OriginConfig:
-              OriginAccessIdentity: ''
-        PriceClass: 'PriceClass_All'
+              OriginAccessIdentity: ""
+        PriceClass: "PriceClass_All"
         Staging: false
         ViewerCertificate:
           AcmCertificateArn: !Ref ACM
-          MinimumProtocolVersion: 'TLSv1.2_2021'
-          SslSupportMethod: 'sni-only'
+          MinimumProtocolVersion: "TLSv1.2_2021"
+          SslSupportMethod: "sni-only"
         WebACLId: !Ref WAFarn
 
   OAC:
@@ -214,9 +208,9 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Name: !Ref OriginAccessControlName
-        OriginAccessControlOriginType: 's3'
+        OriginAccessControlOriginType: "s3"
         SigningBehavior: !Ref SigningSetting # Set if you want to control access
-        SigningProtocol: 'sigv4'
+        SigningProtocol: "sigv4"
 
   Route53CloudFrontAlias:
     Type: AWS::Route53::RecordSet
@@ -228,8 +222,6 @@ Resources:
       HostedZoneId: !Ref Route53HostZoneID
       Name: !Ref Route53RecordName
       Type: "A"
-
-
 
   LambdaForDeletingS3Object:
     Type: AWS::Lambda::Function
@@ -269,7 +261,7 @@ Resources:
     Properties:
       RoleName: !Ref IAMRoleName
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -278,7 +270,7 @@ Resources:
       Policies:
         - PolicyName: !Ref IAMPolicyName
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
