@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     StackName: "generativeAI"
-    S3BucketName: "metalmental-myblog-genai-codepipeline-s3"
+    S3BucketName: "metalmental-myblog-generativeai-codepipeline-s3"
 
 phases:
   install:
