@@ -19,6 +19,7 @@ Metadata:
           - CodeBuildIAMPolicyName
           - CodeBuildProjectName
           - SourceS3Prefix
+          - TriggerCodePipelineName
       - Label:
           default: For Deleting S3 Bucket Configuration
         Parameters:
@@ -54,7 +55,7 @@ Parameters:
 
   S3PrefixNameGenAI:
     Type: String
-    Default: "S3_Content/generative_ai/*"
+    Default: "S3_Content/generative_ai/template.zip"
 
   CodePipelineName:
     Type: String
@@ -99,6 +100,10 @@ Parameters:
   SourceS3Prefix:
     Type: String
     Default: "metalmental-myblog/S3_Content/generative_ai/template.zip"
+
+  TriggerCodePipelineName:
+    Type: String
+    Default: "metalmental-myblog"
 
 Resources:
   S3:
@@ -276,6 +281,7 @@ Resources:
       LogGroupClass: INFREQUENT_ACCESS
       RetentionInDays: 1
 
+  # https://docs.aws.amazon.com/codepipeline/latest/userguide/detect-state-changes-cloudwatch-events.html#detect-state-events-action-succeeded
   EventBridgeRule:
     Type: AWS::Events::Rule
     Properties:
@@ -284,22 +290,14 @@ Resources:
       State: "ENABLED"
       EventPattern:
         source:
-          - aws.s3
+          - aws.codepipeline
         detail-type:
-          - "AWS API Call via CloudTrail"
+          - "CodePipeline Pipeline Execution State Change"
         detail:
-          eventSource:
-            - "s3.amazonaws.com"
-          eventName:
-            - CopyObject
-            - PutObject
-            - PostObject
-            - CompleteMultipartUpload
-          requestParameters:
-            bucketName:
-              - !Ref S3NameForMyBlog
-            key:
-              - !Ref S3PrefixNameGenAI
+          state:
+            - "SUCCEEDED"
+          pipeline:
+            - !Ref TriggerCodePipelineName
       Targets:
         - Arn: !Join
             - ""
