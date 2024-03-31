@@ -31,7 +31,7 @@ Resources:
       Runtime: python3.12
       Timeout: 900
       # https://qiita.com/tkhs1121/items/bbbd5ef6d511d98bfb85
-      CodeUri: "s3://metalmental-myblog/S3_Content/generative_ai/generativeAI.py"
+      CodeUri: "generativeAI.py" # file to deploy
       LoggingConfig:
         LogGroup: !Ref CloudWatchLogs
       Role: !GetAtt LambdaIAMRole.Arn
