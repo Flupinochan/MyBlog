@@ -54,7 +54,7 @@ Parameters:
 
   S3PrefixNameGenAI:
     Type: String
-    Default: "S3_Content/generative_ai/template.zip"
+    Default: "S3_Content/generative_ai/*"
 
   CodePipelineName:
     Type: String
