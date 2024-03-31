@@ -63,3 +63,4 @@ Resources:
                 - lambda.amazonaws.com
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/AmazonBedrockFullAccess"
+        - "arn:aws:iam::aws:policy/CloudWatchFullAccessV2"

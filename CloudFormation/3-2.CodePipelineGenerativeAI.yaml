@@ -1,7 +1,4 @@
-# Create a [s3-myblog] in advance
-# Create a stack with the name [codepipeline-myblog]
-# ★Caution
-# After creating the CloudFormation Stack, please authenticate the connection for CodeStar Connection.
+# Create a stack with the name [generativeai-myblog]
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -160,61 +157,6 @@ Resources:
                 ProjectName: !Ref CodeBuild
               InputArtifacts:
                 - Name: "SourceArtifacts"
-        # - Name: "Deploy"
-        #   Actions:
-        #     - Name: "Deploy"
-        #       Actions:
-        #         - Name: Deploy
-        #           ActionTypeId:
-        #             Category: Deploy
-        #             Owner: AWS
-        #             Provider: CodeDeploy
-        #             Version: "1"
-        #           RunOrder: 1
-        #           Configuration:
-        #             ApplicationName: !Ref CodeDeployApplication
-        #             DeploymentGroupName: !Ref CodeDeployDeploymentGroup
-        #           # OutputArtifacts: []
-        #           InputArtifacts:
-        #             - Name: SourceArtifacts
-        #           # Region: us-west-2
-        #           # Namespace: DeployVariables
-
-  # CodeDeployApplication:
-  #   Type: AWS::CodeDeploy::Application
-  #   Properties:
-  #     ApplicationName: !Ref CodeDeployApplicationName
-  #     ComputePlatform: "Lambda"
-
-  # CodeDeployDeploymentGroup:
-  #   Type: "AWS::CodeDeploy::DeploymentGroup"
-  #   Properties:
-  #     ApplicationName: !Ref: CodeDeployApplication
-  #     AutoRollbackConfiguration:
-  #       Enabled: true
-  #       Events:
-  #         - "DEPLOYMENT_FAILURE"
-  #     DeploymentConfigName: "CodeDeployDefault.LambdaAllAtOnce"
-  #     DeploymentStyle:
-  #       DeploymentType: BLUE_GREEN
-  #       DeploymentOption: WITH_TRAFFIC_CONTROL
-  #     ServiceRoleArn: !GetAtt CodeDeployIAMRole.Arn
-
-  # CodeDeployIAMRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: !Ref CodeDeployIAMRoleName
-  #     AssumeRolePolicyDocument:
-  #       Version: "2012-10-17"
-  #       Statement:
-  #         - Effect: Allow
-  #           Action:
-  #             - "sts:AssumeRole"
-  #           Principal:
-  #             Service:
-  #               - codedeploy.amazonaws.com
-  #     ManagedPolicyArns:
-  #       - "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda"
 
   CodeBuild:
     Type: AWS::CodeBuild::Project
