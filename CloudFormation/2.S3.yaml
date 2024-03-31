@@ -121,6 +121,12 @@ Resources:
           - BucketKeyEnabled: FALSE
       VersioningConfiguration: # When specifying an S3 Bucket as the source in CodePipeline, it is necessary to enable versioning.
         Status: "Enabled"
+      LifecycleConfiguration:
+        Rules:
+          - Id: "rule1"
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 1
+            Status: "Enabled"
 
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
