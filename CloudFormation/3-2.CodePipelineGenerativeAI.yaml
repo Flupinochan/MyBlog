@@ -359,4 +359,5 @@ Resources:
                   - "s3:*"
                   - "cloudformation:*"
                   - "iam:*"
+                  - "lambda:*"
                 Resource: "*"

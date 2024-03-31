@@ -11,10 +11,6 @@ Parameters:
     Type: String
     Default: "generativeAI"
 
-  CodeS3URI:
-    Type: String
-    Default: "s3://metalmental-myblog/S3_Content/generative_ai/generativeAI.py"
-
   CloudWatchLogsName:
     Type: String
     Default: "generativeAI"
@@ -34,7 +30,8 @@ Resources:
           - ".lambda_handler"
       Runtime: python3.12
       Timeout: 900
-      CodeUri: !Ref CodeS3URI
+      # https://qiita.com/tkhs1121/items/bbbd5ef6d511d98bfb85
+      CodeUri: "s3://metalmental-myblog/S3_Content/generative_ai/generativeAI.py"
       LoggingConfig:
         CloudWatchLogs:
           GroupName: !Ref CloudWatchLogs
