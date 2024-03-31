@@ -48,7 +48,7 @@ Parameters:
 
   S3NameForCodePipeline:
     Type: String
-    Default: "metalmental-myblog-genai-codepipeline-s3"
+    Default: "metalmental-myblog-generativeai-codepipeline-s3"
 
   S3NameForMyBlog:
     Type: String
