@@ -40,7 +40,6 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Ref CloudWatchLogsName
-      LogGroupClass: INFREQUENT_ACCESS
       RetentionInDays: 1
 
   LambdaIAMRole:
