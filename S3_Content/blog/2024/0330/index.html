@@ -1,81 +1,143 @@
 <!DOCTYPE html>
 <html lang="ja">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="icon" href="/S3_Content/images/favicon.png">
-    <link rel="apple-touch-icon" href="/S3_Content/images/favicon.png">
+    <link rel="icon" href="/S3_Content/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/S3_Content/images/favicon.png" />
     <link rel="stylesheet" href="/S3_Content/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
     <script src="/S3_Content/common.js"></script>
     <title>ブログ初投稿(≧∇≦*)</title>
-</head>
+  </head>
 
-<body>
+  <body>
+    <div id="particles-js"></div>
     <div id="progressbar"></div>
+
     <div id="whole">
-        <div id="header">
-            <a href="/S3_Content/index.html">
-                <img src="/S3_Content/images/MetalMental_Blog.png" alt="MetalMental_Blog">
-            </a>
+      <div id="header">
+        <a href="/S3_Content/index.html">
+          <img
+            src="/S3_Content/images/MetalMental_Blog.png"
+            alt="MetalMental_Blog"
+          />
+        </a>
+      </div>
+      <div id="headerMenu">
+        <a href="/S3_Content/index.html">
+          <img src="/S3_Content/images/home.png" alt="homeIcon" />
+          Home
+        </a>
+        <a href="/S3_Content/generative_ai/generative_ai.html">
+          <img src="/S3_Content/images/GenAI.png" alt="GenAIIcon" />
+          GenAI
+        </a>
+        <a
+          href="https://github.com/Flupinochan"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img src="/S3_Content/images/GitHub.png" alt="GitHubIcon" />
+          GitHub
+        </a>
+        <a href="#Profile">
+          <img src="/S3_Content/images/Profile.png" alt="ProfileIcon" />
+          Profile
+        </a>
+      </div>
+      <h2>ブログ初投稿(≧∇≦*)</h2>
+      <div id="blogContent">
+        <div id="blogDay">
+          <img
+            src="/S3_Content/images/dayIcon.png"
+            alt="dayIcon"
+            id="dayIcon"
+          />
+          <span id="yyyymmdd">2024-03-30</span>
         </div>
-        <div id="headerMenu">
-            <a href="/S3_Content/index.html">
-                <img src="/S3_Content/images/home.png" alt="homeIcon">
-                Home
-            </a>
-            <a href="/S3_Content/generative_ai/generative_ai.html">
-                <img src="/S3_Content/images/GenAI.png" alt="GenAIIcon">
-                GenAI
-            </a>
-            <a href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">
-                <img src="/S3_Content/images/GitHub.png" alt="GitHubIcon">
-                GitHub
-            </a>
-            <a href="#Profile">
-                <img src="/S3_Content/images/Profile.png" alt="ProfileIcon">
-                Profile
-            </a>
-        </div>
-            <h2>ブログ初投稿(≧∇≦*)</h2>
-        <div id="blogContent">
-            <div id="blogDay">
-                <img src="/S3_Content/images/dayIcon.png" alt="dayIcon" id="dayIcon">
-                <span id="yyyymmdd">2024-03-30</span>
-            </div>
-            <h3>はじめに</h3>
-                <p>こんにちは、MetalMentalです (*ﾟ▽ﾟ)ﾉ</p>
-                <p>ブログを投稿するのは、1年ぶりになります<br>昨年度は、<b>「WordPressを使用したブログ」</b>を投稿していましたが、飽きて投稿しなくなってしまいました…</p>
-                <p>そのため、今後は<b>「HTMLやTypeScriptを使用したブログ」</b>にチャレンジしていきたいと思います!!</p>
-            <h3>本題</h3>
-                <h4>本ブログについて</h4>
-                    <p>本ブログは、エンジニアが投稿するブログです<br><b>AWS、生成AI、ブロックチェーン</b>に関する記事をメインにしたいと考えています</p>
-                    <P>勉強・検証する上で作成したコードは、<a href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">GitHub</a> にアップロードします!!<br>みなさんのお役に立てれば幸いです (o_ _)o</P>
-                    <p>もちろん、本ブログに関するコードもGitHubにアップロードしています!!<br>興味がある方は、以下をご覧ください</p>
-                    <P style="padding-left: 20px;"><a href="https://github.com/Flupinochan/MyBlog" target="_blank" rel="noopener noreferrer">MyBlog</a></P>
-                <h4>生成AIを勉強する理由</h4>
-                    <P>シンプルに、便利で感銘を受けたからですw<br>現在は、個人レベルでしか利用されていませんが、当然、今後は企業レベルで利用されます<br>今のうちに、勉強しておこうと思いました</P>
-                    <p>本ブログでは、<b>RAG(Retrieval-Augmented Generation)</b> を導入予定ですので、楽しみにしていてください!!</p>
-                    <p>お金がかかりそうで怖いですが… ((((；ﾟДﾟ))))</p>
-                <h4>ブロックチェーンを勉強する理由</h4>
-                    <p>先日、仮想通貨1ビットコインが、1000万円を超えました<br>さすがにもう仮想通貨を軽視することはできないです<br>金融の非中央集権化・民主化が来ると思います</p>
-                    <p>少しでもブロックチェーンを勉強し、金融関係の仕事に携わることで、食いっぱぐれないようにしたいです (｡-∀-)</p>
-            <h3>おわりに</h3>
-                <P>少し前に、自分のクレジットカードが不正利用されました Σ( ºωº )<br>以下のように、APPLE COM BILLというご利用名で、いくつも請求されていました<br>サポートが返金手続き中ですが、拒否されることもあるみたいで、怖いです</P>
-                <p>心当たりが…あるんですよねぇw<br>先日、中華サイトで、原神の <a href="https://ascii.jp/elem/000/004/188/4188575/" target="_blank" rel="noopener noreferrer">コラボスマホ(刻晴)</a> を購入しようとしました<br>思いとどまって、購入確認画面で戻ったのですが、手遅れだったのかもしれません…</p>
-                <p>今度から、おとなしくメルカリで購入しようと思います<br>そんなに高くないですし…</p>
-                <p>みなさんもお気を付けください</p>
-                <img src="appleComBill.png" alt="appleComBill" class="normalImage">
-                <p>今回のブログは、ここでおしまいです<br>ご覧いただき、ありがとうございました ((*_ _))</p>
-        </div>
-        <div id="sidebar">
-        </div>
-        <div id="footer">
-        </div>
-
+        <h3>はじめに</h3>
+        <p>こんにちは、MetalMentalです (*ﾟ▽ﾟ)ﾉ</p>
+        <p>
+          ブログを投稿するのは、1年ぶりになります<br />昨年度は、<b>「WordPressを使用したブログ」</b>を投稿していましたが、飽きて投稿しなくなってしまいました…
+        </p>
+        <p>
+          そのため、今後は<b>「HTMLやTypeScriptを使用したブログ」</b>にチャレンジしていきたいと思います!!
+        </p>
+        <h3>本題</h3>
+        <h4>本ブログについて</h4>
+        <p>
+          本ブログは、エンジニアが投稿するブログです<br /><b
+            >AWS、生成AI、ブロックチェーン</b
+          >に関する記事をメインにしたいと考えています
+        </p>
+        <p>
+          勉強・検証する上で作成したコードは、<a
+            href="https://github.com/Flupinochan"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
+          にアップロードします!!<br />みなさんのお役に立てれば幸いです (o_ _)o
+        </p>
+        <p>
+          もちろん、本ブログに関するコードもGitHubにアップロードしています!!<br />興味がある方は、以下をご覧ください
+        </p>
+        <p style="padding-left: 20px">
+          <a
+            href="https://github.com/Flupinochan/MyBlog"
+            target="_blank"
+            rel="noopener noreferrer"
+            >MyBlog</a
+          >
+        </p>
+        <h4>生成AIを勉強する理由</h4>
+        <p>
+          シンプルに、便利で感銘を受けたからですw<br />現在は、個人レベルでしか利用されていませんが、当然、今後は企業レベルで利用されます<br />今のうちに、勉強しておこうと思いました
+        </p>
+        <p>
+          本ブログでは、<b>RAG(Retrieval-Augmented Generation)</b>
+          を導入予定ですので、楽しみにしていてください!!
+        </p>
+        <p>お金がかかりそうで怖いですが… ((((；ﾟДﾟ))))</p>
+        <h4>ブロックチェーンを勉強する理由</h4>
+        <p>
+          先日、仮想通貨1ビットコインが、1000万円を超えました<br />さすがにもう仮想通貨を軽視することはできないです<br />金融の非中央集権化・民主化が来ると思います
+        </p>
+        <p>
+          少しでもブロックチェーンを勉強し、金融関係の仕事に携わることで、食いっぱぐれないようにしたいです
+          (｡-∀-)
+        </p>
+        <h3>おわりに</h3>
+        <p>
+          少し前に、自分のクレジットカードが不正利用されました Σ( ºωº )<br />以下のように、APPLE
+          COM BILLというご利用名で、いくつも請求されていました<br />サポートが返金手続き中ですが、拒否されることもあるみたいで、怖いです
+        </p>
+        <p>
+          心当たりが…あるんですよねぇw<br />先日、中華サイトで、原神の
+          <a
+            href="https://ascii.jp/elem/000/004/188/4188575/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >コラボスマホ(刻晴)</a
+          >
+          を購入しようとしました<br />思いとどまって、購入確認画面で戻ったのですが、手遅れだったのかもしれません…
+        </p>
+        <p>
+          今度から、おとなしくメルカリで購入しようと思います<br />そんなに高くないですし…
+        </p>
+        <p>みなさんもお気を付けください</p>
+        <img src="appleComBill.png" alt="appleComBill" class="normalImage" />
+        <p>
+          今回のブログは、ここでおしまいです<br />ご覧いただき、ありがとうございました
+          ((*_ _))
+        </p>
+      </div>
+      <div id="sidebar"></div>
+      <div id="footer"></div>
     </div>
-</body>
-
+    <script src="/other/particles.js-master/particles.js"></script>
+    <script src="/S3_Content/particles.js"></script>
+  </body>
 </html>

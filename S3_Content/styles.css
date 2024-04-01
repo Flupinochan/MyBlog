@@ -1,214 +1,215 @@
 @keyframes slidedown {
-    0% {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
 
-    100% {
-        transform: translateY();
-        opacity: 1;
-    }
+  100% {
+    transform: translateY();
+    opacity: 1;
+  }
 }
 
 #header {
-    opacity: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    animation: slidedown 0.5s cubic-bezier(0, 0, 0.01, 1);
-    animation-delay: 0.5s;
-    animation-fill-mode: forwards;
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: slidedown 0.5s cubic-bezier(0, 0, 0.01, 1);
+  animation-delay: 0.5s;
+  animation-fill-mode: forwards;
 }
 
 #header img {
-    max-width: 100%;
-    height: auto;
+  max-width: 100%;
+  height: auto;
 }
 
-a:link, a:visited{
-    color: dodgerblue;
+a:link,
+a:visited {
+  color: dodgerblue;
 }
 
 a:hover {
-    color: turquoise;
+  color: turquoise;
 }
 
 @keyframes slideFadeIn {
-    0% {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
 
-    100% {
-        transform: translateX(0%);
-        opacity: 1;
-    }
+  100% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
 }
 
 h2 {
-    font-family: 'Meiryo', 'メイリオ', sans-serif;
-    opacity: 0;
-    padding: 0.5em 1em;
-    color: #4c54c0;
-    background-color: #e1e4f5;
-    box-shadow: 5px -5px #4c54c0;
-    position: relative;
-    animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
-    animation-delay: 1.2s;
-    animation-fill-mode: forwards;
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  opacity: 0;
+  padding: 0.5em 1em;
+  color: #4c54c0;
+  background-color: #e1e4f5;
+  box-shadow: 5px -5px #4c54c0;
+  position: relative;
+  animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
+  animation-delay: 1.2s;
+  animation-fill-mode: forwards;
 }
 
 h3 {
-    font-family: 'Meiryo', 'メイリオ', sans-serif;
-    padding: 0.7em 0.7em;
-    color: #4c54c0;
-    background-color: #e1e4f5;
-    border-left: solid 5px #516ab6;
-    position: relative;
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  padding: 0.7em 0.7em;
+  color: #4c54c0;
+  background-color: #e1e4f5;
+  border-left: solid 5px #516ab6;
+  position: relative;
 }
 
 h4 {
-    font-size: large;
-    font-family: 'Meiryo', 'メイリオ', sans-serif;
-    padding: 0.4em 0.4em;
-    color: #4c54c0;
-    /* background-color: #e1e4f5; */
-    border-bottom: solid 3px #516ab6;
-    position: relative;
+  font-size: large;
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  padding: 0.4em 0.4em;
+  color: #4c54c0;
+  /* background-color: #e1e4f5; */
+  border-bottom: solid 3px #516ab6;
+  position: relative;
 }
 
 #list-home {
-    opacity: 0;
-    list-style: none;
-    padding: 0;
-    animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
-    animation-delay: 1.3s;
-    animation-fill-mode: forwards;
+  opacity: 0;
+  list-style: none;
+  padding: 0;
+  animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
+  animation-delay: 1.3s;
+  animation-fill-mode: forwards;
 }
 
 #list-home li {
-    font-family: 'メイリオ', 'Meiryo', serif;
-    opacity: 0;
-    background: #ebebf8;
-    border-left: 12px solid #9b99de;
-    margin-bottom: 3px;
-    padding: .5em;
-    animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
-    animation-delay: 1.2s;
-    animation-fill-mode: forwards;
+  font-family: "メイリオ", "Meiryo", serif;
+  opacity: 0;
+  background: #ebebf8;
+  border-left: 12px solid #9b99de;
+  margin-bottom: 3px;
+  padding: 0.5em;
+  animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
+  animation-delay: 1.2s;
+  animation-fill-mode: forwards;
 }
 
 @keyframes slideUp {
-    0% {
-        transform: translateY(100%);
-        opacity: 0;
-    }
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 
-    100% {
-        transform: translateY();
-        opacity: 1;
-    }
+  100% {
+    transform: translateY();
+    opacity: 1;
+  }
 }
 
 #headerMenu {
-    opacity: 0;
-    display: flex;
-    justify-content: space-around;
-    background-color: #e5deff;
-    border-bottom: 3px solid #e9ecef;
-    flex-wrap: wrap;
-    padding: 10px;
-    animation: slideUp 0.5s cubic-bezier(0, 0, 0.01, 1);
-    animation-delay: 0.8s;
-    animation-fill-mode: forwards;
+  opacity: 0;
+  display: flex;
+  justify-content: space-around;
+  background-color: #e5deff;
+  border-bottom: 3px solid #e9ecef;
+  flex-wrap: wrap;
+  padding: 10px;
+  animation: slideUp 0.5s cubic-bezier(0, 0, 0.01, 1);
+  animation-delay: 0.8s;
+  animation-fill-mode: forwards;
 }
 
 #headerMenu a {
-    font-family: 'Meiryo', 'メイリオ', sans-serif;
-    text-decoration: none;
-    color: #4c54c0;
-    font-size: 18px;
-    position: relative;
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  text-decoration: none;
+  color: #4c54c0;
+  font-size: 18px;
+  position: relative;
 }
 
 #headerMenu a::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    bottom: -2px;
-    left: 0;
-    background-color: transparent;
-    transition: background-color 0.3s ease;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
 }
 
 #headerMenu a:hover::after {
-    background-color: #4c54c0;
+  background-color: #4c54c0;
 }
 
 #headerMenu a img {
-    height: 1em;
-    position: relative;
-    top: 1px;
+  height: 1em;
+  position: relative;
+  top: 1px;
 }
 
-@keyframes fadeIn{
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-#blogContent{
-    font-family: 'メイリオ', 'Meiryo', serif;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 1000px;
-    padding: 0px 20px 10px 15px;
-    border: 1px solid rgba(76, 84, 192, 0.1);
+@keyframes fadeIn {
+  0% {
     opacity: 0;
-    animation: fadeIn 0.6s;
-    animation-delay: 1.4s;
-    animation-fill-mode: forwards;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+#blogContent {
+  font-family: "メイリオ", "Meiryo", serif;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1000px;
+  padding: 0px 20px 10px 15px;
+  border: 1px solid rgba(76, 84, 192, 0.1);
+  opacity: 0;
+  animation: fadeIn 0.6s;
+  animation-delay: 1.4s;
+  animation-fill-mode: forwards;
 }
 
 #blogDay {
-    display: flex;
-    align-items: center;
-    margin-top: 11px;
+  display: flex;
+  align-items: center;
+  margin-top: 11px;
 }
 
 #dayIcon {
-    width: 20px;
-    height: auto;
+  width: 20px;
+  height: auto;
 }
 
 #yyyymmdd {
-    margin-top: 2px;
-    margin-left: 5px;
-    font-family: 'メイリオ', 'Meiryo', sans-serif;
-    color: #979797;
+  margin-top: 2px;
+  margin-left: 5px;
+  font-family: "メイリオ", "Meiryo", sans-serif;
+  color: #979797;
 }
 
 P {
-    font-family: 'メイリオ', 'Meiryo', serif;
-    color: #4c54c0;
+  font-family: "メイリオ", "Meiryo", serif;
+  color: #4c54c0;
 }
 
 b {
-    font-family: 'メイリオ', 'Meiryo', serif;
-    color: #4c54c0;
+  font-family: "メイリオ", "Meiryo", serif;
+  color: #4c54c0;
 }
 
-.normalImage{
-    max-width: 100%;
-    height: auto;
+.normalImage {
+  max-width: 100%;
+  height: auto;
 }
 
-body{
+/* body{
     background: repeating-linear-gradient(
         -45deg,
         #f3f9f9 ,
@@ -217,41 +218,56 @@ body{
         #eef7f7 50%
     );
     background-size: 65px 65px;
+} */
+
+#blogContent {
+  background-color: white;
 }
 
-#blogContent{
-    background-color: white;
-}
-
-#progressbar{
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 3px;
-    background: #4c54c0;
-    transition: width 0.4s ease-in-out;
+#progressbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: #4c54c0;
+  transition: width 0.4s ease-in-out;
 }
 
 .pace {
-    -webkit-pointer-events: none;
-    pointer-events: none;
+  -webkit-pointer-events: none;
+  pointer-events: none;
 
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 .pace-inactive {
-    display: none;
+  display: none;
 }
 
 .pace .pace-progress {
-    background: #4c54c0;
-    position: fixed;
-    z-index: 2000;
-    top: 0;
-    right: 100%;
-    width: 100%;
-    height: 2px;
+  background: #4c54c0;
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  right: 100%;
+  width: 100%;
+  height: 2px;
+}
+
+canvas {
+  display: block;
+  vertical-align: bottom;
+} /* ---- particles.js container ---- */
+#particles-js {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: #eef7f7;
+  background-image: url("");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 50% 50%;
 }
