@@ -14,7 +14,11 @@ phases:
       - ls -l
   build:
     commands:
-      - echo "skip"
+      - python -m venv myenv
+      - source myenv/bin/activate
+      - mkdir -p lambda_layer/python
+      - mv requirements.txt lambda_layer/
+      - pip install -r lambda_layer/requirements.txt -t lambda_layer/python
   post_build:
     commands:
       - sam build --template-file template.yaml
