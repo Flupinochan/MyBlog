@@ -17,7 +17,7 @@ Parameters:
 
   LambdaIAMRoleName:
     Type: String
-    Default: "generativeAI-LambdaIAMRole"
+    Default: "generativeAI-LambdaIAMRole-us-east-1"
 
 Resources:
   LambdaFunction:
