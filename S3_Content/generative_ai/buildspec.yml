@@ -23,4 +23,4 @@ phases:
     commands:
       - sam build --template-file template.yaml
       - sam package --template-file .aws-sam/build/template.yaml --output-template-file package.yml --s3-bucket "${S3BucketName}"
-      - sam deploy --template-file package.yml --stack-name "${StackName}" --capabilities CAPABILITY_NAMED_IAM
+      - sam deploy --template-file package.yml --stack-name "${StackName}" --capabilities CAPABILITY_NAMED_IAM --region 'us-east-1'
