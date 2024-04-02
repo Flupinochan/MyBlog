@@ -35,6 +35,8 @@ Resources:
       LoggingConfig:
         LogGroup: !Ref CloudWatchLogs
       Role: !GetAtt LambdaIAMRole.Arn
+      Layers:
+        - !Ref LambdaLayer
 
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion
