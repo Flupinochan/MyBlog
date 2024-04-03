@@ -261,7 +261,7 @@ body{
   display: block;
   vertical-align: bottom;
 } /* ---- particles.js container ---- */
-#particles-js {
+/* #particles-js {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -270,4 +270,4 @@ body{
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 50% 50%;
-} */
+} */ */
