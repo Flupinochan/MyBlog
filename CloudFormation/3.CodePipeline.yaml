@@ -5,20 +5,22 @@
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: My Blog Configuration
         Parameters:
           - S3NameForCodePipeline
           - S3NameForMyBlog
           - CodeStarConnectionName
           - GitHubRepositoryName
-          - CodePipelineName
           - MainBranchName
+          - CodePipelineName
           - CodePipelineIAMRoleName
           - CodePipelineIAMPolicyName
-      -
-        Label:
+          - CodeBuildCloudWatchLogsName
+          - CodeBuildIAMRoleName
+          - CodeBuildIAMPolicyName
+          - CodeBuildProjectName
+      - Label:
           default: For Deleting S3 Bucket Configuration
         Parameters:
           - LambdaName
@@ -29,60 +31,74 @@ Metadata:
 Parameters:
   LambdaName:
     Type: String
-    Default: 'ForDeletingS3Object2'
+    Default: "ForDeletingS3Object2"
 
   CloudWatchLogsName:
     Type: String
-    Default: 'ForDeletingS3Object2'
+    Default: "ForDeletingS3Object2"
 
   IAMRoleName:
     Type: String
-    Default: 'ForDeletingS3Object2'
+    Default: "ForDeletingS3Object2"
 
   IAMPolicyName:
     Type: String
-    Default: 'ForDeletingS3Object2'
+    Default: "ForDeletingS3Object2"
 
   S3NameForCodePipeline:
     Type: String
-    Default: 'metalmental-myblog-codepipeline-s3'
+    Default: "metalmental-myblog-codepipeline-s3"
 
   S3NameForMyBlog:
     Type: String
-    Default: 'metalmental-myblog'
+    Default: "metalmental-myblog"
 
   CodeStarConnectionName:
     Type: String
-    Default: 'metalmental-myblog'
+    Default: "metalmental-myblog"
 
   GitHubRepositoryName:
     Type: String
-    Default: 'Flupinochan/MyBlog'
+    Default: "Flupinochan/MyBlog"
 
   CodePipelineName:
     Type: String
-    Default: 'metalmental-myblog'
+    Default: "metalmental-myblog"
 
   MainBranchName:
     Type: String
-    Default: 'master'
+    Default: "master"
 
   CodePipelineIAMRoleName:
     Type: String
-    Default: 'metalmental-myblog-CodePipelineIAMRole'
+    Default: "metalmental-myblog-CodePipelineIAMRole"
 
   CodePipelineIAMPolicyName:
     Type: String
-    Default: 'metalmental-myblog-CodePipelineIAMPolicy'
+    Default: "metalmental-myblog-CodePipelineIAMPolicy"
 
+  CodeBuildCloudWatchLogsName:
+    Type: String
+    Default: "metalmental-myblog-GenAI-CodeDeployBuild"
 
+  CodeBuildProjectName:
+    Type: String
+    Default: "metalmental-myblog-GenAI"
+
+  CodeBuildIAMRoleName:
+    Type: String
+    Default: "metalmental-myblog-GenAI-CodeDeployBuildIAMRole"
+
+  CodeBuildIAMPolicyName:
+    Type: String
+    Default: "metalmental-myblog-GenAI-CodeDeployBuildIAMPolicy"
 
 Resources:
   CodeStarConnection:
     Type: AWS::CodeStarConnections::Connection
     Properties:
       ConnectionName: !Ref CodeStarConnectionName
-      ProviderType: 'GitHub'
+      ProviderType: "GitHub"
 
   S3:
     Type: AWS::S3::Bucket
@@ -104,8 +120,8 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: !Ref CodePipelineName
-      ExecutionMode: 'QUEUED'
-      PipelineType: 'V2'
+      ExecutionMode: "QUEUED"
+      PipelineType: "V2"
       ArtifactStore:
         Type: "S3"
         Location: !Ref S3
@@ -126,20 +142,18 @@ Resources:
                 BranchName: !Ref MainBranchName
               OutputArtifacts:
                 - Name: "SourceArtifacts"
-        - Name: "Deploy" # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-S3Deploy.html
+        - Name: "Build"
           Actions:
-            - Name: "Deploy"
+            - Name: "Build"
               ActionTypeId:
-                Category: "Deploy"
+                Category: "Build"
                 Owner: "AWS"
-                Provider: "S3"
+                Provider: "CodeBuild"
                 Version: "1"
               Configuration:
-                BucketName: !Ref S3NameForMyBlog
-                Extract: 'true'
+                ProjectName: !Ref CodeBuild
               InputArtifacts:
                 - Name: "SourceArtifacts"
-
   CodePipelineIAMRole:
     Type: AWS::IAM::Role
     Properties:
@@ -162,14 +176,113 @@ Resources:
                 Action:
                   - codestar-connections:*
                   - "codecommit:*"
+                  - "codebuild:*"
                   - "codedeploy:*"
+                  - "logs:*"
                   - "s3:*"
                   - "cloudwatch:*"
                   - "sns:*"
                   - "iam:PassRole"
                 Resource: "*"
+        # - Name: "Deploy" # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-S3Deploy.html
+        #   Actions:
+        #     - Name: "Deploy"
+        #       ActionTypeId:
+        #         Category: "Deploy"
+        #         Owner: "AWS"
+        #         Provider: "S3"
+        #         Version: "1"
+        #       Configuration:
+        #         BucketName: !Ref S3NameForMyBlog
+        #         Extract: 'true'
+        #       InputArtifacts:
+        #         - Name: "SourceArtifacts"
 
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref CodeBuildProjectName
+      ServiceRole: !Ref CodeBuildIAMRole
+      Artifacts:
+        Type: "NO_ARTIFACTS"
+      Environment:
+        Type: "LINUX_CONTAINER"
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: "aws/codebuild/amazonlinux2-x86_64-standard:5.0"
+        PrivilegedMode: True
+        EnvironmentVariables:
+          - Name: "MyBlogS3BucketName"
+            Value: !Ref S3NameForMyBlog
+            Type: "PLAINTEXT"
+          - Name: "StackName"
+            Value: "SAM-generativeAI"
+            Type: "PLAINTEXT"
+          - Name: "S3BucketName"
+            Value: "us-east-1-for-generativeai-sam-bucket"
+            Type: "PLAINTEXT"
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName: !Ref CodeBuildClousWatchLogs
+          Status: "ENABLED"
+      Source:
+        Type: "NO_SOURCE"
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                python: 3.12
+            pre_build:
+              commands:
+                - echo "S3 Sync"
+                - aws s3 sync . s3://${MyBlogS3BucketName} --delete
+            build:
+              commands:
+                - cd S3_Content/generative_ai/
+                - python -m venv myenv
+                - source myenv/bin/activate
+                - mkdir -p lambda_layer/python
+                - mv requirements.txt lambda_layer/
+                - pip install -r lambda_layer/requirements.txt -t lambda_layer/python
+            post_build:
+              commands:
+                - echo "Deploy Lambda generativeAI"
+                - sam build --template-file template.yaml
+                - sam package --template-file .aws-sam/build/template.yaml --output-template-file package.yml --s3-bucket ${S3BucketName} --region 'us-east-1'
+                - sam deploy --template-file package.yml --stack-name ${StackName} --capabilities CAPABILITY_NAMED_IAM --region 'us-east-1'
 
+  CodeBuildClousWatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref CodeBuildCloudWatchLogsName
+      RetentionInDays: 1
+  CodeBuildIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CodeBuildIAMRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+      Policies:
+        - PolicyName: !Ref CodeBuildIAMPolicyName
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "codebuild:*"
+                  - "logs:*"
+                  - "s3:*"
+                  - "cloudformation:*"
+                  - "iam:*"
+                  - "lambda:*"
+                Resource: "*"
 
   LambdaForDeletingS3Object:
     Type: AWS::Lambda::Function
@@ -197,19 +310,17 @@ Resources:
               except Exception as e:
                   print("Error: ", e)
                   cfnresponse.send(event, context, cfnresponse.FAILED, {})
-
   InvokeLambda:
     Type: Custom::EmptyS3Bucket
     Properties:
       ServiceToken: !GetAtt LambdaForDeletingS3Object.Arn
       BucketName: !Ref S3
-
   IAMRoleForLambda:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Ref IAMRoleName
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -218,7 +329,7 @@ Resources:
       Policies:
         - PolicyName: !Ref IAMPolicyName
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -227,7 +338,6 @@ Resources:
                 Resource:
                   - !Sub ${S3.Arn}
                   - !Sub ${S3.Arn}/*
-
   CloudWatchLogs:
     Type: AWS::Logs::LogGroup
     Properties:
