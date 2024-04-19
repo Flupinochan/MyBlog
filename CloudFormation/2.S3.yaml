@@ -17,10 +17,8 @@ Metadata:
           - Route53HostZoneID
           - Route53RecordName
           - CloudFrontHostedZoneID
-          - WAFName
-          - IPSetName
           - DefaultPage
-          - WAFarn
+          # - WAFarn
       - Label:
           default: For Deleting S3 Bucket Configuration
         Parameters:
@@ -92,20 +90,12 @@ Parameters:
     Type: String
     Default: "Z2FDTNDATAQYW2"
 
-  WAFName:
-    Type: String
-    Default: "metalmental-myblog"
-
-  IPSetName:
-    Type: String
-    Default: "Custom-ipaddress-blacklist"
-
   DefaultPage:
     Type: String
-    Default: "S3_Content/index.html"
+    Default: "S3_Content/react/build/index.html"
 
-  WAFarn:
-    Type: String
+  # WAFarn:
+  #   Type: String
 
 Conditions:
   IsCloudFrontAlias: !Equals [!Ref UseCloudFrontAlias, "True"]
@@ -207,7 +197,7 @@ Resources:
           AcmCertificateArn: !Ref ACM
           MinimumProtocolVersion: "TLSv1.2_2021"
           SslSupportMethod: "sni-only"
-        WebACLId: !Ref WAFarn
+        # WebACLId: !Ref WAFarn
 
   OAC:
     Type: AWS::CloudFront::OriginAccessControl
