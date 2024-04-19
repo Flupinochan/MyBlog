@@ -14,9 +14,9 @@ const Head: React.FC<HeadProps> = (props) => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content={props.themeColor} />
         <meta name="description" content={props.description} />
-        <link rel="icon" href="%PUBLIC_URL%/images/favicon.png" />
-        <link rel="apple-touch-icon" href="%PUBLIC_URL%/images/favicon.png" />
-        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+        <link rel="icon" href="/images/favicon.png" />
+        <link rel="apple-touch-icon" href="/images/favicon.png" />
+        <link rel="manifest" href="/manifest.json" />
         <title>{props.title}</title>
       </Helmet>
     </div>
