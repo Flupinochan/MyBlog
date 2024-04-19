@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/static/css/main.6abe104c.css",
-    "main.js": "/static/js/main.f5d26c27.js",
+    "main.js": "/static/js/main.aa62e08c.js",
     "static/media/appleComBill.png": "/static/media/appleComBill.735af7f3bd4e2a02859a.png",
     "index.html": "/index.html",
     "main.6abe104c.css.map": "/static/css/main.6abe104c.css.map",
-    "main.f5d26c27.js.map": "/static/js/main.f5d26c27.js.map"
+    "main.aa62e08c.js.map": "/static/js/main.aa62e08c.js.map"
   },
   "entrypoints": [
     "static/css/main.6abe104c.css",
-    "static/js/main.f5d26c27.js"
+    "static/js/main.aa62e08c.js"
   ]
 }

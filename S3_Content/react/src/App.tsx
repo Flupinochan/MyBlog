@@ -18,10 +18,7 @@ function App() {
         <Menu />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route
-            path="/src/blog/2024/03/30/index.tsx"
-            element={<Blog20240330 />}
-          />
+          <Route path="/blog/vol1" element={<Blog20240330 />} />
         </Routes>
       </Router>
     </div>
