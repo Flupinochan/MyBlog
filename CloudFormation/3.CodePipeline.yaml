@@ -16,10 +16,10 @@ Metadata:
           - CodePipelineName
           - CodePipelineIAMRoleName
           - CodePipelineIAMPolicyName
-          - CodeBuildCloudWatchLogsName
+          - CodeBuildProjectName
           - CodeBuildIAMRoleName
           - CodeBuildIAMPolicyName
-          - CodeBuildProjectName
+          - CodeBuildCloudWatchLogsName
       - Label:
           default: For Deleting S3 Bucket Configuration
         Parameters:
@@ -32,15 +32,12 @@ Parameters:
   LambdaName:
     Type: String
     Default: "ForDeletingS3Object2"
-
   CloudWatchLogsName:
     Type: String
     Default: "ForDeletingS3Object2"
-
   IAMRoleName:
     Type: String
     Default: "ForDeletingS3Object2"
-
   IAMPolicyName:
     Type: String
     Default: "ForDeletingS3Object2"
@@ -48,50 +45,41 @@ Parameters:
   S3NameForCodePipeline:
     Type: String
     Default: "metalmental-myblog-codepipeline-s3"
-
   S3NameForMyBlog:
     Type: String
     Default: "metalmental-myblog"
-
   CodeStarConnectionName:
     Type: String
     Default: "metalmental-myblog"
-
   GitHubRepositoryName:
     Type: String
     Default: "Flupinochan/MyBlog"
-
-  CodePipelineName:
-    Type: String
-    Default: "metalmental-myblog"
-
   MainBranchName:
     Type: String
     Default: "master"
 
+  CodePipelineName:
+    Type: String
+    Default: "metalmental-myblog"
   CodePipelineIAMRoleName:
     Type: String
     Default: "metalmental-myblog-CodePipelineIAMRole"
-
   CodePipelineIAMPolicyName:
     Type: String
     Default: "metalmental-myblog-CodePipelineIAMPolicy"
 
   CodeBuildCloudWatchLogsName:
     Type: String
-    Default: "metalmental-myblog-GenAI-CodeDeployBuild"
-
+    Default: "metalmental-myblog-CodeDeployBuild"
   CodeBuildProjectName:
     Type: String
-    Default: "metalmental-myblog-GenAI"
-
+    Default: "metalmental-myblog"
   CodeBuildIAMRoleName:
     Type: String
-    Default: "metalmental-myblog-GenAI-CodeDeployBuildIAMRole"
-
+    Default: "metalmental-myblog-CodeBuildIAMRole"
   CodeBuildIAMPolicyName:
     Type: String
-    Default: "metalmental-myblog-GenAI-CodeDeployBuildIAMPolicy"
+    Default: "metalmental-myblog-CodeBuildIAMPolicy"
 
 Resources:
   CodeStarConnection:
@@ -250,7 +238,6 @@ Resources:
                 - sam build --template-file template.yaml
                 - sam package --template-file .aws-sam/build/template.yaml --output-template-file package.yml --s3-bucket ${S3BucketName} --region 'us-east-1'
                 - sam deploy --template-file package.yml --stack-name ${StackName} --capabilities CAPABILITY_NAMED_IAM --region 'us-east-1'
-
   CodeBuildClousWatchLogs:
     Type: AWS::Logs::LogGroup
     Properties:

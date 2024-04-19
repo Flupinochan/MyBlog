@@ -1,0 +1,107 @@
+body {
+  background: repeating-linear-gradient(
+    -45deg,
+    #f3f9f9,
+    #f3f9f9 25%,
+    #eef7f7 25%,
+    #eef7f7 50%
+  );
+  background-size: 65px 65px;
+}
+
+.normalImage {
+  max-width: 100%;
+  height: auto;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.blogContentBackColor {
+  background-color: white;
+  font-family: "メイリオ", "Meiryo", serif;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1000px;
+  padding: 0px 20px 10px 15px;
+  border: 1px solid rgba(76, 84, 192, 0.1);
+  opacity: 0;
+  animation: fadeIn 0.6s;
+  animation-delay: 1.4s;
+  animation-fill-mode: forwards;
+}
+
+.blogDay {
+  display: flex;
+  align-items: center;
+  margin-top: 11px;
+}
+
+.dayIcon {
+  width: 20px;
+  height: auto;
+}
+
+.blogyyyymmdd {
+  margin-top: 2px;
+  margin-left: 5px;
+  font-family: "メイリオ", "Meiryo", sans-serif;
+  color: #979797;
+}
+
+a:link,
+a:visited {
+  color: dodgerblue;
+}
+
+a:hover {
+  color: turquoise;
+}
+
+h2 {
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  opacity: 0;
+  padding: 0.5em 1em;
+  color: #4c54c0;
+  background-color: #e1e4f5;
+  box-shadow: 5px -5px #4c54c0;
+  position: relative;
+  animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
+  animation-delay: 1.2s;
+  animation-fill-mode: forwards;
+}
+
+h3 {
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  padding: 0.7em 0.7em;
+  color: #4c54c0;
+  background-color: #e1e4f5;
+  border-left: solid 5px #516ab6;
+  position: relative;
+}
+
+h4 {
+  font-size: large;
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  padding: 0.4em 0.4em;
+  color: #4c54c0;
+  border-bottom: solid 3px #516ab6;
+  position: relative;
+}
+
+P {
+  font-family: "メイリオ", "Meiryo", serif;
+  color: #4c54c0;
+}
+
+b {
+  font-family: "メイリオ", "Meiryo", serif;
+  color: #4c54c0;
+}

@@ -1,0 +1,26 @@
+@keyframes slidedown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY();
+    opacity: 1;
+  }
+}
+
+#title {
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: slidedown 0.5s cubic-bezier(0, 0, 0.01, 1);
+  animation-delay: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+#title img {
+  max-width: 100%;
+  height: auto;
+}

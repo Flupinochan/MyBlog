@@ -1,0 +1,32 @@
+@keyframes slideFadeIn {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+}
+
+#home-list {
+  opacity: 0;
+  list-style: none;
+  padding: 0;
+  animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
+  animation-delay: 1.3s;
+  animation-fill-mode: forwards;
+}
+
+#home-list li {
+  font-family: "メイリオ", "Meiryo", serif;
+  opacity: 0;
+  background: #ebebf8;
+  border-left: 12px solid #9b99de;
+  margin-bottom: 3px;
+  padding: 0.5em;
+  animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
+  animation-delay: 1.2s;
+  animation-fill-mode: forwards;
+}
