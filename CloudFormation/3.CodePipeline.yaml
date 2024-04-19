@@ -223,7 +223,7 @@ Resources:
             pre_build:
               commands:
                 - echo "S3 Sync"
-                - aws s3 sync . s3://${MyBlogS3BucketName} --delete
+                - aws s3 sync ./S3_Content/react/build/ s3://${MyBlogS3BucketName} --delete
             build:
               commands:
                 - cd S3_Content/generative_ai/
