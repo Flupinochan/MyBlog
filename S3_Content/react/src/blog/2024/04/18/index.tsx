@@ -134,7 +134,7 @@ const Blog20240418: React.FC = () => {
         <p>
           それから、CodeCommitのAPI{" "}
           <a
-            href="https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/monitoring-events.html#referenceUpdated"
+            href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/codecommit/client/get_differences.html"
             target="_blank"
             rel="noopener noreferrer"
           >
