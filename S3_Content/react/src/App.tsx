@@ -7,21 +7,11 @@ import Menu from "./components/Menu";
 import Home from "./components/Home";
 import Blog20240330 from "./blog/2024/03/30";
 
-const headProps = {
-  themeColor: "#4c54c0",
-  description: "MetalMental Blog",
-  title: "MetalMental Blog",
-};
-
 function App() {
   return (
     <div className="App">
       <Router>
-        <Head
-          themeColor={headProps.themeColor}
-          description={headProps.description}
-          title={headProps.title}
-        />
+        <Head />
         <Title />
         <Menu />
         <Routes>
