@@ -1,3 +1,3 @@
 # MyBlog
 https://www.metalmental.net/<br><br>
-![flow](https://github.com/Flupinochan/MyBlog/assets/140839406/6583edcd-553b-45d0-92d2-5abdf82fae94)
+![flow](https://github.com/Flupinochan/MyBlog/assets/140839406/5e6cea7e-90cf-428a-8bb6-b4a7a380b0f9)
