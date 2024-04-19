@@ -11,6 +11,9 @@ const Home: React.FC = () => {
         <li>
           <Link to="/blog/vol1">Vol.1 ブログ初投稿</Link>
         </li>
+        <li>
+          <Link to="/blog/vol2">Vol.2 AWS CodeCommitのMonorepo構成</Link>
+        </li>
       </ul>
     </div>
   );

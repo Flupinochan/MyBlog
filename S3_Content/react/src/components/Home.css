@@ -24,8 +24,8 @@
   opacity: 0;
   background: #ebebf8;
   border-left: 12px solid #9b99de;
-  margin-bottom: 3px;
-  padding: 0.5em;
+  margin-bottom: 10px;
+  padding: 0.4em;
   animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
   animation-delay: 1.2s;
   animation-fill-mode: forwards;
