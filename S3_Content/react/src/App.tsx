@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import Progressbar from "./components/Progressbar";
 import Head from "./components/Head";
 import Title from "./components/Title";
 import Menu from "./components/Menu";
@@ -11,6 +12,7 @@ function App() {
   return (
     <div className="App">
       <Router>
+        <Progressbar />
         <Head />
         <Title />
         <Menu />
