@@ -9,8 +9,8 @@ import Blog20240330 from "./blog/2024/03/30";
 
 const headProps = {
   themeColor: "#4c54c0",
-  description: "Perform CI/CD at the directory level in CodeCommit.",
-  title: "CodeCommitのMonorepo構成",
+  description: "MetalMental Blog",
+  title: "MetalMental Blog",
 };
 
 function App() {
