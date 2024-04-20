@@ -16,6 +16,7 @@ Metadata:
           - Route53RecordName
           - CloudFrontHostedZoneID
           - DefaultPage
+          - APIDomainName
           # - IndexDocumentFileName
           # - ErrorDocumentFileName
           # - WAFarn
@@ -31,19 +32,15 @@ Parameters:
   S3Name:
     Type: String
     Default: "metalmental-myblog"
-
   LambdaName:
     Type: String
     Default: "ForDeletingS3Object"
-
   CloudWatchLogsName:
     Type: String
     Default: "ForDeletingS3Object"
-
   IAMRoleName:
     Type: String
     Default: "ForDeletingS3Object"
-
   IAMPolicyName:
     Type: String
     Default: "ForDeletingS3Object"
@@ -51,7 +48,6 @@ Parameters:
   # IndexDocumentFileName:
   #   Type: String
   #   Default: "index.html"
-
   # ErrorDocumentFileName:
   #   Type: String
   #   Default: "error.html"
@@ -59,7 +55,6 @@ Parameters:
   OriginAccessControlName:
     Type: String
     Default: "metalmental-myblog"
-
   SigningSetting:
     Type: String
     Default: "always"
@@ -67,35 +62,31 @@ Parameters:
       - "always"
       - "never"
       - "no-override"
-
   ACM:
     Type: String
-
   UseCloudFrontAlias:
     Type: String
     Default: "True"
     AllowedValues:
       - "True"
       - "False"
-
   Route53HostZoneID:
     Type: String
     Default: "Z057146116IR75PLD6YV1"
-
   Route53RecordName:
     Type: String
     Default: "www.metalmental.net"
-
   CloudFrontHostedZoneID:
     Type: String
     Default: "Z2FDTNDATAQYW2"
-
   DefaultPage:
     Type: String
     Default: "index.html"
-
   # WAFarn:
   #   Type: String
+  APIDomainName:
+    Type: String
+    Default: "neck7jc1cb.execute-api.us-west-2.amazonaws.com"
 
 Conditions:
   IsCloudFrontAlias: !Equals [!Ref UseCloudFrontAlias, "True"]
@@ -163,6 +154,21 @@ Resources:
           Compress: true
           TargetOriginId: "S3Origin"
           ViewerProtocolPolicy: "redirect-to-https"
+        CacheBehaviors:
+          - AllowedMethods:
+              - "GET"
+              - "HEAD"
+              - "OPTIONS"
+              - "PUT"
+              - "PATCH"
+              - "POST"
+              - "DELETE"
+            CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+            OriginRequestPolicyId: "216adef6-5c7f-47e4-b989-5492eafa07d3"
+            Compress: true
+            PathPattern: "/api/*" # https://qiita.com/hisayuki/items/d1418961bcc28b1bfdcd#%E5%AF%BE%E5%BF%9C
+            TargetOriginId: "APIOrigin"
+            ViewerProtocolPolicy: "redirect-to-https"
         DefaultRootObject: !Ref DefaultPage
         Enabled: true
         HttpVersion: "http2and3"
@@ -175,6 +181,10 @@ Resources:
               Enabled: false
             S3OriginConfig:
               OriginAccessIdentity: ""
+          - DomainName: !Ref APIDomainName
+            Id: "APIOrigin"
+            CustomOriginConfig:
+              OriginProtocolPolicy: "https-only"
         PriceClass: "PriceClass_All"
         Staging: false
         ViewerCertificate:
