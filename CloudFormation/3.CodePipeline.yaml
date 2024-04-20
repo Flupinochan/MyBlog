@@ -278,6 +278,7 @@ Resources:
                   - "cloudformation:*"
                   - "iam:*"
                   - "lambda:*"
+                  - "cloudfront:*"
                 Resource: "*"
 
   LambdaForDeletingS3Object:
