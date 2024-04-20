@@ -57,6 +57,44 @@ body {
   color: #979797;
 }
 
+ol {
+  counter-reset: number; /*数字をリセット*/
+  list-style-type: none !important; /*数字を一旦消す*/
+  padding: 0.3em 0.8em;
+  border: solid 2px #4c54c0;
+}
+ol li {
+  border-bottom: dashed 1px #4c54c0;
+  position: relative;
+  padding: 0.5em 0.5em 0.5em 30px;
+  line-height: 1.5em;
+}
+ol li:before {
+  /* 以下数字をつける */
+  position: absolute;
+  counter-increment: number;
+  content: counter(number);
+  /*数字のデザイン変える*/
+  display: inline-block;
+  background: #4c54c0;
+  color: white;
+  font-family: "Avenir", "Arial Black", "Arial", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  /*以下 上下中央寄せのため*/
+  /* top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%); */
+}
+ol li:last-of-type {
+  border-bottom: none; /*最後のliの線だけ消す*/
+}
+
 a:link,
 a:visited {
   color: dodgerblue;

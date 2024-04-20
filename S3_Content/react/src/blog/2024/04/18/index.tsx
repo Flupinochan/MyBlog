@@ -25,9 +25,8 @@ const Blog20240418: React.FC = () => {
         <p>
           Reactは、<b>SPA(Single Page Application)</b>
           を作成するためのJavaScriptライブラリです
-          <br />
-          AngularやVueと比較されます
         </p>
+        <p>AngularやVueと比較されます</p>
         <p>
           SPAについて詳しくない方にご説明すると、以下の画像のように、リンク移動前と後で、
           <b>ページの一部しか再読み込みされない</b>ようになった、ということです!
@@ -48,7 +47,8 @@ const Blog20240418: React.FC = () => {
         <p>
           ユーザーは、ページ移動時のリロード時間が削減されるので、
           <b>ブラウザが軽くなります</b>
-          <br />
+        </p>
+        <p>
           ブログを作成する私にとっても、ページごとにタイトルの画像やメニューバーを設定する必要がなくなり、
           <b>ブログの作成が楽になります</b>
         </p>
@@ -58,16 +58,16 @@ const Blog20240418: React.FC = () => {
         <h4>Monorepoとは</h4>
         <p>
           従来は、1つのプロジェクトにつき、1つのリポジトリを作成していました
-          <br />
+        </p>
+        <p>
           そして、1つのリポジトリに対して、1つのCI/CDを設定します
           <br />⇒ <b>Polyrepo</b> と言うみたいです
         </p>
         <p>
           これに対して、1つのリポジトリに対して、複数のCI/CDを設定するのが
           <b>「Monorepo」</b>です
-          <br />
-          ※ちょっと御幣があるかもしれませんが…
         </p>
+        <p>※ちょっと御幣があるかもしれませんが…</p>
         <div className="image-container">
           <div className="img-box">
             <p>■Polyrepo</p>
@@ -88,9 +88,8 @@ const Blog20240418: React.FC = () => {
         <h4>CodeCommitでMonorepoを実装する方法</h4>
         <p>
           先ほどもお伝えしたとおり、2024/04/18では、CodeCommitの機能にMonorepo機能はありません
-          <br />
-          そのため、Lambdaを使用して、コードで上手く処理するしかないです…
         </p>
+        <p>そのため、Lambdaを使用して、コードで上手く処理するしかないです…</p>
         <p>
           ですが、難しくはないです
           <br />
@@ -107,18 +106,20 @@ const Blog20240418: React.FC = () => {
           </a>{" "}
           を参考にしていただければ幸いです
         </p>
+        <p>簡単にまとめると、以下のような処理になります</p>
         <p>
           <b>
-            1. EventBridgeで、CodeCommitのコミットを検知
-            <br />
-            2.
-            Lambdaで、1つ前のコミットと現在のコミットを比較し、変更のあったディレクトリやファイルを取得
-            <br />
-            3.
-            そのままLambdaで、2で取得したディレクトリやファイルに応じてCodePipelineを実行
+            <ol>
+              <li>EventBridgeでCodeCommitのコミットを検知</li>
+              <li>
+                Lambdaで1つ前のコミットと現在のコミットを比較し、変更のあったディレクトリやファイルを取得
+              </li>
+              <li>
+                2で取得したディレクトリやファイルに応じてCodePipelineを実行
+              </li>
+            </ol>
           </b>
         </p>
-        <p>というような感じになります!</p>
         <p>
           <a
             href="https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/monitoring-events.html#referenceUpdated"
@@ -144,7 +145,8 @@ const Blog20240418: React.FC = () => {
         </p>
         <p>
           また、リクエストをする際に、変更を確認したいディレクトリを指定できます
-          <br />
+        </p>
+        <p>
           そして、レスポンスがあるかないかで、そのディレクトリに変更があったのかを確認することができます
         </p>
         <p>
@@ -157,7 +159,8 @@ const Blog20240418: React.FC = () => {
             CodePipeline
           </a>{" "}
           を実行して終わりです!
-          <br />
+        </p>
+        <p>
           ※CodePipeline
           V2であれば、CodePipeline実行時に「variables」を使用することで、CodePipeline変数が設定できます
         </p>
@@ -175,9 +178,8 @@ const Blog20240418: React.FC = () => {
         </p>
         <h3>終わりに</h3>
         <p>以上、React(SPA)とMonorepoについてのお話でした!</p>
+        <p>Monorepoは、知っておいて損はないと思います</p>
         <p>
-          Monorepoは、知っておいて損はないと思います
-          <br />
           わざわざリポジトリを作成するほどではないけれど、ディレクトリやファイル単位でCI/CDを設定したい!
           ということは、あり得ると思ったからです
         </p>
