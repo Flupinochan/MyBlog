@@ -7,6 +7,7 @@ body {
     #eef7f7 50%
   );
   background-size: 65px 65px;
+  overflow: hidden;
 }
 
 .normalImage {
