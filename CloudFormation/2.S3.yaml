@@ -8,8 +8,6 @@ Metadata:
           default: My Blog Configuration
         Parameters:
           - S3Name
-          - IndexDocumentFileName
-          - ErrorDocumentFileName
           - OriginAccessControlName
           - SigningSetting
           - ACM
@@ -18,6 +16,8 @@ Metadata:
           - Route53RecordName
           - CloudFrontHostedZoneID
           - DefaultPage
+          # - IndexDocumentFileName
+          # - ErrorDocumentFileName
           # - WAFarn
       - Label:
           default: For Deleting S3 Bucket Configuration
@@ -48,13 +48,13 @@ Parameters:
     Type: String
     Default: "ForDeletingS3Object"
 
-  IndexDocumentFileName:
-    Type: String
-    Default: "index.html"
+  # IndexDocumentFileName:
+  #   Type: String
+  #   Default: "index.html"
 
-  ErrorDocumentFileName:
-    Type: String
-    Default: "error.html"
+  # ErrorDocumentFileName:
+  #   Type: String
+  #   Default: "error.html"
 
   OriginAccessControlName:
     Type: String
@@ -92,7 +92,7 @@ Parameters:
 
   DefaultPage:
     Type: String
-    Default: "S3_Content/react/build/index.html"
+    Default: "index.html"
 
   # WAFarn:
   #   Type: String
@@ -144,30 +144,14 @@ Resources:
           - !Ref Route53RecordName
         # ContinuousDeploymentPolicyId: String # CI/CD
         CustomErrorResponses:
-          - ErrorCode: 400
-            ErrorCachingMinTTL: 5
-            ResponseCode: 400
-            ResponsePagePath: "/S3_Content/error_pages/400.html"
           - ErrorCode: 403
             ErrorCachingMinTTL: 5
-            ResponseCode: 403
-            ResponsePagePath: "/S3_Content/error_pages/403.html"
+            ResponseCode: 200
+            ResponsePagePath: "/"
           - ErrorCode: 404
             ErrorCachingMinTTL: 5
-            ResponseCode: 404
-            ResponsePagePath: "/S3_Content/error_pages/404.html"
-          - ErrorCode: 500
-            ErrorCachingMinTTL: 5
-            ResponseCode: 500
-            ResponsePagePath: "/S3_Content/error_pages/500.html"
-          - ErrorCode: 502
-            ErrorCachingMinTTL: 5
-            ResponseCode: 502
-            ResponsePagePath: "/S3_Content/error_pages/502.html"
-          - ErrorCode: 504
-            ErrorCachingMinTTL: 5
-            ResponseCode: 504
-            ResponsePagePath: "/S3_Content/error_pages/504.html"
+            ResponseCode: 200
+            ResponsePagePath: "/"
         DefaultCacheBehavior:
           AllowedMethods:
             - "GET"

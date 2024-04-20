@@ -13,6 +13,7 @@ Metadata:
           - CodeStarConnectionName
           - GitHubRepositoryName
           - MainBranchName
+          - CloudFrontID
           - CodePipelineName
           - CodePipelineIAMRoleName
           - CodePipelineIAMPolicyName
@@ -57,6 +58,9 @@ Parameters:
   MainBranchName:
     Type: String
     Default: "master"
+  CloudFrontID:
+    Type: String
+    Default: "E392B62NFG9IBQ"
 
   CodePipelineName:
     Type: String
@@ -208,6 +212,9 @@ Resources:
           - Name: "S3BucketName"
             Value: "us-east-1-for-generativeai-sam-bucket"
             Type: "PLAINTEXT"
+          - Name: "CloudFrontID"
+            Value: !Ref CloudFrontID
+            Type: "PLAINTEXT"
       LogsConfig:
         CloudWatchLogs:
           GroupName: !Ref CodeBuildClousWatchLogs
@@ -224,6 +231,8 @@ Resources:
               commands:
                 - echo "S3 Sync"
                 - aws s3 sync ./S3_Content/react/build/ s3://${MyBlogS3BucketName} --delete
+                - echo "Clearing CloudFront Cache"
+                - aws cloudfront create-invalidation --distribution-id ${CloudFrontID} --paths "/*"
             build:
               commands:
                 - cd S3_Content/generative_ai/

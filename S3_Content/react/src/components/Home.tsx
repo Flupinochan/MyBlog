@@ -9,10 +9,10 @@ const Home: React.FC = () => {
       <h2>Archives</h2>
       <ul id="home-list">
         <li>
-          <Link to="/blog/vol1">Vol.1 ブログ初投稿</Link>
+          <Link to="/blog/vol2">Vol.2 AWS CodeCommitのMonorepo構成</Link>
         </li>
         <li>
-          <Link to="/blog/vol2">Vol.2 AWS CodeCommitのMonorepo構成</Link>
+          <Link to="/blog/vol1">Vol.1 ブログ初投稿</Link>
         </li>
       </ul>
     </div>
