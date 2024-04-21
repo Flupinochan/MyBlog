@@ -4,15 +4,19 @@ export class MyBlogParam {
   };
 
   lambdaGenAI = {
-    functionName: "GenAI",
-    roleName: "Lambda-GenAI-IAMRole",
-    logGroupName: "Lambda-GenAI-CloudWatchLogs",
-    layerName: "Lambda-GenAI-Layer",
+    functionName: "GenIMG",
+    roleName: "Lambda-GenIMG-IAMRole",
+    logGroupName: "Lambda-GenIMG-CloudWatchLogs",
+    layerName: "Lambda-GenIMG-Layer",
   };
 
   apiGateway = {
     restApiName: "MyBlogAPI",
     stageName: "prod",
     logGroupName: "API-Gateway-CloudWatchLogs",
+  };
+
+  s3BucketImgStore = {
+    bucketName: "myblog-generate-image",
   };
 }

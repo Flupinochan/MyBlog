@@ -1,0 +1,1 @@
+pip install -r ./lib/lambda-code/GenAILayer/requirements.txt -t ./lib/lambda-code/GenAILayer/python

@@ -5,6 +5,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import path = require("path");
 import { Duration } from "aws-cdk-lib";
 
@@ -24,6 +25,7 @@ export class MyBlogStack extends cdk.Stack {
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"),
       ],
     });
     const lambdaLogGroupGenAI = new logs.LogGroup(
@@ -63,6 +65,9 @@ export class MyBlogStack extends cdk.Stack {
         timeout: Duration.minutes(15),
         logGroup: lambdaLogGroupGenAI,
         layers: [lambdaLayerGenAI],
+        environment: {
+          BUCKET_NAME: param.s3BucketImgStore.bucketName,
+        },
       }
     );
 
@@ -99,5 +104,22 @@ export class MyBlogStack extends cdk.Stack {
     const apiImageGen = apigwGenAi.root.addResource("imagegen");
     apiImageGen.addMethod("GET");
     apiImageGen.addMethod("POST");
+
+    // S3 for Generating Image
+    const s3BucketImgStore = new s3.Bucket(
+      this,
+      param.s3BucketImgStore.bucketName,
+      {
+        bucketName: param.s3BucketImgStore.bucketName,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+        lifecycleRules: [
+          {
+            enabled: true,
+            expiration: Duration.days(1),
+          },
+        ],
+      }
+    );
   }
 }
