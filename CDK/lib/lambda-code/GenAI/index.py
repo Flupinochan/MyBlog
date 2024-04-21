@@ -1,6 +1,7 @@
 import os
 import sys
 import boto3
+import langchain
 from botocore.exceptions import ClientError, BotoCoreError
 from botocore.config import Config
 
@@ -14,4 +15,5 @@ log = logger.get_logger()
 
 def lambda_handler(event, context):
 
-    log.debug("hello")
+    print(boto3.__version__)
+    print(langchain.__version__)
