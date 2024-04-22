@@ -102,7 +102,7 @@ def create_image(event):
 # ----------------------------------------------------------------------
 def pug_image(image):
     try:
-        image_name = "test.png"
+        image_name = "test2.png"
         s3_client.put_object(
             Bucket=S3_BUCKET,
             Key=image_name,

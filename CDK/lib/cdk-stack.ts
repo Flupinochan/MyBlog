@@ -98,12 +98,47 @@ export class MyBlogStack extends cdk.Stack {
       }
     );
 
-    const apiTextGen = apigwGenAi.root.addResource("textgen");
-    apiTextGen.addMethod("GET");
-    apiTextGen.addMethod("POST");
     const apiImageGen = apigwGenAi.root.addResource("imagegen");
-    apiImageGen.addMethod("GET");
+    // Request with query string
+    apiImageGen.addMethod("GET", new apigw.LambdaIntegration(lambdaGenAI, {
+      // Integrated request settings
+      proxy: false,
+        // Convert query string to json for lambda
+      requestTemplates: {
+        "application/json": JSON.stringify({
+          "positive_prompt": "$util.escapeJavaScript($input.params('positive_prompt'))",
+          "negative_prompt": "$util.escapeJavaScript($input.params('negative_prompt'))"
+        })
+      },
+        // Configuring the response from Lambda (Pass-through and return as it is.)
+      integrationResponses: [
+        { statusCode: "200",}
+      ],
+    }), {
+      // Method request settings
+      requestValidator: new apigw.RequestValidator(this, "validator", {
+        restApi: apigwGenAi,
+        requestValidatorName: "requestValidatePrompt",
+        validateRequestBody: false,
+        validateRequestParameters: true,
+      }),
+        // Query String Setting
+      requestParameters: {
+        "method.request.querystring.positive_prompt": true, 
+        "method.request.querystring.negative_prompt": true, 
+      },
+        // Configuring the response from Lambda.
+      methodResponses: [
+        { statusCode: "200",
+          responseModels: { "application/json": apigw.Model.EMPTY_MODEL },
+        },
+      ],
+    });
     apiImageGen.addMethod("POST");
+
+    const apiTextGen = apigwGenAi.root.addResource("textgen");
+    apiTextGen.addMethod("POST");
+    apiTextGen.addMethod("GET");
 
     // S3 for Generating Image
     const s3BucketImgStore = new s3.Bucket(
