@@ -30,6 +30,7 @@ const StyledTextarea = styled(TextareaAutosize)`
   align-items: flex-start;
   width: 100%;
   padding: 13px;
+  padding-right: 75px;
   font-size: 18px;
   color: #4c54c0;
   background-color: #f7f7f7;
