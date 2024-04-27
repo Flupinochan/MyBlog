@@ -15,7 +15,10 @@
 
 .left {
   max-width: 100%;
+<<<<<<< HEAD
   max-height: 275px;
+=======
+>>>>>>> e702aabe32ec006fb087a8b510f5a700559c0b0a
   height: auto;
 }
 .left img {
