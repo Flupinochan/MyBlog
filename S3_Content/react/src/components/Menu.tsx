@@ -10,7 +10,8 @@ const Menu: React.FC = () => {
         <Link to="/">Home</Link>
       </div>
       <div id="drop-menu">
-        <Link to="/genai/home">GenAI</Link>
+        {/* <Link to="/genai/home">GenAI</Link> */}
+        GenAI
         <ul>
           <li>
             <Link to="/genai/genimage">GenIMG</Link>
