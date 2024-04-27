@@ -6,26 +6,29 @@ import "./Menu.css";
 const Menu: React.FC = () => {
   return (
     <div id="menu">
-      <Link to="/">
-        <img src="/images/home.png" alt="homeIcon" />
-        Home
-      </Link>
-      <a href="#GenAI">
-        <img src="/images/GenAI.png" alt="GenAIIcon" />
-        GenAI
-      </a>
-      <a
-        href="https://github.com/Flupinochan"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img src="/images/GitHub.png" alt="GitHubIcon" />
-        GitHub
-      </a>
-      <a href="#Profile">
-        <img src="/images/Profile.png" alt="ProfileIcon" />
-        Profile
-      </a>
+      <div id="drop-menu">
+        <Link to="/">Home</Link>
+      </div>
+      <div id="drop-menu">
+        <Link to="/genai/home">GenAI</Link>
+        <ul>
+          <li>
+            <Link to="/genai/genimage">GenIMG</Link>
+          </li>
+        </ul>
+      </div>
+      <div id="drop-menu">
+        <a
+          href="https://github.com/Flupinochan"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+      </div>
+      <div id="drop-menu">
+        <a href="#Profile">Profile</a>
+      </div>
     </div>
   );
 };
