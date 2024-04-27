@@ -85,7 +85,7 @@ def create_image(event):
             # 'sampler': string,
             "samples": 1,
             # 'seed': int, # 似た画像を生成したい場合
-            "steps": 100,  # 数値が大きいほど重くなるがクオリティが高くなる
+            "steps": 150,  # 数値が大きいほど重くなるがクオリティが高くなる
             # 'style_preset': 'anime',
         }
         response = bedrock_client.invoke_model(
