@@ -1,10 +1,6 @@
 {
   "files": {
-<<<<<<< HEAD
     "main.css": "/static/css/main.8c772a81.css",
-=======
-    "main.css": "/static/css/main.645b8c54.css",
->>>>>>> 08ee60775edca051a9b95cb1c04be27c6d4e0779
     "main.js": "/static/js/main.516ebfe6.js",
     "static/media/sample.png": "/static/media/sample.044fa866b58b718b675e.png",
     "static/media/polyrepo.png": "/static/media/polyrepo.51c0da28f17e9406bf18.png",
@@ -13,19 +9,11 @@
     "static/media/2.jpg": "/static/media/2.581ae035e0319f61bbe0.jpg",
     "static/media/appleComBill.png": "/static/media/appleComBill.735af7f3bd4e2a02859a.png",
     "index.html": "/index.html",
-<<<<<<< HEAD
     "main.8c772a81.css.map": "/static/css/main.8c772a81.css.map",
     "main.516ebfe6.js.map": "/static/js/main.516ebfe6.js.map"
   },
   "entrypoints": [
     "static/css/main.8c772a81.css",
-=======
-    "main.645b8c54.css.map": "/static/css/main.645b8c54.css.map",
-    "main.516ebfe6.js.map": "/static/js/main.516ebfe6.js.map"
-  },
-  "entrypoints": [
-    "static/css/main.645b8c54.css",
->>>>>>> 08ee60775edca051a9b95cb1c04be27c6d4e0779
     "static/js/main.516ebfe6.js"
   ]
 }
