@@ -14,9 +14,8 @@
 }
 
 .left {
-  height: 300px;
-  margin-right: 5px;
-  overflow: hidden;
+  max-width: 100%;
+  height: auto;
 }
 .left img {
   width: 100%;
