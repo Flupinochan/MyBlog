@@ -1,6 +1,40 @@
 .wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.left,
+.right {
+  flex-grow: 1;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+
+.left {
+  height: 300px;
+  margin-right: 5px;
 }
 .right {
+  height: 300px;
+  margin-left: 10px;
 }
-.left {
+
+.wrap.flex-column {
+  flex-direction: column;
+}
+
+@media (max-width: 600px) {
+  .wrap {
+    flex-direction: column;
+  }
+  .left {
+    margin-right: 0px;
+    margin-bottom: 0px;
+  }
+  .right {
+    margin-left: 0px;
+  }
 }
