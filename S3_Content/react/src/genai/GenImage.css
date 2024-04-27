@@ -19,7 +19,9 @@
 .left img {
   width: 100%;
   height: auto;
+  width: auto;
   max-height: 275px;
+  max-width: 275px;
 }
 .right {
   height: 300px;
