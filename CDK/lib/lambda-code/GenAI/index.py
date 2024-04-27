@@ -48,7 +48,11 @@ def main(event):
         response = {
             "statusCode": 200,
             "downloadURL": presigned_url,
+<<<<<<< HEAD
             "image": base64.b64encode(image).decode("utf-8"),
+=======
+            "image": image,
+>>>>>>> 08ee60775edca051a9b95cb1c04be27c6d4e0779
         }
         return response
     except Exception as e:
