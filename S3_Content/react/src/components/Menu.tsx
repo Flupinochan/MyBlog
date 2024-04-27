@@ -16,6 +16,9 @@ const Menu: React.FC = () => {
           <li>
             <Link to="/genai/genimage">GenIMG</Link>
           </li>
+          <li>
+            <Link to="/genai/gengizi">GenGizi</Link>
+          </li>
         </ul>
       </div>
       <div id="drop-menu">

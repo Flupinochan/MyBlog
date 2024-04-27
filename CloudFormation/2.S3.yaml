@@ -17,6 +17,7 @@ Metadata:
           - CloudFrontHostedZoneID
           - DefaultPage
           - APIDomainName
+          - WebSocketDomainName
           # - IndexDocumentFileName
           # - ErrorDocumentFileName
           # - WAFarn
@@ -87,6 +88,9 @@ Parameters:
   APIDomainName:
     Type: String
     Default: "neck7jc1cb.execute-api.us-west-2.amazonaws.com"
+  WebSocketDomainName:
+    Type: String
+    Default: "lsdujzk2f5.execute-api.us-west-2.amazonaws.com"
 
 Conditions:
   IsCloudFrontAlias: !Equals [!Ref UseCloudFrontAlias, "True"]
@@ -169,6 +173,20 @@ Resources:
             PathPattern: "/api/*" # https://qiita.com/suiwave/items/2e53b8e0f219fd4d3c41
             TargetOriginId: "APIOrigin"
             ViewerProtocolPolicy: "redirect-to-https"
+          - AllowedMethods:
+              - "GET"
+              - "HEAD"
+              - "OPTIONS"
+              - "PUT"
+              - "PATCH"
+              - "POST"
+              - "DELETE"
+            CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+            OriginRequestPolicyId: "b689b0a8-53d0-40ab-baf2-68738e2966ac"
+            Compress: true
+            PathPattern: "/websocket/*" 
+            TargetOriginId: "WebSocketOrigin"
+            ViewerProtocolPolicy: "redirect-to-https"
         DefaultRootObject: !Ref DefaultPage
         Enabled: true
         HttpVersion: "http2and3"
@@ -183,6 +201,10 @@ Resources:
               OriginAccessIdentity: ""
           - DomainName: !Ref APIDomainName
             Id: "APIOrigin"
+            CustomOriginConfig:
+              OriginProtocolPolicy: "https-only"
+          - DomainName: !Ref WebSocketDomainName
+            Id: "WebSocketOrigin"
             CustomOriginConfig:
               OriginProtocolPolicy: "https-only"
         PriceClass: "PriceClass_All"

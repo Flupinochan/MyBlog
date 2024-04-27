@@ -6,7 +6,11 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
+import { WebSocketLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import path = require("path");
+import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
 import { Duration } from "aws-cdk-lib";
 
 import { MyBlogParam } from "./parameters";
@@ -26,6 +30,7 @@ export class MyBlogStack extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
       ],
     });
     const lambdaLogGroupGenAI = new logs.LogGroup(
@@ -100,40 +105,45 @@ export class MyBlogStack extends cdk.Stack {
 
     const apiImageGen = apigwGenAi.root.addResource("imagegen");
     // Request with query string
-    apiImageGen.addMethod("GET", new apigw.LambdaIntegration(lambdaGenAI, {
-      // Integrated request settings
-      proxy: false,
+    apiImageGen.addMethod(
+      "GET",
+      new apigw.LambdaIntegration(lambdaGenAI, {
+        // Integrated request settings
+        proxy: false,
         // Convert query string to json for lambda
-      requestTemplates: {
-        "application/json": JSON.stringify({
-          "positive_prompt": "$util.escapeJavaScript($input.params('positive_prompt'))",
-          "negative_prompt": "$util.escapeJavaScript($input.params('negative_prompt'))"
-        })
-      },
-        // Configuring the response from Lambda (Pass-through and return as it is.)
-      integrationResponses: [
-        { statusCode: "200",}
-      ],
-    }), {
-      // Method request settings
-      requestValidator: new apigw.RequestValidator(this, "validator", {
-        restApi: apigwGenAi,
-        requestValidatorName: "requestValidatePrompt",
-        validateRequestBody: false,
-        validateRequestParameters: true,
-      }),
-        // Query String Setting
-      requestParameters: {
-        "method.request.querystring.positive_prompt": true, 
-        "method.request.querystring.negative_prompt": true, 
-      },
-        // Configuring the response from Lambda.
-      methodResponses: [
-        { statusCode: "200",
-          responseModels: { "application/json": apigw.Model.EMPTY_MODEL },
+        requestTemplates: {
+          "application/json": JSON.stringify({
+            positive_prompt:
+              "$util.escapeJavaScript($input.params('positive_prompt'))",
+            negative_prompt:
+              "$util.escapeJavaScript($input.params('negative_prompt'))",
+          }),
         },
-      ],
-    });
+        // Configuring the response from Lambda (Pass-through and return as it is.)
+        integrationResponses: [{ statusCode: "200" }],
+      }),
+      {
+        // Method request settings
+        requestValidator: new apigw.RequestValidator(this, "validator", {
+          restApi: apigwGenAi,
+          requestValidatorName: "requestValidatePrompt",
+          validateRequestBody: false,
+          validateRequestParameters: true,
+        }),
+        // Query String Setting
+        requestParameters: {
+          "method.request.querystring.positive_prompt": true,
+          "method.request.querystring.negative_prompt": true,
+        },
+        // Configuring the response from Lambda.
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseModels: { "application/json": apigw.Model.EMPTY_MODEL },
+          },
+        ],
+      }
+    );
     apiImageGen.addMethod("POST");
 
     const apiTextGen = apigwGenAi.root.addResource("textgen");
@@ -156,5 +166,129 @@ export class MyBlogStack extends cdk.Stack {
         ],
       }
     );
+
+    // DynamoDB for Websocket
+    const dynamoTable = new dynamodb.TableV2(
+      this,
+      param.dynamodbTable.tableName,
+      {
+        tableName: param.dynamodbTable.tableName,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        partitionKey: {
+          name: param.dynamodbTable.partitionKeyName,
+          type: dynamodb.AttributeType.STRING,
+        },
+      }
+    );
+
+    // Lambda GenGizi
+    const lambdaLogGroupGenGizi = new logs.LogGroup(
+      this,
+      param.lambdaGenGizi.logGroupName,
+      {
+        logGroupName: param.lambdaGenGizi.logGroupName,
+        retention: logs.RetentionDays.ONE_DAY,
+        logGroupClass: logs.LogGroupClass.STANDARD,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      }
+    );
+    const lambdaLayerGenGizi = new lambda.LayerVersion(
+      this,
+      param.lambdaGenGizi.layerName,
+      {
+        layerVersionName: param.lambdaGenGizi.layerName,
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "lambda-code/GenAILayer/")
+        ),
+        compatibleRuntimes: [lambda.Runtime.PYTHON_3_12],
+        description: "GenAI Layer",
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      }
+    );
+
+    const lambdaGenGizi = new lambda.Function(
+      this,
+      param.lambdaGenGizi.functionName,
+      {
+        functionName: param.lambdaGenGizi.functionName,
+        runtime: lambda.Runtime.PYTHON_3_12,
+        handler: "index.lambda_handler",
+        role: lambdaRoleGenAI,
+        code: lambda.Code.fromAsset(path.join(__dirname, "lambda-code/GenAI/")),
+        timeout: Duration.minutes(15),
+        logGroup: lambdaLogGroupGenAI,
+        layers: [lambdaLayerGenAI],
+        environment: {
+          BUCKET_NAME: param.s3BucketImgStore.bucketName,
+        },
+      }
+    );
+
+    // Websocket for Giziroku
+
+    // const apigwv2Logs = new logs.LogGroup(this, param.websocket.logGroupName, {
+    //   logGroupName: param.websocket.logGroupName,
+    //   retention: logs.RetentionDays.ONE_DAY,
+    //   logGroupClass: logs.LogGroupClass.STANDARD,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    // });
+    // const accessLogSettingsProperty: apigatewayv2.CfnApiGatewayManagedOverrides.AccessLogSettingsProperty =
+    //   {
+    //     destinationArn: apigwv2Logs.logGroupArn,
+    //     format: JSON.stringify({
+    //       requestId: "$context.requestId",
+    //       userAgent: "$context.identity.userAgent",
+    //       sourceIp: "$context.identity.sourceIp",
+    //       requestTime: "$context.requestTime",
+    //       requestTimeEpoch: "$context.requestTimeEpoch",
+    //       httpMethod: "$context.httpMethod",
+    //       path: "$context.path",
+    //       status: "$context.status",
+    //       protocol: "$context.protocol",
+    //       responseLength: "$context.responseLength",
+    //       domainName: "$context.domainName",
+    //     }),
+    //   };
+
+    const webSocketApi = new apigwv2.WebSocketApi(
+      this,
+      param.websocket.apiName,
+      {
+        apiName: param.websocket.apiName,
+        connectRouteOptions: {
+          integration: new WebSocketLambdaIntegration("connect", lambdaGenGizi),
+        },
+        disconnectRouteOptions: {
+          integration: new WebSocketLambdaIntegration(
+            "disconnect",
+            lambdaGenGizi
+          ),
+        },
+        defaultRouteOptions: {
+          integration: new WebSocketLambdaIntegration("default", lambdaGenGizi),
+        },
+      }
+    );
+    const webSocketApiStage = new apigwv2.WebSocketStage(
+      this,
+      param.websocket.stageName,
+      {
+        webSocketApi,
+        stageName: param.websocket.stageName,
+        autoDeploy: true,
+      }
+    );
+
+    // const cfnApiGatewayManagedOverrides =
+    //   new apigatewayv2.CfnApiGatewayManagedOverrides(
+    //     this,
+    //     "MyCfnApiGatewayManagedOverrides",
+    //     {
+    //       apiId: webSocketApi.apiId,
+    //       stage: {
+    //         accessLogSettings: accessLogSettingsProperty,
+    //       },
+    //     }
+    //   );
   }
 }

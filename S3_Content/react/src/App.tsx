@@ -11,6 +11,7 @@ import Menu from "./components/Menu";
 import Home from "./components/Home";
 // import GenAiHome from "./genai/GenAiHome";
 import GenImage from "./genai/GenImage";
+import GenGizi from "./genai/GenGizi";
 import Blog20240330 from "./blog/2024/03/30/index";
 import Blog20240418 from "./blog/2024/04/18/index";
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/" element={<Home />} />
             {/* <Route path="/genai/home" element={<GenAiHome />} /> */}
             <Route path="/genai/genimage" element={<GenImage />} />
+            <Route path="/genai/gengizi" element={<GenGizi />} />
             <Route path="/blog/vol1" element={<Blog20240330 />} />
             <Route path="/blog/vol2" element={<Blog20240418 />} />
             <Route path="*" element={<Home />} />

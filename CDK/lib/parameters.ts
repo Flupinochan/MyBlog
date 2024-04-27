@@ -19,4 +19,22 @@ export class MyBlogParam {
   s3BucketImgStore = {
     bucketName: "myblog-generate-image",
   };
+
+  dynamodbTable = {
+    tableName: "MyBlog-Websocket-db",
+    partitionKeyName: "connectionId",
+  };
+
+  websocket = {
+    apiName: "MyBlog-Websocket-api",
+    stageName: "websocket",
+    logGroupName: "MyBlog-Websocket-api-Logs",
+  };
+
+  lambdaGenGizi = {
+    functionName: "GenGizi",
+    roleName: "Lambda-GenGizi-IAMRole",
+    logGroupName: "Lambda-GenGizi-CloudWatchLogs",
+    layerName: "Lambda-GenGizi-Layer",
+  };
 }
