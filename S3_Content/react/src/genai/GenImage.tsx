@@ -97,12 +97,7 @@ const GenImage: React.FC = () => {
         <div className="wrap">
           <div className="left">
             {submitted && image && (
-              <p>
-                <img
-                  src={`data:image/png;base64,${image}`}
-                  alt="createdImage"
-                />
-              </p>
+              <img src={`data:image/png;base64,${image}`} alt="createdImage" />
             )}
             {submitted && download && (
               <ThemeProvider theme={theme}>
