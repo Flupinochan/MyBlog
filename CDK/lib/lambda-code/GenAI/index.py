@@ -3,6 +3,8 @@
 
 import os
 import json
+import random
+from datetime import datetime
 import base64
 import boto3
 import langchain
@@ -48,11 +50,7 @@ def main(event):
         response = {
             "statusCode": 200,
             "downloadURL": presigned_url,
-<<<<<<< HEAD
             "image": base64.b64encode(image).decode("utf-8"),
-=======
-            "image": image,
->>>>>>> 08ee60775edca051a9b95cb1c04be27c6d4e0779
         }
         return response
     except Exception as e:
@@ -110,7 +108,9 @@ def create_image(event):
 # ----------------------------------------------------------------------
 def pug_image(image):
     try:
-        image_name = "test2.png"
+        random_number = str(random.randint(0, 1000))
+        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        image_name = f"{random_number}_{current_time}.png"
         s3_client.put_object(
             Bucket=S3_BUCKET,
             Key=image_name,
