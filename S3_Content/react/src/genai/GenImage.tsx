@@ -3,8 +3,9 @@ import TextareaAutosize from "react-textarea-autosize";
 import styled from "styled-components";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
-import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
+// import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import axios, { AxiosResponse } from "axios";
 
 import "./GenImage.css";
@@ -45,16 +46,21 @@ const StyledTextarea = styled(TextareaAutosize)`
   }
 `;
 
-const StyledButton = styled(Button)`
+const StyledUploadButton = styled(Button)`
   bottom: 48px;
   right: 7px;
+  float: right;
+`;
+
+const StyledDownloadButton = styled(Button)`
   float: right;
 `;
 
 // メイン
 const GenImage: React.FC = () => {
   const [value, setValue] = useState("");
-  const [posiPromptData, setPosiPromptData] = useState("");
+  const [download, setDownload] = useState("");
+  const [image, setImage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const handleChangeValue = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -65,7 +71,8 @@ const GenImage: React.FC = () => {
 
   interface ApiResponse {
     statusCode: number;
-    body: string;
+    downloadURL: string;
+    image: string;
   }
 
   const handleSubmit = () => {
@@ -75,7 +82,8 @@ const GenImage: React.FC = () => {
         `https://www.metalmental.net/api/imagegen?positive_prompt=${value}&negative_prompt=none`
       )
       .then((response: AxiosResponse<ApiResponse>) => {
-        setPosiPromptData(response.data.body);
+        setDownload(response.data.downloadURL);
+        setImage(response.data.image);
       })
       .catch((error) => {
         console.log(error);
@@ -88,11 +96,22 @@ const GenImage: React.FC = () => {
       <div className="blogContentBackColor">
         <div className="wrap">
           <div className="left">
-            <p>value :</p>
-            {submitted && posiPromptData && (
-              <a href={posiPromptData}>
-                <ArrowCircleDownIcon />
-              </a>
+            {submitted && image && (
+              <p>
+                <img
+                  src={`data:image/png;base64,${image}`}
+                  alt="createdImage"
+                />
+              </p>
+            )}
+            {submitted && download && (
+              <ThemeProvider theme={theme}>
+                <StyledDownloadButton variant="contained">
+                  <a id="download_button" href={download}>
+                    Download
+                  </a>
+                </StyledDownloadButton>
+              </ThemeProvider>
             )}
           </div>
           <div className="right">
@@ -107,9 +126,9 @@ const GenImage: React.FC = () => {
               onChange={handleChangeValue}
               placeholder="Input Prompt..."
             />
-            <StyledButton variant="contained">
+            <StyledUploadButton variant="contained">
               <ArrowCircleUpIcon onClick={handleSubmit} fontSize="small" />
-            </StyledButton>
+            </StyledUploadButton>
           </Container>
         </ThemeProvider>
       </div>

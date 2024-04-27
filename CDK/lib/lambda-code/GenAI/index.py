@@ -45,7 +45,11 @@ def main(event):
     try:
         image = create_image(event)
         presigned_url = pug_image(image)
-        response = {"statusCode": 200, "body": presigned_url}
+        response = {
+            "statusCode": 200,
+            "downloadURL": presigned_url,
+            "image": base64.b64encode(image).decode("utf-8"),
+        }
         return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")

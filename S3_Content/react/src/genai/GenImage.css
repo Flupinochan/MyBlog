@@ -16,6 +16,11 @@
 .left {
   height: 300px;
   margin-right: 5px;
+  overflow: hidden;
+}
+.left img {
+  width: 100%;
+  height: auto;
 }
 .right {
   height: 300px;
@@ -37,4 +42,9 @@
   .right {
     margin-left: 0px;
   }
+}
+
+#download_button {
+  text-decoration: none;
+  color: white;
 }
