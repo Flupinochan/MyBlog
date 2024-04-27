@@ -106,16 +106,3 @@
 #drop-menu ul li a:hover {
   background-color: #4125e0;
 }
-
-#drop-menu ul li a::before {
-  content: "";
-  display: block;
-  width: 6px;
-  height: 6px;
-  border-top: 2px solid #e5deff;
-  border-left: 2px solid #e5deff;
-  transform: rotate(135deg);
-  position: absolute;
-  right: 15px;
-  top: calc(50% - 5px);
-}

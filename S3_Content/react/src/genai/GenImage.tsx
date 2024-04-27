@@ -99,6 +99,7 @@ const GenImage: React.FC = () => {
             {submitted && image && (
               <img src={`data:image/png;base64,${image}`} alt="createdImage" />
             )}
+            <br />
             {submitted && download && (
               <ThemeProvider theme={theme}>
                 <StyledDownloadButton variant="contained">

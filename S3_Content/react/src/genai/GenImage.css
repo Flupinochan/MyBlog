@@ -20,8 +20,8 @@
   width: 100%;
   height: auto;
   width: auto;
-  max-height: 275px;
-  max-width: 275px;
+  max-height: 512px;
+  max-width: 512px;
 }
 .right {
   height: 300px;
