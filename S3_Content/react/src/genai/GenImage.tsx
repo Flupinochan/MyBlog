@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
+import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import axios, { AxiosResponse } from "axios";
 
 import "./GenImage.css";
@@ -54,6 +55,7 @@ const StyledButton = styled(Button)`
 const GenImage: React.FC = () => {
   const [value, setValue] = useState("");
   const [posiPromptData, setPosiPromptData] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChangeValue = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(evt.target.value);
@@ -67,6 +69,7 @@ const GenImage: React.FC = () => {
   }
 
   const handleSubmit = () => {
+    setSubmitted(true);
     axios
       .get(
         `https://www.metalmental.net/api/imagegen?positive_prompt=${value}&negative_prompt=none`
@@ -85,7 +88,12 @@ const GenImage: React.FC = () => {
       <div className="blogContentBackColor">
         <div className="wrap">
           <div className="left">
-            <p>value : {posiPromptData}</p>
+            <p>value :</p>
+            {submitted && posiPromptData && (
+              <a href={posiPromptData}>
+                <ArrowCircleDownIcon />
+              </a>
+            )}
           </div>
           <div className="right">
             <p>test2</p>
