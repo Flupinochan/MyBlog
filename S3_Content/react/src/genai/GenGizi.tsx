@@ -69,18 +69,18 @@ const GenGizi: React.FC = () => {
 
   const handleExecuteTranslation = () => {
     if (uploadFile && wsStatus) {
-      const formData = new FormData();
-      formData.append("uploadFile", uploadFile);
-
       const url = "https://www.metalmental.net/api/movieupload";
-      const headers = {
-        headers: {
-          "content-type": "multipart/form-data",
-        },
-      };
 
       axios
-        .post(url, formData, headers)
+        .get(url)
+        .then((response) => {
+          console.log(response);
+          const fileName = response.data.fileName;
+          const downloadURL = response.data.downloadURL;
+          console.log(fileName);
+          console.log(downloadURL);
+          return axios.put(downloadURL, uploadFile);
+        })
         .then((response) => {
           console.log(response);
         })
