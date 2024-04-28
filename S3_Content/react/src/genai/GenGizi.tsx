@@ -40,6 +40,7 @@ const GenGizi: React.FC = () => {
       console.log("ws opended", event);
     };
     ws.onmessage = (event: MessageEvent) => {
+      console.log("ws message", event);
       const decoder = new TextDecoder("utf-8");
       const data = decoder.decode(event.data);
       console.log(data);
