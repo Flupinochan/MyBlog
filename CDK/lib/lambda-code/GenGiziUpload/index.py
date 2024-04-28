@@ -40,34 +40,35 @@ except Exception:
 # ----------------------------------------------------------------------
 # Main Function
 # ----------------------------------------------------------------------
-def main(event):
+def main():
     try:
-        test(event)
+        file_name, presigned_url = generate_url()
+        response = {
+            "statusCode": 200,
+            "fileName": file_name,
+            "downloadURL": presigned_url,
+        }
+        return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
 
 
 # ----------------------------------------------------------------------
-# Put Image to S3 and Generate Pre-Signed URL
+# Generate Pre-Signed URL
 # ----------------------------------------------------------------------
-def pug_image(image):
+def generate_url():
     try:
         random_number = str(random.randint(0, 1000))
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        image_name = f"{random_number}_{current_time}.png"
-        s3_client.put_object(
-            Bucket=S3_BUCKET,
-            Key=image_name,
-            Body=image,
-        )
+        file_name = f"{current_time}_{random_number}"
         presigned_url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": S3_BUCKET, "Key": image_name},
-            ExpiresIn=86400,
-            HttpMethod="GET",
+            "put_object",
+            Params={"Bucket": S3_BUCKET, "Key": file_name},
+            ExpiresIn=900,
+            HttpMethod="PUT",
         )
-        return presigned_url
+        return file_name, presigned_url
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
@@ -76,13 +77,10 @@ def pug_image(image):
 # ----------------------------------------------------------------------
 # Entry Point
 # ----------------------------------------------------------------------
-def lambda_handler(event: dict, context):
+def lambda_handler(event, context):
     try:
-        print(event)
-        body_json = event["body-json"]
-        print(body_json)
-        # main(event)
-        return {"statusCode": 200, "body": "Completed"}
+        response = main()
+        return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise

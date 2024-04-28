@@ -21,8 +21,8 @@ export class MyBlogParam {
   };
 
   dynamodbTable = {
-    tableName: "MyBlog-Websocket-db",
-    partitionKeyName: "connectionId",
+    tableName: "MyBlog-Gizi-db",
+    partitionKeyName: "transcribeJob",
   };
 
   websocket = {
