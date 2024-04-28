@@ -41,9 +41,7 @@ const GenGizi: React.FC = () => {
     };
     ws.onmessage = (event: MessageEvent) => {
       console.log("ws message", event);
-      const decoder = new TextDecoder("utf-8");
-      const data = decoder.decode(event.data);
-      console.log(data);
+      const data = event.data;
       setMessage((prevMessages) => [...prevMessages, data]);
     };
     ws.onclose = (event) => {

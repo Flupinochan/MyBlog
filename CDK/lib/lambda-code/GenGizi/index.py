@@ -74,14 +74,16 @@ def test(event):
         websocket_client = boto3.client(
             "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
         )
-        ohayou = "おはよう".encode("utf-8")
-        konnichiwa = "こんにちは".encode("utf-8")
-        konbanwa = "こんばんは".encode("utf-8")
-        byte_string_array = [ohayou, konnichiwa, konbanwa]
-        for chunk in byte_string_array:
-            websocket_client.post_to_connection(
-                Data=bytes([chunk]), ConnectionId=connectId
-            )
+
+        messages = ["おはよう", "こんにちは", "こんばんは"]
+        byte_arrays = []
+        for message in messages:
+            byte_array = message.encode("utf-8")
+            byte_arrays.append(byte_array)
+
+        for chunk in byte_arrays:
+            websocket_client.post_to_connection(Data=chunk, ConnectionId=connectId)
+
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
