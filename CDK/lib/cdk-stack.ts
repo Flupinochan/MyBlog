@@ -166,6 +166,13 @@ export class MyBlogStack extends cdk.Stack {
         ],
       }
     );
+    const bucketStatement = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ServicePrincipal('transcribe.amazonaws.com')],
+      actions: ['s3:GetObject'],
+      resources: [s3BucketImgStore.arnForObjects('*')],
+    });
+    s3BucketImgStore.addToResourcePolicy(bucketStatement);
 
     // DynamoDB for Websocket
     const dynamoTable = new dynamodb.TableV2(
@@ -214,7 +221,7 @@ export class MyBlogStack extends cdk.Stack {
         runtime: lambda.Runtime.PYTHON_3_12,
         handler: "index.lambda_handler",
         role: lambdaRoleGenAI,
-        code: lambda.Code.fromAsset(path.join(__dirname, "lambda-code/GenAI/")),
+        code: lambda.Code.fromAsset(path.join(__dirname, "lambda-code/GenGizi/")),
         timeout: Duration.minutes(15),
         logGroup: lambdaLogGroupGenAI,
         layers: [lambdaLayerGenAI],

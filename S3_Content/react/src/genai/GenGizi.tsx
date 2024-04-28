@@ -1,10 +1,118 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { styled } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import TranscribeIcon from "@mui/icons-material/Transcribe";
+
 import "./GenGizi.css";
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#4c54c0",
+    },
+  },
+});
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
 const GenGizi: React.FC = () => {
+  const [wsStatus, setWsStatus] = useState<WebSocket | null>(null);
+  const [message, setMessage] = useState<string[]>([]);
+
+  useEffect(() => {
+    // const wsURL = 'wss://lsdujzk2f5.execute-api.us-west-2.amazonaws.com/websocket/';
+    const wsURL = "wss://www.metalmental.net/websocket/";
+    const ws = new WebSocket(wsURL);
+
+    ws.onopen = (event) => {
+      console.log("ws opended", event);
+    };
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+      setMessage((prevMessages) => [...prevMessages, data]);
+    };
+    ws.onclose = (event) => {
+      console.log("ws closed", event);
+      setWsStatus(null);
+    };
+
+    setWsStatus(ws);
+
+    return () => {
+      ws.close();
+      console.log("ws closed");
+    };
+  }, []);
+
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null);
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files![0];
+    setUploadFileName(file.name);
+    setUploadFile(file);
+  };
+
+  const handleExecuteTranslation = () => {
+    if (uploadFile && wsStatus) {
+      const reader = new FileReader();
+      // 2.ファイル読み込み後に実行
+      reader.onload = () => {
+        // 読み込んだデータをarrayBufferに格納し、sendで送信
+        const arrayBuffer = reader.result as ArrayBuffer;
+        wsStatus.send(arrayBuffer);
+        console.log("websocket send");
+      };
+      // 1.ファイル読み込み
+      reader.readAsArrayBuffer(uploadFile);
+    }
+  };
+
   return (
     <div>
       <h2>Generate Giziroku</h2>
+      <div className="blogContentBackColor">
+        <ThemeProvider theme={theme}>
+          <Button
+            component="label"
+            role={undefined}
+            variant="contained"
+            tabIndex={-1}
+            startIcon={<CloudUploadIcon />}
+          >
+            Upload file
+            <VisuallyHiddenInput
+              type="file"
+              accept="audio/mp4, audio/mpeg, audio/ogg, audio/wav, audio/webm, video/mp4, video/ogg, video/webm"
+              onChange={handleFileUpload}
+            />
+          </Button>
+          {uploadFile && (
+            <div>
+              <p>upload file: {uploadFileName}</p>
+              <Button
+                variant="contained"
+                startIcon={<TranscribeIcon />}
+                onClick={handleExecuteTranslation}
+              >
+                Execute translation
+              </Button>
+            </div>
+          )}
+        </ThemeProvider>
+      </div>
     </div>
   );
 };

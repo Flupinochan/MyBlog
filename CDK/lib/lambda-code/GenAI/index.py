@@ -18,7 +18,7 @@ from LoggingClass import LoggingClass
 try:
     S3_BUCKET = os.environ["BUCKET_NAME"]
 except KeyError:
-    raise Exception("Environment variable BUCKET_NAME is not defined.")
+    raise Exception("Environment variable is not defined.")
 
 # ----------------------------------------------------------------------
 # Global Variable Setting
