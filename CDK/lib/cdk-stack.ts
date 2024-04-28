@@ -83,6 +83,36 @@ export class MyBlogStack extends cdk.Stack {
       }
     );
 
+    const lambdaLogGroupGenGiziUpload = new logs.LogGroup(
+      this,
+      param.lambdaGenGiziUpload.logGroupName,
+      {
+        logGroupName: param.lambdaGenGiziUpload.logGroupName,
+        retention: logs.RetentionDays.ONE_DAY,
+        logGroupClass: logs.LogGroupClass.STANDARD,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      }
+    );
+    const lambdaGenGiziUpload = new lambda.Function(
+      this,
+      param.lambdaGenGiziUpload.functionName,
+      {
+        functionName: param.lambdaGenGiziUpload.functionName,
+        runtime: lambda.Runtime.PYTHON_3_12,
+        handler: "index.lambda_handler",
+        role: lambdaRoleGenAI,
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "lambda-code/GenGiziUpload/")
+        ),
+        timeout: Duration.minutes(15),
+        logGroup: lambdaLogGroupGenAI,
+        layers: [lambdaLayerGenAI],
+        environment: {
+          BUCKET_NAME: param.s3BucketImgStore.bucketName,
+        },
+      }
+    );
+
     // API Gateway
     const apigwLogs = new logs.LogGroup(this, param.apiGateway.logGroupName, {
       logGroupName: param.apiGateway.logGroupName,
@@ -110,6 +140,13 @@ export class MyBlogStack extends cdk.Stack {
       }
     );
 
+    const validator = new apigw.RequestValidator(this, "validator", {
+      restApi: apigwGenAi,
+      requestValidatorName: "requestValidatePrompt",
+      validateRequestBody: false,
+      validateRequestParameters: true,
+    });
+
     const apiImageGen = apigwGenAi.root.addResource("imagegen");
     // Request with query string
     apiImageGen.addMethod(
@@ -131,12 +168,7 @@ export class MyBlogStack extends cdk.Stack {
       }),
       {
         // Method request settings
-        requestValidator: new apigw.RequestValidator(this, "validator", {
-          restApi: apigwGenAi,
-          requestValidatorName: "requestValidatePrompt",
-          validateRequestBody: false,
-          validateRequestParameters: true,
-        }),
+        requestValidator: validator,
         // Query String Setting
         requestParameters: {
           "method.request.querystring.positive_prompt": true,
@@ -156,6 +188,72 @@ export class MyBlogStack extends cdk.Stack {
     const apiTextGen = apigwGenAi.root.addResource("textgen");
     apiTextGen.addMethod("POST");
     apiTextGen.addMethod("GET");
+
+    const movieUpload = apigwGenAi.root.addResource("movieupload");
+    movieUpload.addMethod(
+      "POST",
+      new apigw.LambdaIntegration(lambdaGenGiziUpload, {
+        proxy: false,
+        requestTemplates: {
+          "multipart/form-data": `##  See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html
+##  This template will pass through all parameters including path, querystring, header, stage variables, and context through to the integration endpoint via the body/payload
+#set($allParams = $input.params())
+{
+"body-json" : $input.json('$'),
+"params" : {
+#foreach($type in $allParams.keySet())
+    #set($params = $allParams.get($type))
+"$type" : {
+    #foreach($paramName in $params.keySet())
+    "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+        #if($foreach.hasNext),#end
+    #end
+}
+    #if($foreach.hasNext),#end
+#end
+},
+"stage-variables" : {
+#foreach($key in $stageVariables.keySet())
+"$key" : "$util.escapeJavaScript($stageVariables.get($key))"
+    #if($foreach.hasNext),#end
+#end
+},
+"context" : {
+    "account-id" : "$context.identity.accountId",
+    "api-id" : "$context.apiId",
+    "api-key" : "$context.identity.apiKey",
+    "authorizer-principal-id" : "$context.authorizer.principalId",
+    "caller" : "$context.identity.caller",
+    "cognito-authentication-provider" : "$context.identity.cognitoAuthenticationProvider",
+    "cognito-authentication-type" : "$context.identity.cognitoAuthenticationType",
+    "cognito-identity-id" : "$context.identity.cognitoIdentityId",
+    "cognito-identity-pool-id" : "$context.identity.cognitoIdentityPoolId",
+    "http-method" : "$context.httpMethod",
+    "stage" : "$context.stage",
+    "source-ip" : "$context.identity.sourceIp",
+    "user" : "$context.identity.user",
+    "user-agent" : "$context.identity.userAgent",
+    "user-arn" : "$context.identity.userArn",
+    "request-id" : "$context.requestId",
+    "resource-id" : "$context.resourceId",
+    "resource-path" : "$context.resourcePath"
+    }
+}`,
+        },
+        integrationResponses: [{ statusCode: "200" }],
+      }),
+      {
+        // Method request settings
+        requestValidator: validator,
+        // Configuring the response from Lambda.
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseModels: { "application/json": apigw.Model.EMPTY_MODEL },
+          },
+        ],
+      }
+    );
 
     // S3 for Generating Image
     const s3BucketImgStore = new s3.Bucket(

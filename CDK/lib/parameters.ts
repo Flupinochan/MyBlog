@@ -38,4 +38,9 @@ export class MyBlogParam {
     // layerName: "Lambda-GenGiziroku-Layer",
     // ecrName: "myblog-gen-gizi",
   };
+  lambdaGenGiziUpload = {
+    functionName: "GenGiziUpload",
+    roleName: "Lambda-GenGiziUpload-IAMRole",
+    logGroupName: "Lambda-GenGiziUpload-CloudWatchLogs",
+  };
 }

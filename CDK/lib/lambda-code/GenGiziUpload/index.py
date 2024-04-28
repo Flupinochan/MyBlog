@@ -51,51 +51,6 @@ def main(event):
 # ----------------------------------------------------------------------
 # Put Image to S3 and Generate Pre-Signed URL
 # ----------------------------------------------------------------------
-def test(event):
-    try:
-        routeKey = event["requestContext"]["routeKey"]
-        connectId = event["requestContext"]["connectionId"]
-        domainName = event["requestContext"]["domainName"]
-        stageName = event["requestContext"]["stage"]
-        connectionInfo = {
-            "Route Key": routeKey,
-            "Connection ID": connectId,
-            "Domain Name": domainName,
-            "Stage Name": stageName,
-        }
-        log.info(f"Connection Info: {connectionInfo}")
-
-        # Connect
-        if routeKey == "$connect":
-            return {"statusCode": 200, "body": "Connected"}
-        # Disconnect
-        if routeKey == "$disconnect":
-            return {"statusCode": 200, "body": "Disconnected"}
-
-        # Streaming Response
-        # postData = json.loads(event["body"])["data"]
-        # print(postData)
-        websocket_client = boto3.client(
-            "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
-        )
-
-        messages = ["おはよう", "こんにちは", "こんばんは"]
-        byte_arrays = []
-        for message in messages:
-            byte_array = message.encode("utf-8")
-            byte_arrays.append(byte_array)
-
-        for chunk in byte_arrays:
-            websocket_client.post_to_connection(Data=chunk, ConnectionId=connectId)
-
-    except Exception as e:
-        log.error(f"エラーが発生しました: {e}")
-        raise
-
-
-# ----------------------------------------------------------------------
-# Put Image to S3 and Generate Pre-Signed URL
-# ----------------------------------------------------------------------
 def pug_image(image):
     try:
         random_number = str(random.randint(0, 1000))
@@ -124,7 +79,9 @@ def pug_image(image):
 def lambda_handler(event: dict, context):
     try:
         print(event)
-        main(event)
+        body_json = event["body-json"]
+        print(body_json)
+        # main(event)
         return {"statusCode": 200, "body": "Completed"}
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")

@@ -4,8 +4,10 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import TranscribeIcon from "@mui/icons-material/Transcribe";
+import axios from "axios";
 
 import "./GenGizi.css";
+import { Hearing } from "@mui/icons-material";
 
 const theme = createTheme({
   palette: {
@@ -67,16 +69,34 @@ const GenGizi: React.FC = () => {
 
   const handleExecuteTranslation = () => {
     if (uploadFile && wsStatus) {
-      const reader = new FileReader();
-      // 2.ファイル読み込み後に実行
-      reader.onload = () => {
-        // 読み込んだデータをバイナリからbase64文字列にし、sendで送信
-        const base64data = reader.result as string;
-        wsStatus.send(base64data);
-        console.log("websocket send");
+      const formData = new FormData();
+      formData.append("uploadFile", uploadFile);
+
+      const url = "https://www.metalmental.net/api/movieupload";
+      const headers = {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
       };
-      // 1.ファイル読み込み
-      reader.readAsDataURL(uploadFile);
+
+      axios
+        .post(url, formData, headers)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      // const reader = new FileReader();
+      // // 2.ファイル読み込み後に実行
+      // reader.onload = () => {
+      //   // 読み込んだデータをバイナリからbase64文字列にし、sendで送信
+      //   const base64data = reader.result as string;
+      //   wsStatus.send(base64data);
+      //   console.log("websocket send");
+      // };
+      // // 1.ファイル読み込み
+      // reader.readAsDataURL(uploadFile);
     }
   };
 
