@@ -53,25 +53,38 @@ def main(event):
 # Put Image to S3 and Generate Pre-Signed URL
 # ----------------------------------------------------------------------
 def test(event):
-    routeKey = event["requestContext"]["routeKey"]
-    connectId = event["requestContext"]["connectionId"]
-    domainName = event["requestContext"]["domainName"]
-    stageName = event["requestContext"]["stage"]
-    connectionInfo = {
-        "Route Key": routeKey,
-        "Connection ID": connectId,
-        "Domain Name": domainName,
-        "Stage Name": stageName,
-    }
-    log.info(f"Connection Info: {connectionInfo}")
+    try:
+        routeKey = event["requestContext"]["routeKey"]
+        connectId = event["requestContext"]["connectionId"]
+        domainName = event["requestContext"]["domainName"]
+        stageName = event["requestContext"]["stage"]
+        connectionInfo = {
+            "Route Key": routeKey,
+            "Connection ID": connectId,
+            "Domain Name": domainName,
+            "Stage Name": stageName,
+        }
+        log.info(f"Connection Info: {connectionInfo}")
 
-    # Streaming Response
-    websocket_client = boto3.client(
-        "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
-    )
-    byte_string = bytes([random.randint(0, 255) for _ in range(100)])
-    for chunk in byte_string:
-        websocket_client.post_to_connection(Data=bytes([chunk]), ConnectionId=connectId)
+        # Connect
+        if routeKey == "$connect":
+            return {"statusCode": 200, "body": "Connected"}
+
+        # Streaming Response
+        websocket_client = boto3.client(
+            "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
+        )
+        ohayou = "おはよう".encode("utf-8")
+        konnichiwa = "こんにちは".encode("utf-8")
+        konbanwa = "こんばんは".encode("utf-8")
+        byte_string_array = [ohayou, konnichiwa, konbanwa]
+        for chunk in byte_string_array:
+            websocket_client.post_to_connection(
+                Data=bytes([chunk]), ConnectionId=connectId
+            )
+    except Exception as e:
+        log.error(f"エラーが発生しました: {e}")
+        raise
 
 
 # ----------------------------------------------------------------------

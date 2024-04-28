@@ -39,21 +39,22 @@ const GenGizi: React.FC = () => {
     ws.onopen = (event) => {
       console.log("ws opended", event);
     };
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    ws.onmessage = (event: MessageEvent) => {
+      const decoder = new TextDecoder("utf-8");
+      const data = decoder.decode(event.data);
       console.log(data);
       setMessage((prevMessages) => [...prevMessages, data]);
     };
     ws.onclose = (event) => {
       console.log("ws closed", event);
-      // setWsStatus(null);
+      setWsStatus(null);
     };
 
     setWsStatus(ws);
 
     return () => {
-      // ws.close();
-      // console.log("ws closed");
+      ws.close();
+      console.log("ws closed");
     };
   }, []);
 
