@@ -8,6 +8,7 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
+import * as ecr from "aws-cdk-lib/aws-ecr";
 import { WebSocketLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import path = require("path");
 import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
@@ -31,6 +32,12 @@ export class MyBlogStack extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "AmazonAPIGatewayAdministrator"
+        ),
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "AmazonAPIGatewayInvokeFullAccess"
+        ),
       ],
     });
     const lambdaLogGroupGenAI = new logs.LogGroup(
@@ -168,9 +175,9 @@ export class MyBlogStack extends cdk.Stack {
     );
     const bucketStatement = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      principals: [new iam.ServicePrincipal('transcribe.amazonaws.com')],
-      actions: ['s3:GetObject'],
-      resources: [s3BucketImgStore.arnForObjects('*')],
+      principals: [new iam.ServicePrincipal("transcribe.amazonaws.com")],
+      actions: ["s3:GetObject"],
+      resources: [s3BucketImgStore.arnForObjects("*")],
     });
     s3BucketImgStore.addToResourcePolicy(bucketStatement);
 
@@ -189,6 +196,14 @@ export class MyBlogStack extends cdk.Stack {
     );
 
     // Lambda GenGizi
+    // const elasticRepository = new ecr.Repository(
+    //   this,
+    //   param.lambdaGenGizi.ecrName,
+    //   {
+    //     repositoryName: param.lambdaGenGizi.ecrName,
+    //   }
+    // );
+
     const lambdaLogGroupGenGizi = new logs.LogGroup(
       this,
       param.lambdaGenGizi.logGroupName,
@@ -199,19 +214,22 @@ export class MyBlogStack extends cdk.Stack {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
       }
     );
-    const lambdaLayerGenGizi = new lambda.LayerVersion(
-      this,
-      param.lambdaGenGizi.layerName,
-      {
-        layerVersionName: param.lambdaGenGizi.layerName,
-        code: lambda.Code.fromAsset(
-          path.join(__dirname, "lambda-code/GenAILayer/")
-        ),
-        compatibleRuntimes: [lambda.Runtime.PYTHON_3_12],
-        description: "GenAI Layer",
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-      }
-    );
+    // const lambdaGenGizi = new lambda.DockerImageFunction(
+    //   this,
+    //   param.lambdaGenGizi.functionName,
+    //   {
+    //     functionName: param.lambdaGenGizi.functionName,
+    //     role: lambdaRoleGenAI,
+    //     code: lambda.DockerImageCode.fromImageAsset(
+    //       path.join(__dirname, "lambda-code/GenGizi/")
+    //     ),
+    //     timeout: Duration.minutes(15),
+    //     logGroup: lambdaLogGroupGenAI,
+    //     environment: {
+    //       BUCKET_NAME: param.s3BucketImgStore.bucketName,
+    //     },
+    //   }
+    // );
 
     const lambdaGenGizi = new lambda.Function(
       this,
@@ -221,7 +239,9 @@ export class MyBlogStack extends cdk.Stack {
         runtime: lambda.Runtime.PYTHON_3_12,
         handler: "index.lambda_handler",
         role: lambdaRoleGenAI,
-        code: lambda.Code.fromAsset(path.join(__dirname, "lambda-code/GenGizi/")),
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "lambda-code/GenGizi/")
+        ),
         timeout: Duration.minutes(15),
         logGroup: lambdaLogGroupGenAI,
         layers: [lambdaLayerGenAI],

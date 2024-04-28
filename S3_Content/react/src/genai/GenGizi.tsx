@@ -70,13 +70,13 @@ const GenGizi: React.FC = () => {
       const reader = new FileReader();
       // 2.ファイル読み込み後に実行
       reader.onload = () => {
-        // 読み込んだデータをarrayBufferに格納し、sendで送信
-        const arrayBuffer = reader.result as ArrayBuffer;
-        wsStatus.send(arrayBuffer);
+        // 読み込んだデータをバイナリからbase64文字列にし、sendで送信
+        const base64data = reader.result as string;
+        wsStatus.send(base64data);
         console.log("websocket send");
       };
       // 1.ファイル読み込み
-      reader.readAsArrayBuffer(uploadFile);
+      reader.readAsDataURL(uploadFile);
     }
   };
 

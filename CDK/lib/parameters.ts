@@ -35,6 +35,7 @@ export class MyBlogParam {
     functionName: "GenGizi",
     roleName: "Lambda-GenGizi-IAMRole",
     logGroupName: "Lambda-GenGizi-CloudWatchLogs",
-    layerName: "Lambda-GenGizi-Layer",
+    // layerName: "Lambda-GenGiziroku-Layer",
+    // ecrName: "myblog-gen-gizi",
   };
 }
