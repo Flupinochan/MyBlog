@@ -42,13 +42,7 @@ except Exception:
 # ----------------------------------------------------------------------
 def main(event):
     try:
-        image = create_image(event)
-        presigned_url = pug_image(image)
-        response = {
-            "statusCode": 200,
-            "downloadURL": presigned_url,
-            "image": base64.b64encode(image).decode("utf-8"),
-        }
+        response = test(event)
         return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
@@ -56,8 +50,28 @@ def main(event):
 
 
 # ----------------------------------------------------------------------
-# Translate Japanese into English.
+# Put Image to S3 and Generate Pre-Signed URL
 # ----------------------------------------------------------------------
+def test(event):
+    routeKey = event["requestContext"]["routeKey"]
+    connectId = event["requestContext"]["connectionId"]
+    domainName = event["requestContext"]["domainName"]
+    stageName = event["requestContext"]["stage"]
+    connectionInfo = {
+        "Route Key": routeKey,
+        "Connection ID": connectId,
+        "Domain Name": domainName,
+        "Stage Name": stageName,
+    }
+    log.info(f"Connection Info: {connectionInfo}")
+
+    # Streaming Response
+    websocket_client = boto3.client(
+        "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
+    )
+    byte_string = bytes([random.randint(0, 255) for _ in range(100)])
+    for chunk in byte_string:
+        websocket_client.post_to_connection(Data=bytes([chunk]), ConnectionId=connectId)
 
 
 # ----------------------------------------------------------------------
@@ -89,10 +103,6 @@ def pug_image(image):
 # Entry Point
 # ----------------------------------------------------------------------
 def lambda_handler(event: dict, context):
-    # log.debug('='*20 +'Library Version' + '='*20)
-    # log.debug(f'boto3: {boto3.__version__}')
-    # log.debug(f'langchain: {langchain.__version__}')
-    # log.debug(model_client.list_foundation_models())
     try:
         print(event)
         response = main(event)

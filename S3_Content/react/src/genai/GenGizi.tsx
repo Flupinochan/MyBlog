@@ -46,14 +46,14 @@ const GenGizi: React.FC = () => {
     };
     ws.onclose = (event) => {
       console.log("ws closed", event);
-      setWsStatus(null);
+      // setWsStatus(null);
     };
 
     setWsStatus(ws);
 
     return () => {
-      ws.close();
-      console.log("ws closed");
+      // ws.close();
+      // console.log("ws closed");
     };
   }, []);
 

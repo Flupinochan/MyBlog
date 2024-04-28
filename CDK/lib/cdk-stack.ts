@@ -243,7 +243,7 @@ export class MyBlogStack extends cdk.Stack {
           path.join(__dirname, "lambda-code/GenGizi/")
         ),
         timeout: Duration.minutes(15),
-        logGroup: lambdaLogGroupGenAI,
+        logGroup: lambdaLogGroupGenGizi,
         layers: [lambdaLayerGenAI],
         environment: {
           BUCKET_NAME: param.s3BucketImgStore.bucketName,
