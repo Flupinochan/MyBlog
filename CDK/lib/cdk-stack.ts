@@ -234,6 +234,13 @@ export class MyBlogStack extends cdk.Stack {
             expiration: Duration.days(1),
           },
         ],
+        cors: [
+          {
+            allowedHeaders: ["*"],
+            allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.POST],
+            allowedOrigins: ["https://www.metalmental.net"],
+          },
+        ],
       }
     );
     const bucketStatement = new iam.PolicyStatement({
@@ -345,6 +352,7 @@ export class MyBlogStack extends cdk.Stack {
       param.websocket.apiName,
       {
         apiName: param.websocket.apiName,
+        // コンソールから双方向通信を有効化することを忘れずに
         connectRouteOptions: {
           integration: new WebSocketLambdaIntegration("connect", lambdaGenGizi),
         },

@@ -38,25 +38,29 @@ const GenGizi: React.FC = () => {
     const wsURL = "wss://www.metalmental.net/websocket/";
     const ws = new WebSocket(wsURL);
 
-    ws.onopen = (event) => {
-      console.log("ws opended", event);
-    };
-    ws.onmessage = (event: MessageEvent) => {
-      console.log("ws message", event);
-      const data = event.data;
-      setMessage((prevMessages) => [...prevMessages, data]);
-    };
-    ws.onclose = (event) => {
-      console.log("ws closed", event);
-      setWsStatus(null);
-    };
+    const initWebSocket = () => {
+      ws.onopen = (event) => {
+        console.log("ws opended", event);
+      };
+      ws.onmessage = (event: MessageEvent) => {
+        console.log("ws sendMessage", event);
+        const data = event.data;
+        setMessage((prevMessages) => [...prevMessages, data]);
+      };
+      ws.onclose = (event) => {
+        console.log("ws closed", event);
+        setWsStatus(null);
+        setTimeout(initWebSocket, 1000);
+      };
 
-    setWsStatus(ws);
+      setWsStatus(ws);
 
-    return () => {
-      ws.close();
-      console.log("ws closed");
+      return () => {
+        ws.close();
+        console.log("ws closed");
+      };
     };
+    initWebSocket();
   }, []);
 
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -74,15 +78,15 @@ const GenGizi: React.FC = () => {
       axios
         .get(url)
         .then((response) => {
-          console.log(response);
-          const fileName = response.data.fileName;
           const downloadURL = response.data.downloadURL;
-          console.log(fileName);
-          console.log(downloadURL);
+          // put
           return axios.put(downloadURL, uploadFile);
         })
         .then((response) => {
-          console.log(response);
+          // ws send
+          if (uploadFileName !== null) {
+            wsStatus.send(uploadFileName);
+          }
         })
         .catch((error) => {
           console.log(error);
