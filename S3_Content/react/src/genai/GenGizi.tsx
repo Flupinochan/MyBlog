@@ -34,11 +34,10 @@ const GenGizi: React.FC = () => {
   const [message, setMessage] = useState<string[]>([]);
 
   useEffect(() => {
-    // const wsURL = 'wss://lsdujzk2f5.execute-api.us-west-2.amazonaws.com/websocket/';
     const wsURL = "wss://www.metalmental.net/websocket/";
-    const ws = new WebSocket(wsURL);
-
     const initWebSocket = () => {
+      const ws = new WebSocket(wsURL);
+
       ws.onopen = (event) => {
         console.log("ws opended", event);
       };
@@ -56,8 +55,10 @@ const GenGizi: React.FC = () => {
       setWsStatus(ws);
 
       return () => {
-        ws.close();
-        console.log("ws closed");
+        if (wsStatus) {
+          ws.close();
+          console.log("ws closed");
+        }
       };
     };
     initWebSocket();

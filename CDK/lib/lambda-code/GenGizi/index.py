@@ -24,6 +24,7 @@ try:
     model_client = boto3.client("bedrock")
     bedrock_client = boto3.client("bedrock-runtime")
     s3_client = boto3.client("s3")
+    transcribe_client = boto3.client("transcribe")
 except Exception:
     raise Exception("Boto3 client error")
 
@@ -42,16 +43,39 @@ except Exception:
 # ----------------------------------------------------------------------
 def main(event):
     try:
-        test(event)
+        transcribe(event)
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
 
 
 # ----------------------------------------------------------------------
-# Put Image to S3 and Generate Pre-Signed URL
+# Transcribe
 # ----------------------------------------------------------------------
-def test(event):
+def transcribe(event):
+    try:
+        random_number = str(random.randint(0, 1000))
+        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        file_name = event["body"]
+        job_name = f"{file_name}_{random_number}_{current_time}"
+        extension = file_name.split(".")[-1]
+        transcribe_client.start_transcription_job(
+            TranscriptionJobName=job_name,
+            LanguageCode="ja-JP",
+            MediaFormat=extension,
+            Media={"MediaFileUri": f"s3://{S3_BUCKET}/{file_name}"},
+            OutputBucketName=S3_BUCKET,
+            OutputKey=f"{job_name}.json",
+        )
+    except Exception as e:
+        log.error(f"エラーが発生しました: {e}")
+        raise
+
+
+# ----------------------------------------------------------------------
+# Streaming Response
+# ----------------------------------------------------------------------
+def response(event):
     try:
         routeKey = event["requestContext"]["routeKey"]
         connectId = event["requestContext"]["connectionId"]
@@ -88,31 +112,6 @@ def test(event):
         for chunk in byte_arrays:
             websocket_client.post_to_connection(Data=chunk, ConnectionId=connectId)
 
-    except Exception as e:
-        log.error(f"エラーが発生しました: {e}")
-        raise
-
-
-# ----------------------------------------------------------------------
-# Put Image to S3 and Generate Pre-Signed URL
-# ----------------------------------------------------------------------
-def pug_image(image):
-    try:
-        random_number = str(random.randint(0, 1000))
-        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        image_name = f"{random_number}_{current_time}.png"
-        s3_client.put_object(
-            Bucket=S3_BUCKET,
-            Key=image_name,
-            Body=image,
-        )
-        presigned_url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": S3_BUCKET, "Key": image_name},
-            ExpiresIn=86400,
-            HttpMethod="GET",
-        )
-        return presigned_url
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
