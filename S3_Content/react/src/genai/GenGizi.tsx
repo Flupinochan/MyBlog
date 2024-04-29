@@ -146,11 +146,14 @@ const GenGizi: React.FC = () => {
           )}
           <br />
         </ThemeProvider>
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeKatex, rehypeRaw]}
-          children={message.join("")}
-        />
+        {message.map((message, index) => (
+          <ReactMarkdown
+            key={index}
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeKatex, rehypeRaw]}
+            children={message}
+          />
+        ))}
       </div>
     </div>
   );
