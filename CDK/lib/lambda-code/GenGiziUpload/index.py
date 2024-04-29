@@ -23,7 +23,7 @@ except KeyError:
 try:
     model_client = boto3.client("bedrock")
     bedrock_client = boto3.client("bedrock-runtime")
-    s3_client = boto3.client("s3")
+    s3_client = boto3.client("s3", config=Config(signature_version="s3v4"))
 except Exception:
     raise Exception("Boto3 client error")
 
@@ -40,9 +40,9 @@ except Exception:
 # ----------------------------------------------------------------------
 # Main Function
 # ----------------------------------------------------------------------
-def main():
+def main(event):
     try:
-        file_name, presigned_url = generate_url()
+        file_name, presigned_url = generate_url(event)
         response = {
             "statusCode": 200,
             "fileName": file_name,
@@ -57,18 +57,17 @@ def main():
 # ----------------------------------------------------------------------
 # Generate Pre-Signed URL
 # ----------------------------------------------------------------------
-def generate_url():
+def generate_url(event):
     try:
-        random_number = str(random.randint(0, 1000))
-        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = f"{current_time}_{random_number}"
         presigned_url = s3_client.generate_presigned_url(
             "put_object",
-            Params={"Bucket": S3_BUCKET, "Key": file_name},
+            Params={
+                "Bucket": S3_BUCKET,
+                "Key": event["file_name"],
+            },
             ExpiresIn=900,
-            HttpMethod="PUT",
         )
-        return file_name, presigned_url
+        return event["file_name"], presigned_url
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
@@ -79,7 +78,8 @@ def generate_url():
 # ----------------------------------------------------------------------
 def lambda_handler(event, context):
     try:
-        response = main()
+        print(event)
+        response = main(event)
         return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")

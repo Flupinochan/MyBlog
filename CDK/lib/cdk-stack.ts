@@ -194,11 +194,22 @@ export class MyBlogStack extends cdk.Stack {
       "GET",
       new apigw.LambdaIntegration(lambdaGenGiziUpload, {
         proxy: false,
+        // Convert query string to json for lambda
+        requestTemplates: {
+          "application/json": JSON.stringify({
+            file_name:
+              "$util.escapeJavaScript($input.params('file_name'))",
+          }),
+        },
         integrationResponses: [{ statusCode: "200" }],
       }),
       {
         // Method request settings
         requestValidator: validator,
+        // Query String Setting
+        requestParameters: {
+          "method.request.querystring.file_name": true,
+        },
         // Configuring the response from Lambda.
         methodResponses: [
           {

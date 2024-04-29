@@ -69,7 +69,7 @@ const GenGizi: React.FC = () => {
 
   const handleExecuteTranslation = () => {
     if (uploadFile && wsStatus) {
-      const url = "https://www.metalmental.net/api/movieupload";
+      const url = `https://www.metalmental.net/api/movieupload?file_name=${uploadFileName}`;
 
       axios
         .get(url)
