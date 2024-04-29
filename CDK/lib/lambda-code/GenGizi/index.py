@@ -29,8 +29,8 @@ try:
     # config = Config(connect_timeout=10, read_timeout=60)
     config = Config(
         retries={"max_attempts": 30, "mode": "standard"},
-        read_timeout=10,
-        connect_timeout=10,
+        read_timeout=900,
+        connect_timeout=900,
     )
     bedrock_client = boto3.client("bedrock-runtime", config=config)
     s3_client = boto3.client("s3", config=config)
@@ -82,6 +82,9 @@ def transcribe(event):
             Media={"MediaFileUri": f"s3://{S3_BUCKET}/{input_file_name}"},
             OutputBucketName=S3_BUCKET,
             OutputKey=output_file_name,
+            Settings={
+                "VocabularyName": "menber",
+            },
         )
         # Check Transcription Job Status
         while True:
@@ -115,7 +118,18 @@ def giziroku(output_file_name):
 
         # Streaming Response
         model_id = "anthropic.claude-3-opus-20240229-v1:0"
-        system_prompt = "あなたは、文字お越しされた議事録を校正し復元する優秀な議事です。前置きは不要で、作成した議事録のみ回答してください。AWSに関係する用語はカタカナではなく英語にしてください。明確で専門的な言葉を使用し、見出し、小見出し、箇条書きなどの適切な書式を使用して要約を論理的に整理します。概要は理解しやすく、会議の内容の包括的かつ簡潔な概要を提供するものにしてください。要約は不要です。なるべく多くの情報を出力出力形式は、react-markdownに対応するマークダウン形式にしてください。"
+        system_prompt = """あなたは、優秀なAWSエンジニアで、文字お越しされた議事録を校正し復元する優秀な議事です。
+IT AWSに関する会議です。
+基本的な進行としては、期限管理タスク、ご意見箱、メール対応管理、相談・共有事項の4項目があります。
+参加者は、磯野、小野、髙木、川本、福本、大羽、川越、八木澤、朴、鈴木、増田さんのいずれかになります。
+前置きは不要で、作成した議事録のみ回答してください。
+AWSに関係する用語はカタカナではなく英語やアルファベットにしてください。
+明確で専門的な言葉を使用し、見出し、小見出し、箇条書きなどの適切な書式を使用して要約を論理的に整理します。
+概要は理解しやすく、会議の内容の包括的かつ簡潔な概要を提供するものにしてください。
+要約は不要で、素の情報を出力してください。
+曖昧な日本語や英語、漢字やカタカナであれば、出力しないか、可能であれば、正しい言葉に復元してください。
+以上の内容をしっかりと理解した上で、出力形式は、react-markdownに対応するマークダウン形式にして出力してください。
+"""
         user_prompt = {"role": "user", "content": data}
         body = json.dumps(
             {
