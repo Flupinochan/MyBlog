@@ -39,6 +39,17 @@ export class MyBlogStack extends cdk.Stack {
           "AmazonAPIGatewayInvokeFullAccess"
         ),
       ],
+      inlinePolicies: {
+        inlinePolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["transcribe:*"],
+              resources: ["*"],
+            }),
+          ],
+        }),
+      },
     });
     const lambdaLogGroupGenAI = new logs.LogGroup(
       this,

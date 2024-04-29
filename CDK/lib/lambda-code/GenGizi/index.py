@@ -59,14 +59,13 @@ def transcribe(event):
         random_number = str(random.randint(0, 1000))
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         input_file_name = event["body"]
-        job_name = f"{input_file_name}_{random_number}_{current_time}"
+        job_name = f"{random_number}_{current_time}"
         output_file_name = f"{job_name}.json"
         extension = input_file_name.split(".")[-1]
         # Execute Transcription Job
         transcribe_client.start_transcription_job(
             TranscriptionJobName=job_name,
             LanguageCode="ja-JP",
-            LanguageOptions=["ja-JP"],
             MediaFormat=extension,
             Media={"MediaFileUri": f"s3://{S3_BUCKET}/{input_file_name}"},
             OutputBucketName=S3_BUCKET,
@@ -134,8 +133,9 @@ def giziroku(event, output_file_name):
             if stream:
                 for event in stream:
                     chunk = event.get("chunk")
+                    bytes_data = chunk.get("bytes")
                     websocket_client.post_to_connection(
-                        Data=chunk, ConnectionId=connectId
+                        Data=bytes_data, ConnectionId=connectId
                     )
             else:
                 time.sleep(1)

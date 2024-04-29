@@ -77,10 +77,11 @@ const GenGizi: React.FC = () => {
       const url = `https://www.metalmental.net/api/movieupload?file_name=${uploadFileName}`;
 
       axios
+        // get s3 pre signed url
         .get(url)
         .then((response) => {
           const downloadURL = response.data.downloadURL;
-          // put
+          // s3 put
           return axios.put(downloadURL, uploadFile);
         })
         .then((response) => {
@@ -137,6 +138,7 @@ const GenGizi: React.FC = () => {
             </div>
           )}
         </ThemeProvider>
+        <p>{message}</p>
       </div>
     </div>
   );
