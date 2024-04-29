@@ -149,9 +149,8 @@ const GenGizi: React.FC = () => {
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}
-        >
-          {message.join("")}
-        </ReactMarkdown>
+          children={message.join("")}
+        />
       </div>
     </div>
   );
