@@ -44,7 +44,9 @@ const GenGizi: React.FC = () => {
       ws.onmessage = (event: MessageEvent) => {
         console.log("ws sendMessage", event);
         const data = event.data;
-        setMessage((prevMessages) => [...prevMessages, data]);
+        if (event.data !== "Endpoint request timed out") {
+          setMessage((prevMessages) => [...prevMessages, data]);
+        }
       };
       ws.onclose = (event) => {
         console.log("ws closed", event);
@@ -87,6 +89,7 @@ const GenGizi: React.FC = () => {
         .then((response) => {
           // ws send
           if (uploadFileName !== null) {
+            setMessage((prevMessages) => []);
             wsStatus.send(uploadFileName);
           }
         })
