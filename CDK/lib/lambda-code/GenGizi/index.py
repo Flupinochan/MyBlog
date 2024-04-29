@@ -27,7 +27,11 @@ except KeyError:
 # ----------------------------------------------------------------------
 try:
     # config = Config(connect_timeout=10, read_timeout=60)
-    config = Config(retries={"max_attempts": 5, "mode": "standard"})
+    config = Config(
+        retries={"max_attempts": 30, "mode": "standard"},
+        read_timeout=10,
+        connect_timeout=10,
+    )
     bedrock_client = boto3.client("bedrock-runtime", config=config)
     s3_client = boto3.client("s3", config=config)
     transcribe_client = boto3.client("transcribe", config=config)

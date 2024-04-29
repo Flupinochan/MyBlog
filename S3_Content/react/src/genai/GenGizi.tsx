@@ -6,9 +6,12 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import TranscribeIcon from "@mui/icons-material/Transcribe";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
 
 import "./GenGizi.css";
-import { Hearing } from "@mui/icons-material";
 
 const theme = createTheme({
   palette: {
@@ -141,8 +144,14 @@ const GenGizi: React.FC = () => {
               </Button>
             </div>
           )}
+          <br />
         </ThemeProvider>
-        <ReactMarkdown>{message.join("")}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex, rehypeRaw]}
+        >
+          {message.join("")}
+        </ReactMarkdown>
       </div>
     </div>
   );
