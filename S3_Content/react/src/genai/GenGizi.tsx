@@ -151,6 +151,8 @@ const GenGizi: React.FC = () => {
           rehypePlugins={[rehypeKatex, rehypeRaw]}
           children={message.join("")}
         />
+        <br />
+        <br />
       </div>
     </div>
   );
