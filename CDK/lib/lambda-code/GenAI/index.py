@@ -24,9 +24,10 @@ except KeyError:
 # Global Variable Setting
 # ----------------------------------------------------------------------
 try:
-    model_client = boto3.client("bedrock")
-    bedrock_client = boto3.client("bedrock-runtime")
-    s3_client = boto3.client("s3")
+    config = Config(retries={"max_attempts": 5, "mode": "standard"})
+    model_client = boto3.client("bedrock", config=config)
+    bedrock_client = boto3.client("bedrock-runtime", config=config)
+    s3_client = boto3.client("s3", config=config)
 except Exception:
     raise Exception("Boto3 client error")
 

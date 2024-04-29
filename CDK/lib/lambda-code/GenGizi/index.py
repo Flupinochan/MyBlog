@@ -15,6 +15,10 @@ from LoggingClass import LoggingClass
 # ----------------------------------------------------------------------
 try:
     S3_BUCKET = os.environ["BUCKET_NAME"]
+    ROUTE_KEY = ""
+    CONNECT_ID = ""
+    DOMAIN_NAME = ""
+    STAGE_NAME = ""
 except KeyError:
     raise Exception("Environment variable is not defined.")
 
@@ -22,10 +26,11 @@ except KeyError:
 # Global Variable Setting
 # ----------------------------------------------------------------------
 try:
-    model_client = boto3.client("bedrock")
-    bedrock_client = boto3.client("bedrock-runtime")
-    s3_client = boto3.client("s3")
-    transcribe_client = boto3.client("transcribe")
+    # config = Config(connect_timeout=10, read_timeout=60)
+    config = Config(retries={"max_attempts": 5, "mode": "standard"})
+    bedrock_client = boto3.client("bedrock-runtime", config=config)
+    s3_client = boto3.client("s3", config=config)
+    transcribe_client = boto3.client("transcribe", config=config)
 except Exception:
     raise Exception("Boto3 client error")
 
@@ -45,7 +50,7 @@ except Exception:
 def main(event):
     try:
         output_file_name = transcribe(event)
-        giziroku(event, output_file_name)
+        giziroku(output_file_name)
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
@@ -62,6 +67,9 @@ def transcribe(event):
         job_name = f"{random_number}_{current_time}"
         output_file_name = f"{job_name}.json"
         extension = input_file_name.split(".")[-1]
+        log.info(f"Transcribe Job Name: {job_name}")
+        log.info(f"Transcribe Input File Name: {input_file_name}")
+        log.info(f"Transcribe Output File Name: {output_file_name}")
         # Execute Transcription Job
         transcribe_client.start_transcription_job(
             TranscriptionJobName=job_name,
@@ -78,7 +86,7 @@ def transcribe(event):
             )
             status = response["TranscriptionJob"]["TranscriptionJobStatus"]
             if status == "COMPLETED":
-                log.info(f"Transcribe Status: {status}")
+                log.debug(f"Transcribe Status: {status}")
                 break
             time.sleep(5)
         # Delete Transcription Job
@@ -93,7 +101,7 @@ def transcribe(event):
 # ----------------------------------------------------------------------
 # Streaming Response with Bedrock
 # ----------------------------------------------------------------------
-def giziroku(event, output_file_name):
+def giziroku(output_file_name):
     try:
         # Get Transcription Data
         response = s3_client.get_object(Bucket=S3_BUCKET, Key=output_file_name)
@@ -101,16 +109,9 @@ def giziroku(event, output_file_name):
         transcription_dict_data = json.loads(transcription_json_data)
         data = transcription_dict_data["results"]["transcripts"][0]["transcript"]
 
-        connectId = event["requestContext"]["connectionId"]
-        domainName = event["requestContext"]["domainName"]
-        stageName = event["requestContext"]["stage"]
-
         # Streaming Response
-        websocket_client = boto3.client(
-            "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
-        )
         model_id = "anthropic.claude-3-opus-20240229-v1:0"
-        system_prompt = "あなたは、文字お越しされた議事録を校正し復元する優秀な議事です"
+        system_prompt = "あなたは、文字お越しされた議事録を校正し復元する優秀な議事です。前置きは不要で、作成した議事録のみ回答してください。AWSに関係する用語はカタカナではなく英語にしてください。明確で専門的な言葉を使用し、見出し、小見出し、箇条書きなどの適切な書式を使用して要約を論理的に整理します。概要は理解しやすく、会議の内容の包括的かつ簡潔な概要を提供するものにしてください。要約は不要です。なるべく多くの情報を出力出力形式は、react-markdownに対応するマークダウン形式にしてください。"
         user_prompt = {"role": "user", "content": data}
         body = json.dumps(
             {
@@ -127,16 +128,25 @@ def giziroku(event, output_file_name):
             modelId=model_id,
         )
 
-        retries = 3
+        websocket_client = boto3.client(
+            "apigatewaymanagementapi",
+            endpoint_url=f"https://{DOMAIN_NAME}/{STAGE_NAME}",
+        )
+        retries = 5
         while retries > 0:
             stream = response.get("body")
             if stream:
                 for event in stream:
                     chunk = event.get("chunk")
-                    bytes_data = chunk.get("bytes")
-                    websocket_client.post_to_connection(
-                        Data=bytes_data, ConnectionId=connectId
-                    )
+                    if chunk:
+                        chunk_json = json.loads(chunk.get("bytes").decode())
+                        if chunk_json["type"] == "content_block_delta":
+                            data = chunk_json["delta"]["text"]
+                            # バイト文字列に戻して送信
+                            bytes_data = data.encode()
+                            websocket_client.post_to_connection(
+                                Data=bytes_data, ConnectionId=CONNECT_ID
+                            )
             else:
                 time.sleep(1)
                 retries -= 1
@@ -151,24 +161,25 @@ def giziroku(event, output_file_name):
 # ----------------------------------------------------------------------
 def lambda_handler(event: dict, context):
     try:
-        routeKey = event["requestContext"]["routeKey"]
-        connectId = event["requestContext"]["connectionId"]
-        domainName = event["requestContext"]["domainName"]
-        stageName = event["requestContext"]["stage"]
-        connectionInfo = {
-            "Route Key": routeKey,
-            "Connection ID": connectId,
-            "Domain Name": domainName,
-            "Stage Name": stageName,
+        global ROUTE_KEY, CONNECT_ID, DOMAIN_NAME, STAGE_NAME
+        ROUTE_KEY = event["requestContext"]["routeKey"]
+        CONNECT_ID = event["requestContext"]["connectionId"]
+        DOMAIN_NAME = event["requestContext"]["domainName"]
+        STAGE_NAME = event["requestContext"]["stage"]
+        connection_info = {
+            "Route Key": ROUTE_KEY,
+            "Connection ID": CONNECT_ID,
+            "Domain Name": DOMAIN_NAME,
+            "Stage Name": STAGE_NAME,
         }
-        log.info(f"Connection Info: {connectionInfo}")
+        log.info(f"Connection Info: {connection_info}")
         # Connect
-        if routeKey == "$connect":
+        if ROUTE_KEY == "$connect":
             return {"statusCode": 200, "body": "Connected"}
         # Disconnect
-        if routeKey == "$disconnect":
+        if ROUTE_KEY == "$disconnect":
             return {"statusCode": 200, "body": "Disconnected"}
-        # Default (Send Message)
+        # Default
         main(event)
         return {"statusCode": 200, "body": "Default Exit"}
     except Exception as e:
