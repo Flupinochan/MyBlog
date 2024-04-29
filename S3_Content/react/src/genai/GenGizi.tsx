@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import TranscribeIcon from "@mui/icons-material/Transcribe";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
 
 import "./GenGizi.css";
 import { Hearing } from "@mui/icons-material";
@@ -42,9 +43,8 @@ const GenGizi: React.FC = () => {
         console.log("ws opended", event);
       };
       ws.onmessage = (event: MessageEvent) => {
-        console.log("ws sendMessage", event);
         const data = event.data;
-        if (event.data !== "Endpoint request timed out") {
+        if (!data.includes("Endpoint request timed out")) {
           setMessage((prevMessages) => [...prevMessages, data]);
         }
       };
@@ -113,6 +113,7 @@ const GenGizi: React.FC = () => {
     <div>
       <h2>Generate Giziroku</h2>
       <div className="blogContentBackColor">
+        <br />
         <ThemeProvider theme={theme}>
           <Button
             component="label"
@@ -141,7 +142,7 @@ const GenGizi: React.FC = () => {
             </div>
           )}
         </ThemeProvider>
-        <p>{message}</p>
+        <ReactMarkdown>{message.join("")}</ReactMarkdown>
       </div>
     </div>
   );
