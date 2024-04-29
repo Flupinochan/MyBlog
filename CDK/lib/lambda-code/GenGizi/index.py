@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import time
 from datetime import datetime
 import base64
 import boto3
@@ -43,7 +44,8 @@ except Exception:
 # ----------------------------------------------------------------------
 def main(event):
     try:
-        transcribe(event)
+        output_file_name = transcribe(event)
+        giziroku(event, output_file_name)
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
@@ -56,26 +58,98 @@ def transcribe(event):
     try:
         random_number = str(random.randint(0, 1000))
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = event["body"]
-        job_name = f"{file_name}_{random_number}_{current_time}"
-        extension = file_name.split(".")[-1]
+        input_file_name = event["body"]
+        job_name = f"{input_file_name}_{random_number}_{current_time}"
+        output_file_name = f"{job_name}.json"
+        extension = input_file_name.split(".")[-1]
+        # Execute Transcription Job
         transcribe_client.start_transcription_job(
             TranscriptionJobName=job_name,
             LanguageCode="ja-JP",
+            LanguageOptions=["ja-JP"],
             MediaFormat=extension,
-            Media={"MediaFileUri": f"s3://{S3_BUCKET}/{file_name}"},
+            Media={"MediaFileUri": f"s3://{S3_BUCKET}/{input_file_name}"},
             OutputBucketName=S3_BUCKET,
-            OutputKey=f"{job_name}.json",
+            OutputKey=output_file_name,
         )
+        # Check Transcription Job Status
+        while True:
+            response = transcribe_client.get_transcription_job(
+                TranscriptionJobName=job_name
+            )
+            status = response["TranscriptionJob"]["TranscriptionJobStatus"]
+            if status == "COMPLETED":
+                log.info(f"Transcribe Status: {status}")
+                break
+            time.sleep(5)
+        # Delete Transcription Job
+        transcribe_client.delete_transcription_job(TranscriptionJobName=job_name)
+        log.info(f"Delete Transcribe Job Name: {job_name}")
+        return output_file_name
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
 
 
 # ----------------------------------------------------------------------
-# Streaming Response
+# Streaming Response with Bedrock
 # ----------------------------------------------------------------------
-def response(event):
+def giziroku(event, output_file_name):
+    try:
+        # Get Transcription Data
+        response = s3_client.get_object(Bucket=S3_BUCKET, Key=output_file_name)
+        transcription_json_data = response["Body"].read().decode("utf-8")
+        transcription_dict_data = json.loads(transcription_json_data)
+        data = transcription_dict_data["results"]["transcripts"][0]["transcript"]
+
+        connectId = event["requestContext"]["connectionId"]
+        domainName = event["requestContext"]["domainName"]
+        stageName = event["requestContext"]["stage"]
+
+        # Streaming Response
+        websocket_client = boto3.client(
+            "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
+        )
+        model_id = "anthropic.claude-3-opus-20240229-v1:0"
+        system_prompt = "あなたは、文字お越しされた議事録を校正し復元する優秀な議事です"
+        user_prompt = {"role": "user", "content": data}
+        body = json.dumps(
+            {
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": 4000,
+                "system": system_prompt,
+                "messages": [user_prompt],
+            }
+        )
+        response = bedrock_client.invoke_model_with_response_stream(
+            body=body,
+            contentType="application/json",
+            accept="application/json",
+            modelId=model_id,
+        )
+
+        retries = 3
+        while retries > 0:
+            stream = response.get("body")
+            if stream:
+                for event in stream:
+                    chunk = event.get("chunk")
+                    websocket_client.post_to_connection(
+                        Data=chunk, ConnectionId=connectId
+                    )
+            else:
+                time.sleep(1)
+                retries -= 1
+
+    except Exception as e:
+        log.error(f"エラーが発生しました: {e}")
+        raise
+
+
+# ----------------------------------------------------------------------
+# Entry Point
+# ----------------------------------------------------------------------
+def lambda_handler(event: dict, context):
     try:
         routeKey = event["requestContext"]["routeKey"]
         connectId = event["requestContext"]["connectionId"]
@@ -88,43 +162,15 @@ def response(event):
             "Stage Name": stageName,
         }
         log.info(f"Connection Info: {connectionInfo}")
-
         # Connect
         if routeKey == "$connect":
             return {"statusCode": 200, "body": "Connected"}
         # Disconnect
         if routeKey == "$disconnect":
             return {"statusCode": 200, "body": "Disconnected"}
-
-        # Streaming Response
-        # postData = json.loads(event["body"])["data"]
-        # print(postData)
-        websocket_client = boto3.client(
-            "apigatewaymanagementapi", endpoint_url=f"https://{domainName}/{stageName}"
-        )
-
-        messages = ["おはよう", "こんにちは", "こんばんは"]
-        byte_arrays = []
-        for message in messages:
-            byte_array = message.encode("utf-8")
-            byte_arrays.append(byte_array)
-
-        for chunk in byte_arrays:
-            websocket_client.post_to_connection(Data=chunk, ConnectionId=connectId)
-
-    except Exception as e:
-        log.error(f"エラーが発生しました: {e}")
-        raise
-
-
-# ----------------------------------------------------------------------
-# Entry Point
-# ----------------------------------------------------------------------
-def lambda_handler(event: dict, context):
-    try:
-        print(event)
+        # Default (Send Message)
         main(event)
-        return {"statusCode": 200, "body": "Completed"}
+        return {"statusCode": 200, "body": "Default Exit"}
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
