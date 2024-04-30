@@ -10,6 +10,9 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
 
 import "./GenGizi.css";
 
@@ -112,6 +115,13 @@ const GenGizi: React.FC = () => {
     }
   };
 
+  interface CodeProps {
+    node?: any;
+    inline?: any;
+    className?: any;
+    children?: any;
+  }
+
   return (
     <div>
       <h2>Generate Giziroku</h2>
@@ -147,10 +157,29 @@ const GenGizi: React.FC = () => {
           <br />
         </ThemeProvider>
         <ReactMarkdown
-          className={"markdown"}
+          // className={"markdown"}
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}
           children={message.join("")}
+          components={{
+            code(props: CodeProps) {
+              const { children, className, node, ...rest } = props;
+              const match = /language-(\w+)/.exec(className || "");
+              return match ? (
+                <SyntaxHighlighter
+                  {...rest}
+                  PreTag="div"
+                  children={String(children).replace(/\n$/, "")}
+                  language={match[1]}
+                  style={dark}
+                />
+              ) : (
+                <code {...rest} className={className}>
+                  {children}
+                </code>
+              );
+            },
+          }}
         />
         <br />
         <br />
