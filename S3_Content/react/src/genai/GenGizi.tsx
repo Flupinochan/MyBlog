@@ -12,6 +12,7 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
+// https://k8shiro.github.io/ReactCompareCodeHighlighter/
 
 import "./GenGizi.css";
 

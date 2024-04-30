@@ -109,6 +109,7 @@ a:hover {
   color: turquoise;
 }
 h1 {
+  text-align: center;
   position: relative;
   padding: 1rem 1.5rem;
   margin: 13px;
