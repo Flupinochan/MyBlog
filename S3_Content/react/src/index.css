@@ -57,6 +57,11 @@ body {
   color: #979797;
 }
 
+ul,
+li {
+  color: #4c54c0;
+}
+
 ol {
   counter-reset: number; /*数字をリセット*/
   list-style-type: none !important; /*数字を一旦消す*/

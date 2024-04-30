@@ -11,7 +11,6 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
 
 import "./GenGizi.css";
@@ -171,7 +170,7 @@ const GenGizi: React.FC = () => {
                   PreTag="div"
                   children={String(children).replace(/\n$/, "")}
                   language={match[1]}
-                  style={dark}
+                  style={shadesOfPurple}
                 />
               ) : (
                 <code {...rest} className={className}>
