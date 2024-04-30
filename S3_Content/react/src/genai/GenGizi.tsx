@@ -147,6 +147,7 @@ const GenGizi: React.FC = () => {
           <br />
         </ThemeProvider>
         <ReactMarkdown
+          className={"markdown"}
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}
           children={message.join("")}

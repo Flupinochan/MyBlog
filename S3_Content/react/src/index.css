@@ -103,6 +103,21 @@ a:visited {
 a:hover {
   color: turquoise;
 }
+h1 {
+  position: relative;
+  padding: 1.5rem 2.5rem;
+  border: 4px solid #4c54c0;
+}
+
+h1:before {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  content: "";
+  border: 4px dotted #4c54c0;
+}
 
 h2 {
   font-family: "Meiryo", "メイリオ", sans-serif;
