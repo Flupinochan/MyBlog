@@ -85,7 +85,7 @@ def transcribe(event):
             Settings={
                 "VocabularyName": "menber",
             },
-            ModelSettings={"LanguageModelName": "custom"},
+            # ModelSettings={"LanguageModelName": "custom_model"},
         )
         # Check Transcription Job Status
         while True:
