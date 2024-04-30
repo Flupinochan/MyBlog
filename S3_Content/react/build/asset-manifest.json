@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/static/css/main.7541050e.css",
+    "main.css": "/static/css/main.00c026e5.css",
     "main.js": "/static/js/main.2f4d6b27.js",
     "static/media/sample.png": "/static/media/sample.044fa866b58b718b675e.png",
     "static/media/polyrepo.png": "/static/media/polyrepo.51c0da28f17e9406bf18.png",
@@ -9,11 +9,11 @@
     "static/media/2.jpg": "/static/media/2.581ae035e0319f61bbe0.jpg",
     "static/media/appleComBill.png": "/static/media/appleComBill.735af7f3bd4e2a02859a.png",
     "index.html": "/index.html",
-    "main.7541050e.css.map": "/static/css/main.7541050e.css.map",
+    "main.00c026e5.css.map": "/static/css/main.00c026e5.css.map",
     "main.2f4d6b27.js.map": "/static/js/main.2f4d6b27.js.map"
   },
   "entrypoints": [
-    "static/css/main.7541050e.css",
+    "static/css/main.00c026e5.css",
     "static/js/main.2f4d6b27.js"
   ]
 }

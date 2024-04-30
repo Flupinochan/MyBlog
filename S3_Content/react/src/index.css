@@ -105,16 +105,18 @@ a:hover {
 }
 h1 {
   position: relative;
-  /* padding: 1.5rem 2.5rem; */
-  padding: 4px;
+  padding: 1.5rem 2.5rem;
   border: 4px solid #4c54c0;
   color: #4c54c0;
 }
 
 h1:before {
-  padding: 0px;
   position: absolute;
   background-color: #e1e4f5;
+  top: 4px;
+  right: 4px;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
   content: "";
   border: 4px dotted #4c54c0;
 }

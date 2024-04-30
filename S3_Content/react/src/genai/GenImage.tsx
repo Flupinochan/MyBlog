@@ -3,7 +3,6 @@ import TextareaAutosize from "react-textarea-autosize";
 import styled from "styled-components";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 // import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import axios, { AxiosResponse } from "axios";
