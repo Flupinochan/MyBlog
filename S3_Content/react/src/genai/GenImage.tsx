@@ -8,6 +8,7 @@ import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import axios, { AxiosResponse } from "axios";
 
 import "./GenImage.css";
+import StepsSlider from "./tool/StepsSlider";
 
 // TextArea用
 const Container = styled.div`
@@ -62,6 +63,7 @@ const GenImage: React.FC = () => {
   const [download, setDownload] = useState("");
   const [image, setImage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  let stepsValue: number;
 
   const handleChangeValue = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(evt.target.value);
@@ -75,12 +77,39 @@ const GenImage: React.FC = () => {
     image: string;
   }
 
+  // const handleSubmit = () => {
+  //   setSubmitted(true);
+  //   axios
+  //     .get(
+  //       `https://www.metalmental.net/api/imagegen?positive_prompt=${value}&negative_prompt=none`
+  //     )
+  //     .then((response: AxiosResponse<ApiResponse>) => {
+  //       setDownload(response.data.downloadURL);
+  //       setImage(response.data.image);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
+
   const handleSubmit = () => {
     setSubmitted(true);
+    const postData = {
+      positive_prompt: value,
+      negative_prompt: "none",
+      steps: stepsValue,
+    };
+    const postConfig = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    const url = "https://www.metalmental.net/api/imagegen";
     axios
-      .get(
-        `https://www.metalmental.net/api/imagegen?positive_prompt=${value}&negative_prompt=none`
-      )
+      // .get(
+      //   `https://www.metalmental.net/api/imagegen?positive_prompt=${value}&negative_prompt=none`
+      // )
+      .post(url, postData, postConfig)
       .then((response: AxiosResponse<ApiResponse>) => {
         setDownload(response.data.downloadURL);
         setImage(response.data.image);
@@ -88,6 +117,10 @@ const GenImage: React.FC = () => {
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  const handleStepsSliderChange = (steps: number) => {
+    stepsValue = steps;
   };
 
   return (
@@ -111,7 +144,7 @@ const GenImage: React.FC = () => {
             )}
           </div>
           <div className="right">
-            <p>test2</p>
+            <StepsSlider onChange={handleStepsSliderChange} />
           </div>
         </div>
         <ThemeProvider theme={theme}>

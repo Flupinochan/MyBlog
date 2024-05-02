@@ -72,6 +72,7 @@ def create_image(event):
         model_id = "stability.stable-diffusion-xl-v1"
         positive_prompt = event["positive_prompt"]
         negative_prompt = event["negative_prompt"]
+        steps = event["steps"]
         log.debug(f"positive_prompt: {positive_prompt}")
         # https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-parameters-diffusion-1-0-text-image.html
         body = {
@@ -86,7 +87,7 @@ def create_image(event):
             # 'sampler': string,
             "samples": 1,
             # 'seed': int, # 似た画像を生成したい場合
-            "steps": 150,  # 数値が大きいほど重くなるがクオリティが高くなる
+            "steps": steps,  # 数値が大きいほど重くなるがクオリティが高くなる
             # 'style_preset': 'anime',
         }
         response = bedrock_client.invoke_model(
@@ -138,6 +139,7 @@ def lambda_handler(event: dict, context):
     # log.debug(f'langchain: {langchain.__version__}')
     # log.debug(model_client.list_foundation_models())
     try:
+        log.debug(f"event: {event}")
         response = main(event)
         return response
     except Exception as e:

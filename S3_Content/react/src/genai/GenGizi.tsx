@@ -115,6 +115,10 @@ const GenGizi: React.FC = () => {
     }
   };
 
+  // マークダウンハイライト用
+  //   anOldHope
+  // vs2015
+  // shadesOfPurple
   interface CodeProps {
     node?: any;
     inline?: any;

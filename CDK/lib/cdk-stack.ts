@@ -151,11 +151,18 @@ export class MyBlogStack extends cdk.Stack {
       }
     );
 
-    const validator = new apigw.RequestValidator(this, "validator", {
+    const validatorGet = new apigw.RequestValidator(this, "validatorGet", {
       restApi: apigwGenAi,
-      requestValidatorName: "requestValidatePrompt",
+      requestValidatorName: "requestValidateGet",
       validateRequestBody: false,
       validateRequestParameters: true,
+    });
+
+    const validatorPost = new apigw.RequestValidator(this, "validatorPost", {
+      restApi: apigwGenAi,
+      requestValidatorName: "requestValidatePost",
+      validateRequestBody: true,
+      validateRequestParameters: false,
     });
 
     const apiImageGen = apigwGenAi.root.addResource("imagegen");
@@ -179,7 +186,7 @@ export class MyBlogStack extends cdk.Stack {
       }),
       {
         // Method request settings
-        requestValidator: validator,
+        requestValidator: validatorGet,
         // Query String Setting
         requestParameters: {
           "method.request.querystring.positive_prompt": true,
@@ -194,7 +201,52 @@ export class MyBlogStack extends cdk.Stack {
         ],
       }
     );
-    apiImageGen.addMethod("POST");
+    const requestModelGenIMG= apigwGenAi.addModel(param.lambdaGenAI.modelNameRequest, {
+      contentType: 'application/json',
+      modelName: param.lambdaGenAI.modelNameRequest,
+      schema: {
+        schema: apigw.JsonSchemaVersion.DRAFT4,
+        title: param.lambdaGenAI.modelNameRequest,
+        type: apigw.JsonSchemaType.OBJECT,
+        properties: {
+          positive_prompt: { type: apigw.JsonSchemaType.STRING },
+          negative_prompt: { type: apigw.JsonSchemaType.STRING }
+        }
+      }
+    });
+    const responseModelGenIMG= apigwGenAi.addModel(param.lambdaGenAI.modelNameResponse, {
+      contentType: 'application/json',
+      modelName: param.lambdaGenAI.modelNameResponse,
+      schema: {
+        schema: apigw.JsonSchemaVersion.DRAFT4,
+        title: param.lambdaGenAI.modelNameResponse,
+        type: apigw.JsonSchemaType.OBJECT,
+        properties: {
+          image: { type: apigw.JsonSchemaType.STRING },
+        }
+      }
+    });
+    // メソッドの定義は、
+    // 第一引数に、メソッドの種類
+    // 第二引数に、統合設定
+    // 第三引数に、メソッド設定
+    apiImageGen.addMethod("POST", new apigw.LambdaIntegration(lambdaGenAI, {
+      proxy: false,
+      passthroughBehavior: apigw.PassthroughBehavior.WHEN_NO_TEMPLATES,
+      integrationResponses: [{ statusCode: "200" }],
+      }),{
+        requestModels: {
+          "application/json": requestModelGenIMG,
+        },
+        requestValidator: validatorPost,
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseModels: { "application/json": responseModelGenIMG},
+          },
+        ],
+      },
+    )
 
     const apiTextGen = apigwGenAi.root.addResource("textgen");
     apiTextGen.addMethod("POST");
@@ -216,7 +268,7 @@ export class MyBlogStack extends cdk.Stack {
       }),
       {
         // Method request settings
-        requestValidator: validator,
+        requestValidator: validatorGet,
         // Query String Setting
         requestParameters: {
           "method.request.querystring.file_name": true,

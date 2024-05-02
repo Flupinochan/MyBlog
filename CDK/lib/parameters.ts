@@ -8,6 +8,8 @@ export class MyBlogParam {
     roleName: "Lambda-GenIMG-IAMRole",
     logGroupName: "Lambda-GenIMG-CloudWatchLogs",
     layerName: "Lambda-GenIMG-Layer",
+    modelNameRequest: "lambdagenimgrequest",
+    modelNameResponse: "lambdagenimgresponse"
   };
 
   apiGateway = {
