@@ -33,7 +33,6 @@ const GenImage: React.FC = () => {
   let sizeValue: number;
   let stepsValue: number;
   let cfgScaleValue: number;
-  let positivePromptValue: string;
 
   interface ApiResponse {
     statusCode: number;
@@ -61,9 +60,9 @@ const GenImage: React.FC = () => {
     const postData = {
       positive_prompt: positivePromptValue,
       negative_prompt: "none",
-      size: sizeValue,
-      steps: stepsValue,
-      cfg_scale: cfgScaleValue,
+      size: sizeValueRef.current,
+      steps: stepsValueRef.current,
+      cfg_scale: cfgScaleValueRef.current,
     };
     const postConfig = {
       headers: {
@@ -84,15 +83,20 @@ const GenImage: React.FC = () => {
         console.log(error);
       });
   };
+
+  const sizeValueRef = useRef<number>(512);
+  const stepsValueRef = useRef<number>(100);
+  const cfgScaleValueRef = useRef<number>(10);
+
   const handleSizeChange = (size: number) => {
-    sizeValue = size;
+    sizeValueRef.current = size;
   };
 
   const handleStepsSliderChange = (steps: number) => {
-    stepsValue = steps;
+    stepsValueRef.current = steps;
   };
   const handleCfgScaleChange = (cfgScale: number) => {
-    cfgScaleValue = cfgScale;
+    cfgScaleValueRef.current = cfgScale;
   };
 
   return (
