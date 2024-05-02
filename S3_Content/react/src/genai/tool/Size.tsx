@@ -21,7 +21,7 @@ const Size: React.FC<Props> = (props) => {
   return (
     <div>
       <FormControl fullWidth>
-        <InputLabel id="size-label">Age</InputLabel>
+        <InputLabel id="size-label">Size</InputLabel>
         <Select
           labelId="size-label"
           id="size-select"

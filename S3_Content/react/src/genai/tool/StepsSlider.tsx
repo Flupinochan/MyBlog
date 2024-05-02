@@ -40,7 +40,7 @@ const StepsSlider: React.FC<Props> = (props) => {
     <div>
       <Box sx={{ width: 300 }}>
         <Typography id="input-slider" gutterBottom>
-          <b>steps</b>
+          <b>Steps</b>
           <br />
           More steps can result in a more accurate result.
         </Typography>
