@@ -210,7 +210,10 @@ export class MyBlogStack extends cdk.Stack {
         type: apigw.JsonSchemaType.OBJECT,
         properties: {
           positive_prompt: { type: apigw.JsonSchemaType.STRING },
-          negative_prompt: { type: apigw.JsonSchemaType.STRING }
+          negative_prompt: { type: apigw.JsonSchemaType.STRING },
+          size: { type: apigw.JsonSchemaType.STRING },
+          steps: { type: apigw.JsonSchemaType.STRING },
+          cfg_scale: { type: apigw.JsonSchemaType.STRING }
         }
       }
     });

@@ -56,7 +56,7 @@ const GenImage: React.FC = () => {
   //     });
   // };
 
-  const handleSubmit = () => {
+  const handleSubmit = (positivePromptValue: string) => {
     setSubmitted(true);
     const postData = {
       positive_prompt: positivePromptValue,

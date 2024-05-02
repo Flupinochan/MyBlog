@@ -72,6 +72,7 @@ def create_image(event):
         model_id = "stability.stable-diffusion-xl-v1"
         positive_prompt = event["positive_prompt"]
         negative_prompt = event["negative_prompt"]
+        size = event["size"]
         steps = event["steps"]
         cfg_scale = event["cfg_scale"]
         log.debug(f"positive_prompt: {positive_prompt}")
@@ -81,8 +82,8 @@ def create_image(event):
                 {"text": positive_prompt, "weight": 1.0},
                 {"text": negative_prompt, "weight": -1.0},
             ],
-            "height": 1024,
-            "width": 1024,
+            "height": size,
+            "width": size,
             "cfg_scale": cfg_scale,  # 数値が大きいほどプロンプトに忠実でランダム性がなくなる
             # 'clip_guidance_preset': 'SLOW',
             # 'sampler': string,

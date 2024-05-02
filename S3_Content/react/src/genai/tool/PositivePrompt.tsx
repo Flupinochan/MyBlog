@@ -50,7 +50,7 @@ const StyledUploadButton = styled(Button)`
 `;
 
 interface Props {
-  onChange: () => void;
+  onChange: (value: string) => void;
 }
 
 const PositivePrompt: React.FC<Props> = (Props) => {
@@ -74,7 +74,7 @@ const PositivePrompt: React.FC<Props> = (Props) => {
           />
           <StyledUploadButton variant="contained">
             <ArrowCircleUpIcon
-              onClick={() => Props.onChange()}
+              onClick={() => Props.onChange(value)}
               fontSize="small"
             />
           </StyledUploadButton>
