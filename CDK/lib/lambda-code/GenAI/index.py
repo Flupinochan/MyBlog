@@ -73,6 +73,7 @@ def create_image(event):
         positive_prompt = event["positive_prompt"]
         negative_prompt = event["negative_prompt"]
         steps = event["steps"]
+        cfg_scale = event["cfg_scale"]
         log.debug(f"positive_prompt: {positive_prompt}")
         # https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-parameters-diffusion-1-0-text-image.html
         body = {
@@ -82,7 +83,7 @@ def create_image(event):
             ],
             "height": 1024,
             "width": 1024,
-            "cfg_scale": 10,  # 数値が大きいほどプロンプトに忠実でランダム性がなくなる
+            "cfg_scale": cfg_scale,  # 数値が大きいほどプロンプトに忠実でランダム性がなくなる
             # 'clip_guidance_preset': 'SLOW',
             # 'sampler': string,
             "samples": 1,

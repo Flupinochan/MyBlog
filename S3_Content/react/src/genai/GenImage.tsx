@@ -1,21 +1,17 @@
 import React, { useRef, useState } from "react";
-import TextareaAutosize from "react-textarea-autosize";
+// import TextareaAutosize from "react-textarea-autosize";
 import styled from "styled-components";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
+// import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 // import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import axios, { AxiosResponse } from "axios";
 
 import "./GenImage.css";
 import StepsSlider from "./tool/StepsSlider";
-
-// TextArea用
-const Container = styled.div`
-  position: relative;
-  width: 100%;
-  height: auto;
-`;
+import PositivePrompt from "./tool/PositivePrompt";
+import CfgScale from "./tool/CfgScale";
+import Size from "./tool/Size";
 
 const theme = createTheme({
   palette: {
@@ -25,51 +21,19 @@ const theme = createTheme({
   },
 });
 
-const StyledTextarea = styled(TextareaAutosize)`
-  flex-direction: row;
-  align-items: flex-start;
-  width: 100%;
-  padding: 13px;
-  padding-right: 75px;
-  font-size: 18px;
-  color: #4c54c0;
-  background-color: #f7f7f7;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  transition: border-color 0.3s;
-  box-sizing: border-box;
-  resize: none;
-
-  &:focus {
-    border-color: #4c54c0;
-    background-color: white;
-  }
-`;
-
-const StyledUploadButton = styled(Button)`
-  bottom: 48px;
-  right: 7px;
-  float: right;
-`;
-
 const StyledDownloadButton = styled(Button)`
   float: right;
 `;
 
 // メイン
 const GenImage: React.FC = () => {
-  const [value, setValue] = useState("");
   const [download, setDownload] = useState("");
   const [image, setImage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  let sizeValue: number;
   let stepsValue: number;
-
-  const handleChangeValue = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(evt.target.value);
-  };
-
-  const posiPromptRef = useRef<HTMLTextAreaElement>(null);
+  let cfgScaleValue: number;
+  let positivePromptValue: string;
 
   interface ApiResponse {
     statusCode: number;
@@ -95,9 +59,11 @@ const GenImage: React.FC = () => {
   const handleSubmit = () => {
     setSubmitted(true);
     const postData = {
-      positive_prompt: value,
+      positive_prompt: positivePromptValue,
       negative_prompt: "none",
+      size: sizeValue,
       steps: stepsValue,
+      cfg_scale: cfgScaleValue,
     };
     const postConfig = {
       headers: {
@@ -118,9 +84,15 @@ const GenImage: React.FC = () => {
         console.log(error);
       });
   };
+  const handleSizeChange = (size: number) => {
+    sizeValue = size;
+  };
 
   const handleStepsSliderChange = (steps: number) => {
     stepsValue = steps;
+  };
+  const handleCfgScaleChange = (cfgScale: number) => {
+    cfgScaleValue = cfgScale;
   };
 
   return (
@@ -144,22 +116,14 @@ const GenImage: React.FC = () => {
             )}
           </div>
           <div className="right">
-            <StepsSlider onChange={handleStepsSliderChange} />
+            <ThemeProvider theme={theme}>
+              <Size onChange={handleSizeChange} />
+              <StepsSlider onChange={handleStepsSliderChange} />
+              <CfgScale onChange={handleCfgScaleChange} />
+            </ThemeProvider>
           </div>
         </div>
-        <ThemeProvider theme={theme}>
-          <Container>
-            <StyledTextarea
-              ref={posiPromptRef}
-              value={value}
-              onChange={handleChangeValue}
-              placeholder="Input Prompt..."
-            />
-            <StyledUploadButton variant="contained">
-              <ArrowCircleUpIcon onClick={handleSubmit} fontSize="small" />
-            </StyledUploadButton>
-          </Container>
-        </ThemeProvider>
+        <PositivePrompt onChange={handleSubmit} />
       </div>
     </div>
   );
