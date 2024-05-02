@@ -30,9 +30,9 @@ const GenImage: React.FC = () => {
   const [download, setDownload] = useState("");
   const [image, setImage] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  let sizeValue: number;
-  let stepsValue: number;
-  let cfgScaleValue: number;
+  const sizeValueRef = useRef<number>(512);
+  const stepsValueRef = useRef<number>(100);
+  const cfgScaleValueRef = useRef<number>(10);
 
   interface ApiResponse {
     statusCode: number;
@@ -64,6 +64,7 @@ const GenImage: React.FC = () => {
       steps: stepsValueRef.current,
       cfg_scale: cfgScaleValueRef.current,
     };
+    console.log(postData);
     const postConfig = {
       headers: {
         "Content-Type": "application/json",
@@ -83,10 +84,6 @@ const GenImage: React.FC = () => {
         console.log(error);
       });
   };
-
-  const sizeValueRef = useRef<number>(512);
-  const stepsValueRef = useRef<number>(100);
-  const cfgScaleValueRef = useRef<number>(10);
 
   const handleSizeChange = (size: number) => {
     sizeValueRef.current = size;

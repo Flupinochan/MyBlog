@@ -19,12 +19,14 @@ const CfgScale: React.FC<Props> = (props) => {
 
   const handleCfgScaleChange = (event: Event, newValue: number | number[]) => {
     setCfgScaleValue(newValue as number);
+    props.onChange(cfgScaleValue); // 親コンポーネントに返す値
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCfgScaleValue(
       event.target.value === "" ? 0 : Number(event.target.value)
     );
+    props.onChange(cfgScaleValue); // 親コンポーネントに返す値
   };
 
   const handleCfgScale = () => {

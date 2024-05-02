@@ -19,10 +19,12 @@ const StepsSlider: React.FC<Props> = (props) => {
 
   const handleStepsChange = (event: Event, newValue: number | number[]) => {
     setStepsValue(newValue as number);
+    props.onChange(stepsValue); // 親コンポーネントに返す値
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setStepsValue(event.target.value === "" ? 0 : Number(event.target.value));
+    props.onChange(stepsValue); // 親コンポーネントに返す値
   };
 
   const handleSteps = () => {
