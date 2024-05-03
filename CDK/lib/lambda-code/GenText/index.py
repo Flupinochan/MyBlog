@@ -59,11 +59,22 @@ def main(event):
 # ----------------------------------------------------------------------
 def generate_text(event):
     try:
+        preamble = """
+## Task & Context
+You help people answer their questions and other requests interactively. You will be asked a very wide array of requests on all kinds of topics. You will be equipped with a wide range of search engines or similar tools to help you, which you use to research your answer. You should focus on serving the user's needs as best you can, which will be wide-ranging.
+
+## Style Guide
+Unless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling.
+
+## Output Format
+The output format should be in Markdown only.
+"""
         positive_prompt = event["positive_prompt"]
         model_id = "cohere.command-r-plus-v1:0"
         data = json.dumps(
             {
                 "message": positive_prompt,
+                "preamble": preamble,
                 "temperature": 0.9,
                 "p": 0.75,
                 "k": 0,

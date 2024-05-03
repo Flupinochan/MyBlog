@@ -6,6 +6,8 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
+import anOldHope from "react-syntax-highlighter/dist/esm/styles/hljs/an-old-hope";
+import vs2015 from "react-syntax-highlighter/dist/esm/styles/hljs/vs2015";
 
 import axios, { AxiosResponse } from "axios";
 
@@ -69,7 +71,7 @@ const GenText: React.FC = () => {
                   PreTag="div"
                   children={String(children).replace(/\n$/, "")}
                   language={match[1]}
-                  style={shadesOfPurple}
+                  style={vs2015}
                 />
               ) : (
                 <code {...rest} className={className}>
