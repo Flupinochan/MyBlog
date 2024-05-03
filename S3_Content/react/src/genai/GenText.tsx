@@ -1,4 +1,12 @@
 import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
+
 import axios, { AxiosResponse } from "axios";
 
 import PositivePrompt from "./tool/PositivePrompt";
@@ -6,6 +14,13 @@ import PositivePrompt from "./tool/PositivePrompt";
 interface ApiResponse {
   statusCode: number;
   text: string;
+}
+
+interface CodeProps {
+  node?: any;
+  inline?: any;
+  className?: any;
+  children?: any;
 }
 
 const GenText: React.FC = () => {
@@ -39,7 +54,32 @@ const GenText: React.FC = () => {
         <p>
           This is the generate text page with <b>cohere</b>
         </p>
-        <p>{text}</p>
+        <ReactMarkdown
+          // className={"markdown"}
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex, rehypeRaw]}
+          children={text}
+          components={{
+            code(props: CodeProps) {
+              const { children, className, node, ...rest } = props;
+              const match = /language-(\w+)/.exec(className || "");
+              return match ? (
+                <SyntaxHighlighter
+                  {...rest}
+                  PreTag="div"
+                  children={String(children).replace(/\n$/, "")}
+                  language={match[1]}
+                  style={shadesOfPurple}
+                />
+              ) : (
+                <code {...rest} className={className}>
+                  {children}
+                </code>
+              );
+            },
+          }}
+        />
+        <br />
         <PositivePrompt onChange={handleSubmit} />
       </div>
     </div>
