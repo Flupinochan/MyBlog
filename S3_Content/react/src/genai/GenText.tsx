@@ -5,9 +5,10 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
-import anOldHope from "react-syntax-highlighter/dist/esm/styles/hljs/an-old-hope";
-import vs2015 from "react-syntax-highlighter/dist/esm/styles/hljs/vs2015";
+import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+// import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
+// import anOldHope from "react-syntax-highlighter/dist/esm/styles/hljs/an-old-hope";
+// import vs2015 from "react-syntax-highlighter/dist/esm/styles/hljs/vs2015";
 
 import axios, { AxiosResponse } from "axios";
 
@@ -69,12 +70,11 @@ const GenText: React.FC = () => {
                   PreTag="div"
                   children={String(children).replace(/\n$/, "")}
                   language={match[1]}
-                  style={anOldHope}
+                  style={duotoneDark}
                 />
               ) : (
                 <code {...rest} className={className}>
                   {children}
-                  error
                 </code>
               );
             },

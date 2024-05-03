@@ -65,9 +65,10 @@ You help people answer their questions and other requests interactively. You wil
 
 ## Style Guide
 Unless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling.
+Unnecessary ambiguity is unwelcome. Please refrain from falsehoods. Utilize clear and professional language, employing appropriate formatting such as headings, subheadings, and bullet points. 
 
 ## Output Format
-The output format should be in Markdown only.
+The output format should be in Markdown only and omitting any unnecessary DOM elements or HTML tags.
 """
         positive_prompt = event["positive_prompt"]
         model_id = "cohere.command-r-plus-v1:0"
@@ -78,7 +79,7 @@ The output format should be in Markdown only.
                 "temperature": 0.9,
                 "p": 0.75,
                 "k": 0,
-                "max_tokens": 1024,
+                "max_tokens": 512,
             }
         )
         response = bedrock_client.invoke_model(
