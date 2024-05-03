@@ -56,6 +56,7 @@ const GenText: React.FC = () => {
         <p>
           This is the generate text page with <b>cohere</b>
         </p>
+        <br />
         <ReactMarkdown
           // className={"markdown"}
           remarkPlugins={[remarkGfm, remarkMath]}
