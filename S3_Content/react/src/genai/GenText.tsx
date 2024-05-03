@@ -9,10 +9,10 @@ import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 // import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
 // import anOldHope from "react-syntax-highlighter/dist/esm/styles/hljs/an-old-hope";
 // import vs2015 from "react-syntax-highlighter/dist/esm/styles/hljs/vs2015";
-
 import axios, { AxiosResponse } from "axios";
 
 import PositivePrompt from "./tool/PositivePrompt";
+import "./GenText.css";
 
 interface ApiResponse {
   statusCode: number;
@@ -52,11 +52,11 @@ const GenText: React.FC = () => {
 
   return (
     <div>
-      <h2>Generate Text</h2>
+      <h2>Generate Text (Cohere)</h2>
       <div className="blogContentBackColor">
         <br />
         <ReactMarkdown
-          // className={"markdown"}
+          className={"markdown"}
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}
           children={text}
