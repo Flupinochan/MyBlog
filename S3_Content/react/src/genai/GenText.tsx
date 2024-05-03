@@ -53,10 +53,9 @@ const GenText: React.FC = () => {
   return (
     <div>
       <h2>Generate Text (Cohere)</h2>
-      <div className="blogContentBackColor">
+      <div className="blogContentBackColor markdown">
         <br />
         <ReactMarkdown
-          className={"markdown"}
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}
           children={text}

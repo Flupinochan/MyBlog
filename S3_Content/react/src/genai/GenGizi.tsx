@@ -11,7 +11,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import shadesOfPurple from "react-syntax-highlighter/dist/esm/styles/hljs/shades-of-purple";
+import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 // https://k8shiro.github.io/ReactCompareCodeHighlighter/
 
 import "./GenGizi.css";
@@ -175,7 +175,7 @@ const GenGizi: React.FC = () => {
                   PreTag="div"
                   children={String(children).replace(/\n$/, "")}
                   language={match[1]}
-                  style={shadesOfPurple}
+                  style={duotoneDark}
                 />
               ) : (
                 <code {...rest} className={className}>
