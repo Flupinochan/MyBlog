@@ -139,7 +139,7 @@ const GenGizi: React.FC = () => {
             tabIndex={-1}
             startIcon={<CloudUploadIcon />}
           >
-            Upload file
+            Upload Movie
             <VisuallyHiddenInput
               type="file"
               accept="audio/mp4, audio/mpeg, audio/ogg, audio/wav, audio/webm, video/mp4, video/ogg, video/webm"
@@ -154,7 +154,7 @@ const GenGizi: React.FC = () => {
                 startIcon={<TranscribeIcon />}
                 onClick={handleExecuteTranslation}
               >
-                Execute translation
+                Execute Transcription
               </Button>
             </div>
           )}

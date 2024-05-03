@@ -94,6 +94,7 @@ export class MyBlogStack extends cdk.Stack {
       }
     );
 
+    // Lambda GenGiziUpload
     const lambdaLogGroupGenGiziUpload = new logs.LogGroup(
       this,
       param.lambdaGenGiziUpload.logGroupName,
@@ -117,6 +118,38 @@ export class MyBlogStack extends cdk.Stack {
         ),
         timeout: Duration.minutes(15),
         logGroup: lambdaLogGroupGenGiziUpload,
+        layers: [lambdaLayerGenAI],
+        environment: {
+          BUCKET_NAME: param.s3BucketImgStore.bucketName,
+        },
+      }
+    );
+
+    const lambdaLogGroupGenText= new logs.LogGroup(
+      this,
+      param.lambdaGenText.logGroupName,
+      {
+        logGroupName: param.lambdaGenText.logGroupName,
+        retention: logs.RetentionDays.ONE_DAY,
+        logGroupClass: logs.LogGroupClass.STANDARD,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      }
+    );
+
+    // LambdaGenText
+    const lambdaGenText= new lambda.Function(
+      this,
+      param.lambdaGenText.functionName,
+      {
+        functionName: param.lambdaGenText.functionName,
+        runtime: lambda.Runtime.PYTHON_3_12,
+        handler: "index.lambda_handler",
+        role: lambdaRoleGenAI,
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "lambda-code/GenText/")
+        ),
+        timeout: Duration.minutes(15),
+        logGroup: lambdaLogGroupGenText,
         layers: [lambdaLayerGenAI],
         environment: {
           BUCKET_NAME: param.s3BucketImgStore.bucketName,
@@ -251,8 +284,49 @@ export class MyBlogStack extends cdk.Stack {
       },
     )
 
+    const requestModelGenText = apigwGenAi.addModel(param.lambdaGenText.modelNameRequest, {
+      contentType: 'application/json',
+      modelName: param.lambdaGenText.modelNameRequest,
+      schema: {
+        schema: apigw.JsonSchemaVersion.DRAFT4,
+        title: param.lambdaGenText.modelNameRequest,
+        type: apigw.JsonSchemaType.OBJECT,
+        properties: {
+          positive_prompt: { type: apigw.JsonSchemaType.STRING },
+        }
+      }
+    });
+    const responseModelGenText= apigwGenAi.addModel(param.lambdaGenText.modelNameResponse, {
+      contentType: 'application/json',
+      modelName: param.lambdaGenText.modelNameResponse,
+      schema: {
+        schema: apigw.JsonSchemaVersion.DRAFT4,
+        title: param.lambdaGenText.modelNameResponse,
+        type: apigw.JsonSchemaType.OBJECT,
+        properties: {
+          statusCode: { type: apigw.JsonSchemaType.NUMBER },
+          text: { type: apigw.JsonSchemaType.STRING },
+        }
+      }
+    });
     const apiTextGen = apigwGenAi.root.addResource("textgen");
-    apiTextGen.addMethod("POST");
+    apiTextGen.addMethod("POST", new apigw.LambdaIntegration(lambdaGenText, {
+      proxy: false,
+      passthroughBehavior: apigw.PassthroughBehavior.WHEN_NO_TEMPLATES,
+      integrationResponses: [{ statusCode: "200" }],
+      }),{
+        requestModels: {
+          "application/json": requestModelGenText,
+        },
+        requestValidator: validatorPost,
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseModels: { "application/json": responseModelGenText},
+          },
+        ],
+      },
+    );
     apiTextGen.addMethod("GET");
 
     const movieUpload = apigwGenAi.root.addResource("movieupload");
@@ -367,6 +441,7 @@ export class MyBlogStack extends cdk.Stack {
     //   }
     // );
 
+    // LambdaGenGizi
     const lambdaGenGizi = new lambda.Function(
       this,
       param.lambdaGenGizi.functionName,

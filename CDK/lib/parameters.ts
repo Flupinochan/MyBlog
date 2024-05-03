@@ -45,4 +45,11 @@ export class MyBlogParam {
     roleName: "Lambda-GenGiziUpload-IAMRole",
     logGroupName: "Lambda-GenGiziUpload-CloudWatchLogs",
   };
+  lambdaGenText= {
+    functionName: "GenText",
+    roleName: "Lambda-GenText-IAMRole",
+    logGroupName: "Lambda-GenText-CloudWatchLogs",
+    modelNameRequest: "lambdagentextrequest",
+    modelNameResponse: "lambdagentextresponse"
+  };
 }

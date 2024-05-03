@@ -19,6 +19,9 @@ const Menu: React.FC = () => {
           <li>
             <Link to="/genai/gengizi">GenGizi</Link>
           </li>
+          <li>
+            <Link to="/genai/gentext">GenText</Link>
+          </li>
         </ul>
       </div>
       <div id="drop-menu">
