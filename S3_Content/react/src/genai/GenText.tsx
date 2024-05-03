@@ -53,9 +53,6 @@ const GenText: React.FC = () => {
     <div>
       <h2>Generate Text</h2>
       <div className="blogContentBackColor">
-        <p>
-          This is the generate text page with <b>cohere</b>
-        </p>
         <br />
         <ReactMarkdown
           // className={"markdown"}
@@ -72,11 +69,12 @@ const GenText: React.FC = () => {
                   PreTag="div"
                   children={String(children).replace(/\n$/, "")}
                   language={match[1]}
-                  style={vs2015}
+                  style={anOldHope}
                 />
               ) : (
                 <code {...rest} className={className}>
                   {children}
+                  error
                 </code>
               );
             },
