@@ -67,14 +67,12 @@ const GenText: React.FC = () => {
               return match ? (
                 <SyntaxHighlighter
                   {...rest}
-                  useInlineStyles={false}
                   className={"test"}
                   PreTag="div"
                   children={String(children).replace(/\n$/, "")}
                   language={match[1]}
                   style={duotoneDark}
                   showLineNumbers={true}
-                  showInlineLineNumbers={true}
                 />
               ) : (
                 <code {...rest} className={className}>

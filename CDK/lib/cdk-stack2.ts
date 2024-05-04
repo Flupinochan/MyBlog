@@ -144,8 +144,7 @@ export class MyBlogStack2 extends cdk.Stack {
     //   port: 80,
     //   targets: [service],
     // });
-    const certificateArn =
-      "";
+    const certificateArn = ""; // \MyBlog\.git\hooks\pre-commit"
     const certificate = certmgr.Certificate.fromCertificateArn(
       this,
       "MyBlogCertificate",
