@@ -14,7 +14,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 // https://k8shiro.github.io/ReactCompareCodeHighlighter/
 
-import "./GenGizi.css";
+// import "./GenGizi.css";
 
 const theme = createTheme({
   palette: {

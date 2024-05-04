@@ -10,9 +10,10 @@ import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 // import anOldHope from "react-syntax-highlighter/dist/esm/styles/hljs/an-old-hope";
 // import vs2015 from "react-syntax-highlighter/dist/esm/styles/hljs/vs2015";
 import axios, { AxiosResponse } from "axios";
+import CopyToClipBoard from "react-copy-to-clipboard";
 
 import PositivePrompt from "./tool/PositivePrompt";
-import "./GenText.css";
+// import "./GenText.css";
 
 interface ApiResponse {
   statusCode: number;
@@ -50,11 +51,11 @@ const GenText: React.FC = () => {
       });
   };
 
+  // https://github.com/react-syntax-highlighter/react-syntax-highlighter
   return (
     <div>
       <h2>Generate Text (Cohere)</h2>
-      <div className="blogContentBackColor markdown">
-        <br />
+      <div className="blogContentBackColor">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}
@@ -66,10 +67,14 @@ const GenText: React.FC = () => {
               return match ? (
                 <SyntaxHighlighter
                   {...rest}
+                  useInlineStyles={false}
+                  className={"test"}
                   PreTag="div"
                   children={String(children).replace(/\n$/, "")}
                   language={match[1]}
                   style={duotoneDark}
+                  showLineNumbers={true}
+                  showInlineLineNumbers={true}
                 />
               ) : (
                 <code {...rest} className={className}>
