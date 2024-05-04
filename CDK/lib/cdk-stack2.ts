@@ -145,7 +145,7 @@ export class MyBlogStack2 extends cdk.Stack {
     //   targets: [service],
     // });
     const certificateArn =
-      "";
+      """";
     const certificate = certmgr.Certificate.fromCertificateArn(
       this,
       "MyBlogCertificate",
