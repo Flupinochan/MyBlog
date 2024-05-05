@@ -19,8 +19,16 @@ export class MyBlogParam2 {
     NginxRepoName: "nginx",
     StreamlitRepoName: "streamlit",
     ALBName: "MyBlog-ALB",
+    S3Name: "myblog-alb-access-log",
     ALBSecurityGroupName: "MyBlogALBSG",
     ALBListenerName: "MyBlogALBListener",
     ALBTargetGroupName: "MyBlogALBTargetGroup",
+  };
+  // Don't use -
+  Glue = {
+    DatabaseName: "alb_access_log_db",
+    TableName: "alb_access_log_table",
+    AthenaBucketName: "alb-access-log-athena-query",
+    WorkGroupName: "alb_access_log",
   };
 }

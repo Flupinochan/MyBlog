@@ -10,10 +10,10 @@ import { MyBlogParam2 } from "../lib/parameters2";
 const param = new MyBlogParam();
 const param2 = new MyBlogParam2();
 
-const app = new cdk.App();
-new MyBlogStack(app, "MyBlogCDK", {
-  env: { region: param.env.region },
-});
+// const app = new cdk.App();
+// new MyBlogStack(app, "MyBlogCDK", {
+//   env: { region: param.env.region },
+// });
 
 const app2 = new cdk.App();
 new MyBlogStack2(app2, "MyBlogCDK2", {

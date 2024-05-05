@@ -18,6 +18,8 @@ Metadata:
           - DefaultPage
           - APIDomainName
           - WebSocketDomainName
+          - FargateDomainName
+          - S3CloudFrontLogs
           # - IndexDocumentFileName
           # - ErrorDocumentFileName
           # - WAFarn
@@ -91,6 +93,13 @@ Parameters:
   WebSocketDomainName:
     Type: String
     Default: "lsdujzk2f5.execute-api.us-west-2.amazonaws.com"
+  FargateDomainName:
+    Type: String
+    Default: "myblog-alb-163528529.us-west-2.elb.amazonaws.com"
+  S3CloudFrontLogs:
+    Type: String
+    Default: "myblog-cloudfront-logs"
+  
 
 Conditions:
   IsCloudFrontAlias: !Equals [!Ref UseCloudFrontAlias, "True"]
@@ -104,8 +113,22 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - BucketKeyEnabled: FALSE
-      VersioningConfiguration: # When specifying an S3 Bucket as the source in CodePipeline, it is necessary to enable versioning.
-        Status: "Enabled"
+      VersioningConfiguration:
+        Status: "Suspended"
+      LifecycleConfiguration:
+        Rules:
+          - Id: "rule1"
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 1
+            Status: "Enabled"
+
+  S3ForCloudFrontLogs:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3CloudFrontLogs
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: FALSE
       LifecycleConfiguration:
         Rules:
           - Id: "rule1"
@@ -125,6 +148,24 @@ Resources:
             Effect: Allow
             Resource:
               - !Sub ${S3ForMyBlog.Arn}/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  S3BucketPolicyForS3ForCloudFrontLogs:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3ForCloudFrontLogs
+      PolicyDocument:
+        Version: 2008-10-17 # old version
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource:
+              - !Sub ${S3ForCloudFrontLogs.Arn}/*
             Principal:
               Service: cloudfront.amazonaws.com
             Condition:
@@ -187,6 +228,20 @@ Resources:
             PathPattern: "/websocket/*" 
             TargetOriginId: "WebSocketOrigin"
             ViewerProtocolPolicy: "redirect-to-https"
+          - AllowedMethods:
+              - "GET"
+              - "HEAD"
+              - "OPTIONS"
+              - "PUT"
+              - "PATCH"
+              - "POST"
+              - "DELETE"
+            CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+            OriginRequestPolicyId: "b689b0a8-53d0-40ab-baf2-68738e2966ac"
+            Compress: true
+            PathPattern: "/streamlit/*" 
+            TargetOriginId: "FargateOrigin"
+            ViewerProtocolPolicy: "redirect-to-https"
         DefaultRootObject: !Ref DefaultPage
         Enabled: true
         HttpVersion: "http2and3"
@@ -207,12 +262,20 @@ Resources:
             Id: "WebSocketOrigin"
             CustomOriginConfig:
               OriginProtocolPolicy: "https-only"
+          - DomainName: !Ref FargateDomainName
+            Id: "FargateOrigin"
+            CustomOriginConfig:
+              OriginProtocolPolicy: "https-only"
         PriceClass: "PriceClass_All"
         Staging: false
         ViewerCertificate:
           AcmCertificateArn: !Ref ACM
           MinimumProtocolVersion: "TLSv1.2_2021"
           SslSupportMethod: "sni-only"
+        Logging:
+          Bucket: !GetAtt S3ForCloudFrontLogs.DomainName
+          IncludeCookies: false
+
         # WebACLId: !Ref WAFarn
 
   OAC:
