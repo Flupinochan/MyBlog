@@ -149,7 +149,7 @@ export class MyBlogStack2 extends cdk.Stack {
         },
       ],
     });
-    // connection logは、コンソールから設定する
+    // AccessLogs & ConnectionLogs
     alb.logAccessLogs(albS3Logs);
     const certificateArn = ""; // \MyBlog\.git\hooks\pre-commit"
     const certificate = certmgr.Certificate.fromCertificateArn(this, "MyBlogCertificate", certificateArn);
@@ -174,6 +174,9 @@ export class MyBlogStack2 extends cdk.Stack {
       },
       stickinessCookieDuration: Duration.days(1),
     });
+    // https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/APIReference/API_LoadBalancerAttribute.html
+    alb.setAttribute("connection_logs.s3.enabled", "true");
+    alb.setAttribute("connection_logs.s3.bucket", albS3Logs.bucketName);
 
     // const glueCatalog = new glue.CfnDataCatalogEncryptionSettings(
     //   this,

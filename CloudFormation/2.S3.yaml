@@ -135,6 +135,9 @@ Resources:
             NoncurrentVersionExpiration:
               NoncurrentDays: 1
             Status: "Enabled"
+      OwnershipControls:
+        Rules:
+        - ObjectOwnership: "BucketOwnerPreferred"
 
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -154,24 +157,25 @@ Resources:
               StringEquals:
                 AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
 
-  S3BucketPolicyForS3ForCloudFrontLogs:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref S3ForCloudFrontLogs
-      PolicyDocument:
-        Version: 2008-10-17 # old version
-        Statement:
-          - Action:
-              - s3:GetObject
-            Effect: Allow
-            Resource:
-              - !Sub ${S3ForCloudFrontLogs.Arn}/*
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+  # S3BucketPolicyForS3ForCloudFrontLogs:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket: !Ref S3ForCloudFrontLogs
+  #     PolicyDocument:
+  #       Version: 2008-10-17 # old version
+  #       Statement:
+  #         - Action:
+  #             - s3:PutObject
+  #           Effect: Allow
+  #           Resource:
+  #             - !Sub ${S3ForCloudFrontLogs.Arn}/*
+  #           Principal:
+  #             Service: cloudfront.amazonaws.com
+  #           Condition:
+  #             StringEquals:
+  #               AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
 
+  # AWS::CloudFront::RealtimeLogConfig
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
