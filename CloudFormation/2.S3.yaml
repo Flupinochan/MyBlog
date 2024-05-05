@@ -95,7 +95,7 @@ Parameters:
     Default: "lsdujzk2f5.execute-api.us-west-2.amazonaws.com"
   FargateDomainName:
     Type: String
-    Default: "myblog-alb-163528529.us-west-2.elb.amazonaws.com"
+    Default: "chatbot.metalmental.net"
   S3CloudFrontLogs:
     Type: String
     Default: "myblog-cloudfront-logs"

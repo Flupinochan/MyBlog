@@ -8,6 +8,7 @@ import { DockerImageAsset } from "aws-cdk-lib/aws-ecr-assets";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as certmgr from "aws-cdk-lib/aws-certificatemanager";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 import { Duration } from "aws-cdk-lib";
 import { aws_glue as glue } from "aws-cdk-lib";
@@ -58,10 +59,32 @@ export class MyBlogStack2 extends cdk.Stack {
       retention: logs.RetentionDays.ONE_DAY,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
+    const taskRole= new iam.Role(this, param.ECS.TaskRoleName, {
+      roleName: param.ECS.TaskRoleName,
+      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
+      ],
+      inlinePolicies: {
+        inlinePolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["ssmmessages:*"],
+              resources: ["*"],
+            }),
+          ],
+        }),
+      },
+    });
     const task = new ecs.FargateTaskDefinition(this, param.ECS.TaskName, {
       family: param.ECS.TaskName,
       cpu: 256,
       memoryLimitMiB: 512,
+      taskRole: taskRole
     });
     task.addContainer("nginx", {
       image: ecs.ContainerImage.fromDockerImageAsset(nginxRepo),
@@ -156,7 +179,7 @@ export class MyBlogStack2 extends cdk.Stack {
     const listener443 = alb.addListener(param.ECS.ALBTargetGroupName, {
       port: 443,
       certificates: [certificate],
-      sslPolicy: elbv2.SslPolicy.TLS13_13,
+      sslPolicy: elbv2.SslPolicy.TLS11, // CloudFrontは最新のTLS1.3に対応していない
     });
     listener443.addTargets(param.ECS.ALBTargetGroupName, {
       port: 80,

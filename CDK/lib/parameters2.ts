@@ -14,6 +14,7 @@ export class MyBlogParam2 {
     ClusterName: "MyBlog-ECSCluster",
     ServiceName: "MyBlog-ECSService",
     TaskName: "MyBlog-ECSTask",
+    TaskRoleName: "MyBlogECSTaskRole",
     ContainerLogsName: "MyBlogECSTaskLogs",
     ContainerNginxName: "nginx",
     NginxRepoName: "nginx",
