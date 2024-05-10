@@ -22,14 +22,15 @@ const Menu: React.FC = () => {
           <li>
             <Link to="/genai/gentext">GenText</Link>
           </li>
+          <li>
+            <a href="https://chatbot.metalmental.net/streamlit/" target="_blank" rel="noopener noreferrer">
+              CBot
+            </a>
+          </li>
         </ul>
       </div>
       <div id="drop-menu">
-        <a
-          href="https://github.com/Flupinochan"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">
           GitHub
         </a>
       </div>

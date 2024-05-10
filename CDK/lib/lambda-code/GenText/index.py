@@ -6,8 +6,13 @@ import base64
 import boto3
 import langchain
 from botocore.config import Config
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 
 from LoggingClass import LoggingClass
+
+xray_recorder.configure(service="Gen GenText")
+patch_all()
 
 # ----------------------------------------------------------------------
 # Environment Variable Setting
@@ -44,6 +49,7 @@ except Exception:
 # ----------------------------------------------------------------------
 # Main Function
 # ----------------------------------------------------------------------
+@xray_recorder.capture("main")
 def main(event):
     try:
         response_body = generate_text(event)
@@ -57,6 +63,7 @@ def main(event):
 # ----------------------------------------------------------------------
 # Generate Text
 # ----------------------------------------------------------------------
+@xray_recorder.capture("generate_text")
 def generate_text(event):
     try:
         preamble = """
@@ -102,6 +109,7 @@ The output format should be in Markdown only and omitting any unnecessary DOM el
 # ----------------------------------------------------------------------
 # Entry Point
 # ----------------------------------------------------------------------
+@xray_recorder.capture("lambda_handler")
 def lambda_handler(event: dict, context):
     try:
         log.debug(f"event: {event}")

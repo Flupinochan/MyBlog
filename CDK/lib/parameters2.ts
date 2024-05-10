@@ -15,6 +15,7 @@ export class MyBlogParam2 {
     ServiceName: "MyBlog-ECSService",
     TaskName: "MyBlog-ECSTask",
     TaskRoleName: "MyBlogECSTaskRole",
+    TaskExecutionRoleName: "MyBlogECSTaskExecutionRole",
     ContainerLogsName: "MyBlogECSTaskLogs",
     ContainerNginxName: "nginx",
     NginxRepoName: "nginx",
@@ -27,9 +28,11 @@ export class MyBlogParam2 {
   };
   // Don't use -
   Glue = {
-    DatabaseName: "alb_access_log_db",
-    TableName: "alb_access_log_table",
+    DatabaseName: "access_log_db",
+    AlbTableName: "alb_table",
+    CloudFrontTableName: "cloudfront_table",
     AthenaBucketName: "alb-access-log-athena-query",
     WorkGroupName: "alb_access_log",
+    CloudFrontS3BucketURILog: "s3://myblog-cloudfront-logs/"
   };
 }

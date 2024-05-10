@@ -67,6 +67,7 @@ export class MyBlogStack2 extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSXrayFullAccess"),
       ],
       inlinePolicies: {
         inlinePolicy: new iam.PolicyDocument({
@@ -84,7 +85,8 @@ export class MyBlogStack2 extends cdk.Stack {
       family: param.ECS.TaskName,
       cpu: 256,
       memoryLimitMiB: 512,
-      taskRole: taskRole
+      taskRole: taskRole,
+      // executionRole: taskExecutionRole,
     });
     task.addContainer("nginx", {
       image: ecs.ContainerImage.fromDockerImageAsset(nginxRepo),
@@ -113,6 +115,29 @@ export class MyBlogStack2 extends cdk.Stack {
       },
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: "streamlit",
+        logGroup: ecsLogs,
+      }),
+    });
+    task.addContainer("xray-daemon", {
+      containerName: "xray-daemon",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
+      command: ["--local-mode"],
+      cpu: 32,
+      memoryReservationMiB: 256,
+      portMappings: [
+          {
+            containerPort: 2000,
+            protocol: ecs.Protocol.UDP
+          }
+      ],
+      healthCheck: {
+        command: ["CMD", "/xray", "--version", "||", "exit 1"],
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
+        retries: 3,
+      },
+      logging: ecs.LogDriver.awsLogs({
+        streamPrefix: "xray",
         logGroup: ecsLogs,
       }),
     });
@@ -174,12 +199,12 @@ export class MyBlogStack2 extends cdk.Stack {
     });
     // AccessLogs & ConnectionLogs
     alb.logAccessLogs(albS3Logs);
-    const certificateArn = ""; // \MyBlog\.git\hooks\pre-commit"
+    const certificateArn = ""
     const certificate = certmgr.Certificate.fromCertificateArn(this, "MyBlogCertificate", certificateArn);
     const listener443 = alb.addListener(param.ECS.ALBTargetGroupName, {
       port: 443,
       certificates: [certificate],
-      sslPolicy: elbv2.SslPolicy.TLS11, // CloudFrontは最新のTLS1.3に対応していない
+      sslPolicy: elbv2.SslPolicy.TLS12, // CloudFrontは最新のTLS1.3に対応していない
     });
     listener443.addTargets(param.ECS.ALBTargetGroupName, {
       port: 80,
@@ -219,11 +244,11 @@ export class MyBlogStack2 extends cdk.Stack {
         name: param.Glue.DatabaseName,
       },
     });
-    const glueTable = new glue.CfnTable(this, param.Glue.TableName, {
+    const glueAlbTable = new glue.CfnTable(this, param.Glue.AlbTableName, {
       catalogId: accountId,
       databaseName: glueDatabase.ref,
       tableInput: {
-        name: param.Glue.TableName,
+        name: param.Glue.AlbTableName,
         tableType: "EXTERNAL_TABLE",
         parameters: {
           "projection.enabled": "true",
@@ -290,6 +315,63 @@ export class MyBlogStack2 extends cdk.Stack {
             parameters: {
               "serialization.format": "1",
               "input.regex": '([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) "([^ ]*) (.*) (- |[^ ]*)" "([^"]*)" ([A-Z0-9-_]+) ([A-Za-z0-9.-]*) ([^ ]*) "([^"]*)" "([^"]*)" "([^"]*)" ([-.0-9]*) ([^ ]*) "([^"]*)" "([^"]*)" "([^ ]*)" "([^s]+?)" "([^s]+)" "([^ ]*)" "([^ ]*)"',
+            },
+          },
+        },
+      },
+    });
+    const glueCloudFrontTable = new glue.CfnTable(this, param.Glue.CloudFrontTableName, {
+      catalogId: accountId,
+      databaseName: glueDatabase.ref,
+      tableInput: {
+        name: param.Glue.CloudFrontTableName,
+        tableType: "EXTERNAL_TABLE",
+        parameters: {
+          "skip.header.line.count": "2"
+        },
+        storageDescriptor: {
+          columns: [
+            { name: "date", type: "DATE" },
+            { name: "time", type: "STRING" },
+            { name: "x_edge_location", type: "STRING" },
+            { name: "sc_bytes", type: "BIGINT" },
+            { name: "c_ip", type: "STRING" },
+            { name: "cs_method", type: "STRING" },
+            { name: "cs_host", type: "STRING" },
+            { name: "cs_uri_stem", type: "STRING" },
+            { name: "sc_status", type: "INT" },
+            { name: "cs_referrer", type: "STRING" },
+            { name: "cs_user_agent", type: "STRING" },
+            { name: "cs_uri_query", type: "STRING" },
+            { name: "cs_cookie", type: "STRING" },
+            { name: "x_edge_result_type", type: "STRING" },
+            { name: "x_edge_request_id", type: "STRING" },
+            { name: "x_host_header", type: "STRING" },
+            { name: "cs_protocol", type: "STRING" },
+            { name: "cs_bytes", type: "BIGINT" },
+            { name: "time_taken", type: "FLOAT" },
+            { name: "x_forwarded_for", type: "STRING" },
+            { name: "ssl_protocol", type: "STRING" },
+            { name: "ssl_cipher", type: "STRING" },
+            { name: "x_edge_response_result_type", type: "STRING" },
+            { name: "cs_protocol_version", type: "STRING" },
+            { name: "fle_status", type: "STRING" },
+            { name: "fle_encrypted_fields", type: "INT" },
+            { name: "c_port", type: "INT" },
+            { name: "time_to_first_byte", type: "FLOAT" },
+            { name: "x_edge_detailed_result_type", type: "STRING" },
+            { name: "sc_content_type", type: "STRING" },
+            { name: "sc_content_len", type: "BIGINT" },
+            { name: "sc_range_start", type: "BIGINT" },
+            { name: "sc_range_end", type: "BIGINT" }
+          ],
+          location: param.Glue.CloudFrontS3BucketURILog,
+          inputFormat: "org.apache.hadoop.mapred.TextInputFormat",
+          outputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+          serdeInfo: {
+            serializationLibrary: 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe',
+            parameters: {
+              "serialization.format": "\t"
             },
           },
         },

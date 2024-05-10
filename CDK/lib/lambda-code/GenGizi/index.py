@@ -7,8 +7,13 @@ import base64
 import boto3
 import langchain
 from botocore.config import Config
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 
 from LoggingClass import LoggingClass
+
+# xray_recorder.configure(service="Gen Gizi")
+# patch_all()
 
 # ----------------------------------------------------------------------
 # Environment Variable Setting
@@ -51,6 +56,7 @@ except Exception:
 # ----------------------------------------------------------------------
 # Main Function
 # ----------------------------------------------------------------------
+# @xray_recorder.capture("main")
 def main(event):
     try:
         output_file_name = transcribe(event)
@@ -63,6 +69,7 @@ def main(event):
 # ----------------------------------------------------------------------
 # Transcribe
 # ----------------------------------------------------------------------
+# @xray_recorder.capture("transcribe")
 def transcribe(event):
     try:
         random_number = str(random.randint(0, 1000))
@@ -89,9 +96,7 @@ def transcribe(event):
         )
         # Check Transcription Job Status
         while True:
-            response = transcribe_client.get_transcription_job(
-                TranscriptionJobName=job_name
-            )
+            response = transcribe_client.get_transcription_job(TranscriptionJobName=job_name)
             status = response["TranscriptionJob"]["TranscriptionJobStatus"]
             if status == "COMPLETED":
                 log.debug(f"Transcribe Status: {status}")
@@ -109,6 +114,7 @@ def transcribe(event):
 # ----------------------------------------------------------------------
 # Streaming Response with Bedrock
 # ----------------------------------------------------------------------
+# @xray_recorder.capture("giziroku")
 def giziroku(output_file_name):
     try:
         # Get Transcription Data
@@ -165,9 +171,7 @@ AWSやITに関係する用語はカタカナではなく英語やアルファベ
                             data = chunk_json["delta"]["text"]
                             # バイト文字列に戻して送信
                             bytes_data = data.encode()
-                            websocket_client.post_to_connection(
-                                Data=bytes_data, ConnectionId=CONNECT_ID
-                            )
+                            websocket_client.post_to_connection(Data=bytes_data, ConnectionId=CONNECT_ID)
             else:
                 time.sleep(1)
                 retries -= 1
@@ -180,6 +184,7 @@ AWSやITに関係する用語はカタカナではなく英語やアルファベ
 # ----------------------------------------------------------------------
 # Entry Point
 # ----------------------------------------------------------------------
+# @xray_recorder.capture("lambda_handler")
 def lambda_handler(event: dict, context):
     try:
         global ROUTE_KEY, CONNECT_ID, DOMAIN_NAME, STAGE_NAME

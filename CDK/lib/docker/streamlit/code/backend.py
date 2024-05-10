@@ -3,12 +3,22 @@
 from langchain_aws import ChatBedrock
 from langchain.memory import ConversationBufferMemory
 from langchain.chains.conversation.base import ConversationChain
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from botocore.config import Config
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 
 from LoggingClass import LoggingClass
 
 # メモリについて
 # https://book.st-hakky.com/data-science/memory-of-langchain/
+
+xray_recorder.configure(
+    plugins=("EC2Plugin", "ECSPlugin"),
+    daemon_address="127.0.0.1:2000",
+    service="streamlit-backend",
+)
+patch_all()
 
 
 class Backend:
@@ -20,6 +30,7 @@ class Backend:
         connect_timeout=900,
     )
 
+    @xray_recorder.capture("llm_setting")
     def llm_setting(self):
         try:
             model_id = "anthropic.claude-3-opus-20240229-v1:0"
@@ -39,6 +50,7 @@ class Backend:
             self.log.error(f"エラーが発生しました: {e}")
         raise
 
+    @xray_recorder.capture("llm_memory")
     def llm_memory(self, llm):
         try:
             memory = ConversationBufferMemory(
@@ -49,12 +61,10 @@ class Backend:
         except Exception as e:
             self.log.error(f"エラーが発生しました: {e}")
 
+    @xray_recorder.capture("llm_chain")
     def llm_chain(self, llm, memory):
         try:
-            chain = ConversationChain(
-                llm=llm,
-                memory=memory,
-            )
+            chain = ConversationChain(llm=llm, memory=memory)
             return chain
         except Exception as e:
             self.log.error(f"エラーが発生しました: {e}")

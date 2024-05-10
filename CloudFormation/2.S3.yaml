@@ -262,6 +262,9 @@ Resources:
             Id: "APIOrigin"
             CustomOriginConfig:
               OriginProtocolPolicy: "https-only"
+            OriginCustomHeaders:
+              - HeaderName: "Referer"
+                HeaderValue: "validate-cfn"
           - DomainName: !Ref WebSocketDomainName
             Id: "WebSocketOrigin"
             CustomOriginConfig:

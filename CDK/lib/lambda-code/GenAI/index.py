@@ -9,8 +9,13 @@ import base64
 import boto3
 import langchain
 from botocore.config import Config
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 
 from LoggingClass import LoggingClass
+
+xray_recorder.configure(service="Gen IMG")
+patch_all()
 
 # ----------------------------------------------------------------------
 # Environment Variable Setting
@@ -44,10 +49,11 @@ except Exception:
 # ----------------------------------------------------------------------
 # Main Function
 # ----------------------------------------------------------------------
+@xray_recorder.capture("main")
 def main(event):
     try:
         image = create_image(event)
-        presigned_url = pug_image(image)
+        presigned_url = put_image(image)
         response = {
             "statusCode": 200,
             "downloadURL": presigned_url,
@@ -67,6 +73,7 @@ def main(event):
 # ----------------------------------------------------------------------
 # Create Image
 # ----------------------------------------------------------------------
+@xray_recorder.capture("create_image")
 def create_image(event):
     try:
         model_id = "stability.stable-diffusion-xl-v1"
@@ -110,7 +117,8 @@ def create_image(event):
 # ----------------------------------------------------------------------
 # Put Image to S3 and Generate Pre-Signed URL
 # ----------------------------------------------------------------------
-def pug_image(image):
+@xray_recorder.capture("put_image")
+def put_image(image):
     try:
         random_number = str(random.randint(0, 1000))
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -135,6 +143,7 @@ def pug_image(image):
 # ----------------------------------------------------------------------
 # Entry Point
 # ----------------------------------------------------------------------
+@xray_recorder.capture("lambda_handler")
 def lambda_handler(event: dict, context):
     # log.debug('='*20 +'Library Version' + '='*20)
     # log.debug(f'boto3: {boto3.__version__}')

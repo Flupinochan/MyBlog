@@ -7,7 +7,13 @@ import boto3
 import langchain
 from botocore.config import Config
 
+# from aws_xray_sdk.core import xray_recorder
+# from aws_xray_sdk.core import patch_all
+
 from LoggingClass import LoggingClass
+
+# xray_recorder.configure(service="Gen GiziUpload")
+# patch_all()
 
 # ----------------------------------------------------------------------
 # Environment Variable Setting
@@ -21,9 +27,7 @@ except KeyError:
 # Global Variable Setting
 # ----------------------------------------------------------------------
 try:
-    config = Config(
-        retries={"max_attempts": 5, "mode": "standard"}, signature_version="s3v4"
-    )
+    config = Config(retries={"max_attempts": 5, "mode": "standard"}, signature_version="s3v4")
     s3_client = boto3.client("s3", config=config)
 except Exception:
     raise Exception("Boto3 client error")
@@ -41,6 +45,7 @@ except Exception:
 # ----------------------------------------------------------------------
 # Main Function
 # ----------------------------------------------------------------------
+# @xray_recorder.capture("main")
 def main(event):
     try:
         file_name, presigned_url = generate_url(event)
@@ -58,6 +63,7 @@ def main(event):
 # ----------------------------------------------------------------------
 # Generate Pre-Signed URL
 # ----------------------------------------------------------------------
+# @xray_recorder.capture("generate_url")
 def generate_url(event):
     try:
         presigned_url = s3_client.generate_presigned_url(
@@ -79,6 +85,7 @@ def generate_url(event):
 # ----------------------------------------------------------------------
 # Entry Point
 # ----------------------------------------------------------------------
+# @xray_recorder.capture("lambda_handler")
 def lambda_handler(event, context):
     try:
         log.debug(f"Event: {event}")

@@ -91,6 +91,7 @@ export class MyBlogStack extends cdk.Stack {
         environment: {
           BUCKET_NAME: param.s3BucketImgStore.bucketName,
         },
+        tracing: lambda.Tracing.ACTIVE
       }
     );
 
@@ -122,6 +123,7 @@ export class MyBlogStack extends cdk.Stack {
         environment: {
           BUCKET_NAME: param.s3BucketImgStore.bucketName,
         },
+        // tracing: lambda.Tracing.ACTIVE
       }
     );
 
@@ -154,6 +156,7 @@ export class MyBlogStack extends cdk.Stack {
         environment: {
           BUCKET_NAME: param.s3BucketImgStore.bucketName,
         },
+        tracing: lambda.Tracing.ACTIVE
       }
     );
 
@@ -180,7 +183,30 @@ export class MyBlogStack extends cdk.Stack {
           metricsEnabled: true,
           accessLogDestination: new apigw.LogGroupLogDestination(apigwLogs),
           accessLogFormat: apigw.AccessLogFormat.clf(),
+          tracingEnabled: true
         },
+        policy: iam.PolicyDocument.fromJson({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Effect: "Deny",
+              Principal: "*",
+              Action: "execute-api:Invoke",
+              Resource: "*",
+              Condition: {
+                StringNotEquals: {
+                  "aws:Referer": "validate-cfn"
+                }
+              }
+            },
+            {
+              Effect: "Allow",
+              Principal: "*",
+              Action: "execute-api:Invoke",
+              Resource: "*"
+            }
+          ],
+        }),
       }
     );
 
@@ -459,6 +485,7 @@ export class MyBlogStack extends cdk.Stack {
         environment: {
           BUCKET_NAME: param.s3BucketImgStore.bucketName,
         },
+        // tracing: lambda.Tracing.ACTIVE
       }
     );
 
