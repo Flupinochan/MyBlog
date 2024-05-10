@@ -1,0 +1,76 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  LambdaName:
+    Type: String
+    Default: "GenerativeAI"
+
+  CodeFileName:
+    Type: String
+    Default: "generativeAI"
+
+  CloudWatchLogsName:
+    Type: String
+    Default: "generativeAI"
+
+  LambdaIAMRoleName:
+    Type: String
+    Default: "generativeAI-LambdaIAMRole-us-east-1"
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref LambdaName
+      Handler: !Join
+        - ""
+        - - !Ref CodeFileName
+          - ".lambda_handler"
+      Runtime: python3.12
+      Timeout: 900
+      # https://qiita.com/tkhs1121/items/bbbd5ef6d511d98bfb85
+      CodeUri: "code/" # directory to deploy
+      LoggingConfig:
+        LogGroup: !Ref CloudWatchLogs
+      Role: !GetAtt LambdaIAMRole.Arn
+      Layers:
+        - !Ref LambdaLayer
+
+  LambdaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Metadata:
+      BuildMethod: python3.12
+      BuildArchitecture: x86_64
+    Properties:
+      LayerName: MyLayer
+      ContentUri: ./lambda_layer
+      CompatibleRuntimes:
+        - python3.12
+      CompatibleArchitectures:
+        - x86_64
+      RetentionPolicy: Delete
+
+  CloudWatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref CloudWatchLogsName
+      RetentionInDays: 1
+
+  LambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref LambdaIAMRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonBedrockFullAccess"
+        - "arn:aws:iam::aws:policy/CloudWatchFullAccessV2"

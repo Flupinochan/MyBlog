@@ -1,17 +1,11 @@
 body {
-  background: repeating-linear-gradient(
-    -45deg,
-    #f3f9f9,
-    #f3f9f9 25%,
-    #eef7f7 25%,
-    #eef7f7 50%
-  );
+  background: repeating-linear-gradient(-45deg, #f3f9f9, #f3f9f9 25%, #eef7f7 25%, #eef7f7 50%);
   background-size: 65px 65px;
   overflow: hidden;
 }
 
 .normalImage {
-  max-width: 100%;
+  width: 100%;
   height: auto;
 }
 

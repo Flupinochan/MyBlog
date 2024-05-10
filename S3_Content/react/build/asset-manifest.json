@@ -1,19 +1,28 @@
 {
   "files": {
-    "main.css": "/static/css/main.47d2be5e.css",
-    "main.js": "/static/js/main.2f430a1d.js",
+    "main.css": "/static/css/main.95350af4.css",
+    "main.js": "/static/js/main.752c5e7e.js",
     "static/media/sample.png": "/static/media/sample.044fa866b58b718b675e.png",
+    "static/media/cloudwatch_ram.png": "/static/media/cloudwatch_ram.474d53f2f334399e5224.png",
+    "static/media/cloudwatch_ram_f12.png": "/static/media/cloudwatch_ram_f12.231a191046a2771ecc28.png",
+    "static/media/cloudwatch_ram_component.png": "/static/media/cloudwatch_ram_component.67cce1d0065ddf046a22.png",
+    "static/media/cloudwatch_ram_code.png": "/static/media/cloudwatch_ram_code.725b6025d60258261816.png",
     "static/media/polyrepo.png": "/static/media/polyrepo.51c0da28f17e9406bf18.png",
     "static/media/1.jpg": "/static/media/1.cfc1a03e1ff6d946e2b8.jpg",
     "static/media/monorepo.png": "/static/media/monorepo.5f8ee5cd7152fca43184.png",
     "static/media/2.jpg": "/static/media/2.581ae035e0319f61bbe0.jpg",
+    "static/media/cloudwatch_ram_route.png": "/static/media/cloudwatch_ram_route.6136f627bd0b2314cb3d.png",
+    "static/media/cloudwatch_ram_page1.png": "/static/media/cloudwatch_ram_page1.2e52859293e47cb53f29.png",
+    "static/media/cloudwatch_menu.png": "/static/media/cloudwatch_menu.8de9079281766d6994dc.png",
+    "static/media/cloudwatch_ram_setting.png": "/static/media/cloudwatch_ram_setting.f80d7e1c3e65dbc482f5.png",
     "static/media/appleComBill.png": "/static/media/appleComBill.735af7f3bd4e2a02859a.png",
+    "static/media/cloudwatch_ram_page2.png": "/static/media/cloudwatch_ram_page2.2cde9bafd5d3a264431d.png",
     "index.html": "/index.html",
-    "main.47d2be5e.css.map": "/static/css/main.47d2be5e.css.map",
-    "main.2f430a1d.js.map": "/static/js/main.2f430a1d.js.map"
+    "main.95350af4.css.map": "/static/css/main.95350af4.css.map",
+    "main.752c5e7e.js.map": "/static/js/main.752c5e7e.js.map"
   },
   "entrypoints": [
-    "static/css/main.47d2be5e.css",
-    "static/js/main.2f430a1d.js"
+    "static/css/main.95350af4.css",
+    "static/js/main.752c5e7e.js"
   ]
 }

@@ -1,5 +1,3 @@
-// https://github.com/aws-observability/aws-rum-web/blob/main/docs/cdn_react.md
-// https://github.com/aws-observability/aws-rum-web/blob/main/docs/cdn_installation.md
 import { AwsRum, AwsRumConfig } from "aws-rum-web";
 
 let cwr: AwsRum | null = null;

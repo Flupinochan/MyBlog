@@ -17,6 +17,9 @@ const Home: React.FC = () => {
       <h2>Archives</h2>
       <ul id="home-list">
         <li>
+          <Link to="/blog/vol3">Vol.3 AWS CloudWatch RUMによるユーザ視点からの監視</Link>
+        </li>
+        <li>
           <Link to="/blog/vol2">Vol.2 AWS CodeCommitのMonorepo構成</Link>
         </li>
         <li>

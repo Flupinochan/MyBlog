@@ -1,0 +1,35 @@
+.CloudWatchMenu {
+  max-width: 252px;
+}
+
+.CloudWatchRAM {
+  max-width: 984px;
+}
+
+.CloudWatchRAMSetting {
+  max-width: 406px;
+}
+
+.CloudWatchRAMCode {
+  max-width: 603px;
+}
+
+.CloudWatchRAMRoute {
+  max-width: 643px;
+}
+
+.CloudWatchRAMComponent {
+  max-width: 1026px;
+}
+
+.CloudWatchRAMPage1 {
+  max-width: 682px;
+}
+
+.CloudWatchRAMPage2 {
+  max-width: 633px;
+}
+
+.CloudWatchRAMf12 {
+  max-width: 764px;
+}
