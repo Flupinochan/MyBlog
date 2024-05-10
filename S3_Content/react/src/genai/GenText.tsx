@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -14,6 +15,7 @@ import CopyToClipBoard from "react-copy-to-clipboard";
 
 import PositivePrompt from "./tool/PositivePrompt";
 // import "./GenText.css";
+import { getRum } from "../CloudWatchRUM";
 
 interface ApiResponse {
   statusCode: number;
@@ -28,6 +30,13 @@ interface CodeProps {
 }
 
 const GenText: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    const cwr = getRum();
+    if (!cwr) return;
+    console.log("logging pageview to cwr: " + location.pathname);
+    cwr.recordPageView(location.pathname);
+  }, [location]);
   const [text, setText] = useState("");
 
   const handleSubmit = (positivePromptValue: string) => {
@@ -65,15 +74,7 @@ const GenText: React.FC = () => {
               const { children, className, node, ...rest } = props;
               const match = /language-(\w+)/.exec(className || "");
               return match ? (
-                <SyntaxHighlighter
-                  {...rest}
-                  className={"test"}
-                  PreTag="div"
-                  children={String(children).replace(/\n$/, "")}
-                  language={match[1]}
-                  style={duotoneDark}
-                  showLineNumbers={true}
-                />
+                <SyntaxHighlighter {...rest} className={"test"} PreTag="div" children={String(children).replace(/\n$/, "")} language={match[1]} style={duotoneDark} showLineNumbers={true} />
               ) : (
                 <code {...rest} className={className}>
                   {children}

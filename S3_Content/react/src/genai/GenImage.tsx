@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 // import TextareaAutosize from "react-textarea-autosize";
 import styled from "styled-components";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -12,6 +13,7 @@ import StepsSlider from "./tool/StepsSlider";
 import PositivePrompt from "./tool/PositivePrompt";
 import CfgScale from "./tool/CfgScale";
 import Size from "./tool/Size";
+import { getRum } from "../CloudWatchRUM";
 
 const theme = createTheme({
   palette: {
@@ -27,6 +29,13 @@ const StyledDownloadButton = styled(Button)`
 
 // メイン
 const GenImage: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    const cwr = getRum();
+    if (!cwr) return;
+    console.log("logging pageview to cwr: " + location.pathname);
+    cwr.recordPageView(location.pathname);
+  }, [location]);
   const [download, setDownload] = useState("");
   const [image, setImage] = useState("");
   const [submitted, setSubmitted] = useState(false);

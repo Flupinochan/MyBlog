@@ -1,4 +1,8 @@
+// https://github.com/aws-observability/aws-rum-web/blob/main/docs/cdn_react.md
+// https://github.com/aws-observability/aws-rum-web/blob/main/docs/cdn_installation.md
 import { AwsRum, AwsRumConfig } from "aws-rum-web";
+
+let cwr: AwsRum | null = null;
 try {
   const config: AwsRumConfig = {
     sessionSampleRate: 1,
@@ -14,6 +18,11 @@ try {
   const APPLICATION_REGION: string = "us-west-2";
 
   const awsRum: AwsRum = new AwsRum(APPLICATION_ID, APPLICATION_VERSION, APPLICATION_REGION, config);
+  cwr = awsRum;
 } catch (error) {
   // Ignore errors thrown during CloudWatch RUM web client initialization
 }
+
+export const getRum = () => {
+  return cwr;
+};

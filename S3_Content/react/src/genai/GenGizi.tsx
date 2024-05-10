@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -15,6 +16,7 @@ import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 // https://k8shiro.github.io/ReactCompareCodeHighlighter/
 
 // import "./GenGizi.css";
+import { getRum } from "../CloudWatchRUM";
 
 const theme = createTheme({
   palette: {
@@ -37,6 +39,13 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const GenGizi: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    const cwr = getRum();
+    if (!cwr) return;
+    console.log("logging pageview to cwr: " + location.pathname);
+    cwr.recordPageView(location.pathname);
+  }, [location]);
   const [wsStatus, setWsStatus] = useState<WebSocket | null>(null);
   const [message, setMessage] = useState<string[]>([]);
 
@@ -132,28 +141,14 @@ const GenGizi: React.FC = () => {
       <div className="blogContentBackColor">
         <br />
         <ThemeProvider theme={theme}>
-          <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-          >
+          <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUploadIcon />}>
             Upload Movie
-            <VisuallyHiddenInput
-              type="file"
-              accept="audio/mp4, audio/mpeg, audio/ogg, audio/wav, audio/webm, video/mp4, video/ogg, video/webm"
-              onChange={handleFileUpload}
-            />
+            <VisuallyHiddenInput type="file" accept="audio/mp4, audio/mpeg, audio/ogg, audio/wav, audio/webm, video/mp4, video/ogg, video/webm" onChange={handleFileUpload} />
           </Button>
           {uploadFile && (
             <div>
               <p>upload file: {uploadFileName}</p>
-              <Button
-                variant="contained"
-                startIcon={<TranscribeIcon />}
-                onClick={handleExecuteTranslation}
-              >
+              <Button variant="contained" startIcon={<TranscribeIcon />} onClick={handleExecuteTranslation}>
                 Execute Transcription
               </Button>
             </div>
@@ -170,13 +165,7 @@ const GenGizi: React.FC = () => {
               const { children, className, node, ...rest } = props;
               const match = /language-(\w+)/.exec(className || "");
               return match ? (
-                <SyntaxHighlighter
-                  {...rest}
-                  PreTag="div"
-                  children={String(children).replace(/\n$/, "")}
-                  language={match[1]}
-                  style={duotoneDark}
-                />
+                <SyntaxHighlighter {...rest} PreTag="div" children={String(children).replace(/\n$/, "")} language={match[1]} style={duotoneDark} />
               ) : (
                 <code {...rest} className={className}>
                   {children}

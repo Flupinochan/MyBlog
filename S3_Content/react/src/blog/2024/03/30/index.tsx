@@ -1,8 +1,17 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 
 import AppleBillComIcon from "./appleComBill.png";
+import { getRum } from "../../../../CloudWatchRUM";
 
 const Blog20240330: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    const cwr = getRum();
+    if (!cwr) return;
+    console.log("logging pageview to cwr: " + location.pathname);
+    cwr.recordPageView(location.pathname);
+  }, [location]);
   return (
     <div id="blog0330">
       <h2>ブログ初投稿(≧∇≦*)</h2>
@@ -33,11 +42,7 @@ const Blog20240330: React.FC = () => {
         </p>
         <p>
           勉強・検証する上で作成したコードは、
-          <a
-            href="https://github.com/Flupinochan"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
           にアップロードします!!
@@ -50,11 +55,7 @@ const Blog20240330: React.FC = () => {
           興味がある方は、以下をご覧ください
         </p>
         <p>
-          <a
-            href="https://github.com/Flupinochan/MyBlog"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://github.com/Flupinochan/MyBlog" target="_blank" rel="noopener noreferrer">
             MyBlog
           </a>
         </p>
@@ -79,15 +80,11 @@ const Blog20240330: React.FC = () => {
           <br />
           金融の非中央集権化・民主化が来ると思います
         </p>
-        <p>
-          少しでもブロックチェーンを勉強し、金融関係の仕事に携わることで、食いっぱぐれないようにしたいです
-          (｡-∀-)
-        </p>
+        <p>少しでもブロックチェーンを勉強し、金融関係の仕事に携わることで、食いっぱぐれないようにしたいです (｡-∀-)</p>
         <h3>おわりに</h3>
         <p>
           少し前に、自分のクレジットカードが不正利用されました Σ( ºωº )<br />
-          以下のように、APPLE COM
-          BILLというご利用名で、いくつも請求されていました
+          以下のように、APPLE COM BILLというご利用名で、いくつも請求されていました
           <br />
           サポートが返金手続き中ですが、拒否されることもあるみたいで、怖いです
         </p>
@@ -95,11 +92,7 @@ const Blog20240330: React.FC = () => {
           心当たりが…あるんですよねぇw
           <br />
           先日、中華サイトで、原神の
-          <a
-            href="https://ascii.jp/elem/000/004/188/4188575/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://ascii.jp/elem/000/004/188/4188575/" target="_blank" rel="noopener noreferrer">
             コラボスマホ(刻晴)
           </a>
           を購入しようとしました
@@ -112,11 +105,7 @@ const Blog20240330: React.FC = () => {
           そんなに高くないですし…
         </p>
         <p>みなさんもお気を付けください</p>
-        <img
-          src={AppleBillComIcon}
-          alt="appleComBill"
-          className="normalImage"
-        />
+        <img src={AppleBillComIcon} alt="appleComBill" className="normalImage" />
         <p>
           今回のブログは、ここでおしまいです
           <br />

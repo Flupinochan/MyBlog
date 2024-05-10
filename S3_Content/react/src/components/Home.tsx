@@ -1,9 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import "./Home.css";
+import { getRum } from "../CloudWatchRUM";
 
 const Home: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    const cwr = getRum();
+    if (!cwr) return;
+    console.log("logging pageview to cwr: " + location.pathname);
+    cwr.recordPageView(location.pathname);
+  }, [location]);
   return (
     <div id="home">
       <h2>Archives</h2>
