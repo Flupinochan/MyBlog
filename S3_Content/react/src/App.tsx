@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import "simplebar-react/dist/simplebar.min.css";
 import SimpleBar from "simplebar-react";
 
@@ -18,27 +18,24 @@ import Blog20240418 from "./blog/2024/04/18/index";
 
 import { AwsRum, AwsRumConfig } from "aws-rum-web";
 
-try {
-  const config: AwsRumConfig = {
-    sessionSampleRate: 1,
-    identityPoolId: "us-west-2:cf4c129c-8deb-4b4f-848e-746e1b84b120",
-    endpoint: "https://dataplane.rum.us-west-2.amazonaws.com",
-    telemetries: ["performance", "errors", "http"],
-    allowCookies: true,
-    enableXRay: true,
-    // disableAutoPageView: true,
-  };
+const config: AwsRumConfig = {
+  sessionSampleRate: 1,
+  identityPoolId: "us-west-2:a70782e0-77dd-4827-960f-20fd3a84d627",
+  endpoint: "https://dataplane.rum.us-west-2.amazonaws.com",
+  telemetries: ["performance", "errors", "http"],
+  allowCookies: true,
+  enableXRay: true,
+  // disableAutoPageView: true,
+};
 
-  const APPLICATION_ID: string = "ea8af376-cbb5-4c15-a203-f4d8206848fb";
-  const APPLICATION_VERSION: string = "1.0.0";
-  const APPLICATION_REGION: string = "us-west-2";
+const APPLICATION_ID: string = "9bc8a6c1-d424-4bba-a3e4-808a33a1a970";
+const APPLICATION_VERSION: string = "1.0.0";
+const APPLICATION_REGION: string = "us-west-2";
 
-  const awsRum: AwsRum = new AwsRum(APPLICATION_ID, APPLICATION_VERSION, APPLICATION_REGION, config);
-} catch (error) {
-  // Ignore errors thrown during CloudWatch RUM web client initialization
-}
+// https://aws.amazon.com/jp/blogs/mt/using-amazon-cloudwatch-rum-with-a-react-web-application-in-five-steps/
+const awsRum: AwsRum = new AwsRum(APPLICATION_ID, APPLICATION_VERSION, APPLICATION_REGION, config);
 
-function App() {
+const App: React.FC = () => {
   return (
     <div className="App">
       <Router>
@@ -61,6 +58,6 @@ function App() {
       </Router>
     </div>
   );
-}
+};
 
 export default App;
