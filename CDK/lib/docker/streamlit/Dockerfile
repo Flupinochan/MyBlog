@@ -17,4 +17,4 @@ EXPOSE 8501
 USER streamlit
 
 # CMD [ "streamlit", "hello", "--server.port", "8501", "--server.enableCORS", "false", "--server.enableXsrfProtection", "false" ]
-CMD [ "streamlit", "run", "menu.py" ]
+CMD [ "streamlit", "run", "app.py" ]

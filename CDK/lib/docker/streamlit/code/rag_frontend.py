@@ -21,18 +21,22 @@ class Frontend:
         llm = bk.llm_setting()
         title = '<h1 style="font-family:sans-serif; font-size: 42px;">Amazon Titan2 RAG</h1>'
         st.markdown(body=title, unsafe_allow_html=True)
-        file = st.file_uploader("Upload your pdf file or text file", type=["pdf"])
+        file_type = st.selectbox("Select file type", ("pdf", "txt"))
+        file = ""
+        if file_type == "pdf":
+            file = st.file_uploader("Upload your file", type=["pdf"])
+        elif file_type == "txt":
+            file = st.file_uploader("Upload your file", type=["txt"])
 
         if st.button("Create Index", type="primary"):
             with st.spinner("Creating vector index..."):
-                file_path = "tmp.pdf"
+                file_path = f"tmp.{file_type}"
                 with open(file_path, "wb") as f:
                     f.write(file.getvalue())
-                st.session_state.vector_index = bk.create_embedded_index(file_path)
+                st.session_state.vector_index = bk.create_embedded_index(file_path, file_type)
                 if os.path.exists(file_path):
                     os.remove(file_path)
-
-        input_question = st.text_area("Input Question", label_visibility="collapsed")
+        input_question = st.text_area("Input Question")
 
         if st.button("Search Index", type="primary"):
             with st.spinner("Searching..."):

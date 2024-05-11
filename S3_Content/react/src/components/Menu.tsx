@@ -24,7 +24,7 @@ const Menu: React.FC = () => {
           </li>
           <li>
             <a href="https://chatbot.metalmental.net/streamlit/" target="_blank" rel="noopener noreferrer">
-              CBot
+              Streamlit
             </a>
           </li>
         </ul>

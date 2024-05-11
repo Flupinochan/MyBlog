@@ -2,6 +2,7 @@ import os
 import boto3
 from botocore.config import Config
 from langchain_community.document_loaders.pdf import PyPDFLoader
+from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_aws import BedrockEmbeddings
 from langchain_aws import BedrockChat
@@ -30,8 +31,11 @@ class Backend:
     )
 
     # @xray_recorder.capture("create_embedded_index")
-    def create_embedded_index(self, file_path):
-        loader = PyPDFLoader(file_path)
+    def create_embedded_index(self, file_path, file_type):
+        if file_type == "pdf":
+            loader = PyPDFLoader(file_path)
+        elif file_type == "txt":
+            loader = TextLoader(file_path)
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n", " ", ""],
             chunk_size=100,
