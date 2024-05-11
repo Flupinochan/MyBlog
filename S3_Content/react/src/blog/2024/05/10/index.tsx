@@ -89,7 +89,7 @@ const Blog20240510: React.FC = () => {
         <p>以下のように、RUM設定用のファイルを作成します</p>
         <p>サンプルコードをコピペし、24行目のようにexportします</p>
         <img className="normalImage CloudWatchRAMComponent" src={CloudWatchRAMComponent} alt="CloudWatchComponent" />
-        <p>データを送信したいWebページで、以下のようにuseEffectとrecordPageViewを使用して、Webページが読み込まれた際に、データを送信するようにします</p>
+        <p>データを送信したいWebページで、以下のようにuseEffectとrecordPageViewを使用して、Webページがレンダリングされた際に、データを送信するようにします</p>
         <p>useLocationを使用して、React Route情報を送信していることが分かりますね!</p>
         <p>
           <a href="https://aws.amazon.com/jp/blogs/mt/using-amazon-cloudwatch-rum-with-a-react-web-application-in-five-steps/" target="_blank" rel="noopener noreferrer">
