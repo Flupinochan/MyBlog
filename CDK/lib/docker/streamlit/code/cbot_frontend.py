@@ -3,7 +3,7 @@ from langchain_community.callbacks import StreamlitCallbackHandler
 from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core import patch_all
 
-from backend import Backend
+from cbot_backend import Backend
 from LoggingClass import LoggingClass
 
 xray_recorder.configure(
