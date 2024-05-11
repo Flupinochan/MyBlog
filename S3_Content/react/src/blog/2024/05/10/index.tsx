@@ -86,7 +86,8 @@ const Blog20240510: React.FC = () => {
         <p>ここでは、TypeScript ReactのWebページに設定する方法を解説いたします</p>
         <p>前提として、以下のようなRoute(Webページ)があります</p>
         <img className="normalImage CloudWatchRAMRoute" src={CloudWatchRAMRoute} alt="CloudWatchRoute" />
-        <p>以下のように、サンプルコードをコピペし、24行目のようにexportします</p>
+        <p>以下のように、RUM設定用のファイルを作成します</p>
+        <p>サンプルコードをコピペし、24行目のようにexportします</p>
         <img className="normalImage CloudWatchRAMComponent" src={CloudWatchRAMComponent} alt="CloudWatchComponent" />
         <p>データを送信したいWebページで、以下のようにuseEffectとrecordPageViewを使用して、Webページが読み込まれた際に、データを送信するようにします</p>
         <p>useLocationを使用して、React Route情報を送信していることが分かりますね!</p>
