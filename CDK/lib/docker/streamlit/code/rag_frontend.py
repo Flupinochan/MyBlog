@@ -1,4 +1,5 @@
 import os
+import chardet
 import streamlit as st
 
 from rag_backend import Backend

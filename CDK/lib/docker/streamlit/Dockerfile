@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app/
 
-COPY requirements.txt code/* /app/
+COPY . /app/
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -14,7 +14,8 @@ RUN useradd -m streamlit
 
 EXPOSE 8501
 
-USER streamlit
+# USER streamlit
 
-# CMD [ "streamlit", "hello", "--server.port", "8501", "--server.enableCORS", "false", "--server.enableXsrfProtection", "false" ]
+WORKDIR /app/code/
+
 CMD [ "streamlit", "run", "app.py" ]

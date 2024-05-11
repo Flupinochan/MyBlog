@@ -35,7 +35,7 @@ class Backend:
         if file_type == "pdf":
             loader = PyPDFLoader(file_path)
         elif file_type == "txt":
-            loader = TextLoader(file_path)
+            loader = TextLoader(file_path, autodetect_encoding=True)
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n", " ", ""],
             chunk_size=100,

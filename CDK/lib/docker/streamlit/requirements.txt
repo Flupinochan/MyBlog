@@ -12,3 +12,4 @@ pypdf==4.2.0
 faiss-cpu==1.8.0
 langchain-text-splitters==0.0.1
 openai==1.28.1
+chardet==5.2.0

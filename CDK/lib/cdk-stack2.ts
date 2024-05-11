@@ -121,6 +121,7 @@ export class MyBlogStack2 extends cdk.Stack {
     task.addContainer("xray-daemon", {
       containerName: "xray-daemon",
       image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
+      // image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:3.3.12"),
       command: ["--local-mode"],
       cpu: 32,
       memoryReservationMiB: 256,
