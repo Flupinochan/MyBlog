@@ -4,6 +4,8 @@ from botocore.config import Config
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_community.document_loaders.text import TextLoader
 from langchain_community.document_loaders.html import UnstructuredHTMLLoader
+from langchain_community.document_loaders.youtube import YoutubeLoader
+from langchain_community.document_loaders.excel import UnstructuredExcelLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_aws import BedrockEmbeddings
 from langchain_aws import BedrockChat
@@ -33,12 +35,22 @@ class Backend:
 
     # @xray_recorder.capture("create_embedded_index")
     def create_embedded_index(self, file_path, file_type):
+        loader = None
         if file_type == "pdf":
             loader = PyPDFLoader(file_path)
         elif file_type == "txt":
             loader = TextLoader(file_path, autodetect_encoding=True)
         elif file_type == "html":
             loader = UnstructuredHTMLLoader(file_path)
+        elif file_type == "Youtube":
+            loader = YoutubeLoader.from_youtube_url(
+                youtube_url=file_path,
+                add_video_info=True,
+                language="ja",
+                continue_on_failure=True,
+            )
+        elif file_type == "Excel":
+            loader = UnstructuredExcelLoader(file_path)
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n", " ", ""],
             chunk_size=100,
@@ -65,7 +77,7 @@ class Backend:
         llm = BedrockChat(
             model_id=model_id,
             model_kwargs={
-                "max_tokens": 3000,
+                "max_tokens": 3800,
                 "temperature": 0.1,
                 "top_k": 250,
                 "top_p": 0.9,

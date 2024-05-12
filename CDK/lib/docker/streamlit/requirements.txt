@@ -15,3 +15,8 @@ openai==1.28.1
 chardet==5.2.0
 requests==2.31.0
 unstructured
+youtube-transcript-api==0.6.2
+pytube==15.0.0
+pandas==2.2.2
+openpyxl==3.1.2
+networkx==3.3
