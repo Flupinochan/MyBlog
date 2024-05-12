@@ -2,7 +2,8 @@ import os
 import boto3
 from botocore.config import Config
 from langchain_community.document_loaders.pdf import PyPDFLoader
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders.text import TextLoader
+from langchain_community.document_loaders.html import UnstructuredHTMLLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_aws import BedrockEmbeddings
 from langchain_aws import BedrockChat
@@ -36,6 +37,8 @@ class Backend:
             loader = PyPDFLoader(file_path)
         elif file_type == "txt":
             loader = TextLoader(file_path, autodetect_encoding=True)
+        elif file_type == "html":
+            loader = UnstructuredHTMLLoader(file_path)
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n", " ", ""],
             chunk_size=100,
