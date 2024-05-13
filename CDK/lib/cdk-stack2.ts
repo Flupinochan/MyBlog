@@ -54,21 +54,19 @@ export class MyBlogStack2 extends cdk.Stack {
         logging: ecs.ExecuteCommandLogging.NONE,
       },
     });
+    const namespace = cluster.addDefaultCloudMapNamespace({
+      name: param.ECS.NameSpace,
+      useForServiceConnect: true,
+    });
     const ecsLogs = new logs.LogGroup(this, param.ECS.ContainerLogsName, {
       logGroupName: param.ECS.ContainerLogsName,
       retention: logs.RetentionDays.ONE_DAY,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    const taskRole= new iam.Role(this, param.ECS.TaskRoleName, {
+    const taskRole = new iam.Role(this, param.ECS.TaskRoleName, {
       roleName: param.ECS.TaskRoleName,
       assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSXrayFullAccess"),
-      ],
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AWSXrayFullAccess")],
       inlinePolicies: {
         inlinePolicy: new iam.PolicyDocument({
           statements: [
@@ -81,31 +79,55 @@ export class MyBlogStack2 extends cdk.Stack {
         }),
       },
     });
-    const task = new ecs.FargateTaskDefinition(this, param.ECS.TaskName, {
-      family: param.ECS.TaskName,
+    const taskNginx = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameNginx, {
+      family: param.ECS.TaskNameNginx,
       cpu: 256,
       memoryLimitMiB: 512,
       taskRole: taskRole,
       // executionRole: taskExecutionRole,
     });
-    task.addContainer("nginx", {
+    const taskStreamlit = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameStreamlit, {
+      family: param.ECS.TaskNameStreamlit,
+      cpu: 256,
+      memoryLimitMiB: 512,
+      taskRole: taskRole,
+      // executionRole: taskExecutionRole,
+    });
+    taskNginx.addContainer("nginx", {
       image: ecs.ContainerImage.fromDockerImageAsset(nginxRepo),
-      portMappings: [{ containerPort: 80 }],
+      portMappings: [
+        {
+          name: "nginx",
+          containerPort: 80,
+          // protocol: ecs.Protocol.TCP,
+          // appProtocol: ecs.AppProtocol.http,
+        },
+      ],
       containerName: "nginx",
       healthCheck: {
         command: ["CMD-SHELL", "curl -f http://127.0.0.1/streamlit >> /proc/1/fd/1 2>&1 || exit 1"],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
+        interval: cdk.Duration.seconds(60),
+        timeout: cdk.Duration.seconds(30),
         retries: 3,
       },
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: "nginx",
         logGroup: ecsLogs,
       }),
+      // environment: {
+      //   streamlithost: param.ECS.DiscoveryNameStreamlit + "." + param.ECS.NameSpace,
+      // },
     });
-    task.addContainer("streamlit", {
+    taskStreamlit.addContainer("streamlit", {
       image: ecs.ContainerImage.fromDockerImageAsset(streamlitRepo),
-      portMappings: [{ containerPort: 8501 }],
+      portMappings: [
+        {
+          name: "streamlit",
+          containerPort: 8501,
+          // protocol: ecs.Protocol.TCP,
+          // appProtocol: ecs.AppProtocol.http,
+        },
+      ],
       containerName: "streamlit",
       healthCheck: {
         command: ["CMD-SHELL", "curl -f http://127.0.0.1:8501/_stcore/health >> /proc/1/fd/1 2>&1  || exit 1"],
@@ -118,7 +140,7 @@ export class MyBlogStack2 extends cdk.Stack {
         logGroup: ecsLogs,
       }),
     });
-    task.addContainer("xray-daemon", {
+    taskNginx.addContainer("xray-daemon", {
       containerName: "xray-daemon",
       image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
       // image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:3.3.12"),
@@ -126,10 +148,10 @@ export class MyBlogStack2 extends cdk.Stack {
       cpu: 32,
       memoryReservationMiB: 256,
       portMappings: [
-          {
-            containerPort: 2000,
-            protocol: ecs.Protocol.UDP
-          }
+        {
+          containerPort: 2000,
+          protocol: ecs.Protocol.UDP,
+        },
       ],
       healthCheck: {
         command: ["CMD", "/xray", "--version", "||", "exit 1"],
@@ -142,10 +164,34 @@ export class MyBlogStack2 extends cdk.Stack {
         logGroup: ecsLogs,
       }),
     });
-    const service = new ecs.FargateService(this, param.ECS.ServiceName, {
+    taskStreamlit.addContainer("xray-daemon", {
+      containerName: "xray-daemon",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
+      // image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:3.3.12"),
+      command: ["--local-mode"],
+      cpu: 32,
+      memoryReservationMiB: 256,
+      portMappings: [
+        {
+          containerPort: 2000,
+          protocol: ecs.Protocol.UDP,
+        },
+      ],
+      healthCheck: {
+        command: ["CMD", "/xray", "--version", "||", "exit 1"],
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
+        retries: 3,
+      },
+      logging: ecs.LogDriver.awsLogs({
+        streamPrefix: "xray",
+        logGroup: ecsLogs,
+      }),
+    });
+    const serviceNginx = new ecs.FargateService(this, param.ECS.ServiceNameNginx, {
       cluster: cluster,
-      taskDefinition: task,
-      serviceName: param.ECS.ServiceName,
+      taskDefinition: taskNginx,
+      serviceName: param.ECS.ServiceNameNginx,
       assignPublicIp: true,
       enableExecuteCommand: true,
       desiredCount: 1,
@@ -163,12 +209,73 @@ export class MyBlogStack2 extends cdk.Stack {
       circuitBreaker: {
         rollback: true,
       },
+      serviceConnectConfiguration: {
+        services: [
+          {
+            portMappingName: "nginx", // portMappingのnameに合わせる
+            discoveryName: param.ECS.DiscoveryNameNginx, // このサービスにアクセスする際の名前
+            port: 80,
+            // dnsName: "ng" // alias name
+          },
+        ],
+        logDriver: ecs.LogDriver.awsLogs({
+          streamPrefix: "service-connect-nginx",
+          logGroup: ecsLogs,
+        }),
+      },
     });
-    const scaling = service.autoScaleTaskCount({
+    serviceNginx.node.addDependency(namespace); // namespaceが作成された後に作成されるよう依存関係を設定する必要がある
+    const serviceStreamlit = new ecs.FargateService(this, param.ECS.ServiceNameStreamlit, {
+      cluster: cluster,
+      taskDefinition: taskStreamlit,
+      serviceName: param.ECS.ServiceNameStreamlit,
+      assignPublicIp: true,
+      enableExecuteCommand: true,
+      desiredCount: 1,
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      capacityProviderStrategies: [
+        {
+          capacityProvider: "FARGATE_SPOT",
+          weight: 1,
+        },
+        {
+          capacityProvider: "FARGATE",
+          weight: 0,
+        },
+      ],
+      circuitBreaker: {
+        rollback: true,
+      },
+      serviceConnectConfiguration: {
+        services: [
+          {
+            portMappingName: "streamlit",
+            discoveryName: param.ECS.DiscoveryNameStreamlit,
+            port: 8501,
+          },
+        ],
+        logDriver: ecs.LogDriver.awsLogs({
+          streamPrefix: "service-connect-streamlit",
+          logGroup: ecsLogs,
+        }),
+      },
+    });
+    serviceStreamlit.node.addDependency(namespace);
+    serviceStreamlit.connections.allowFrom(serviceNginx, ec2.Port.tcp(8501));
+    const scalingNginx = serviceNginx.autoScaleTaskCount({
       minCapacity: 1,
       maxCapacity: 3,
     });
-    scaling.scaleOnCpuUtilization("CpuScaling", {
+    scalingNginx.scaleOnCpuUtilization("CpuScalingNginx", {
+      targetUtilizationPercent: 85,
+      scaleInCooldown: cdk.Duration.seconds(60),
+      scaleOutCooldown: cdk.Duration.seconds(60),
+    });
+    const scalingStreamlit = serviceStreamlit.autoScaleTaskCount({
+      minCapacity: 1,
+      maxCapacity: 3,
+    });
+    scalingStreamlit.scaleOnCpuUtilization("CpuScalingStreamlit", {
       targetUtilizationPercent: 85,
       scaleInCooldown: cdk.Duration.seconds(60),
       scaleOutCooldown: cdk.Duration.seconds(60),
@@ -200,7 +307,7 @@ export class MyBlogStack2 extends cdk.Stack {
     });
     // AccessLogs & ConnectionLogs
     alb.logAccessLogs(albS3Logs);
-    const certificateArn = ""
+    const certificateArn = "";
     const certificate = certmgr.Certificate.fromCertificateArn(this, "MyBlogCertificate", certificateArn);
     const listener443 = alb.addListener(param.ECS.ALBTargetGroupName, {
       port: 443,
@@ -209,7 +316,7 @@ export class MyBlogStack2 extends cdk.Stack {
     });
     listener443.addTargets(param.ECS.ALBTargetGroupName, {
       port: 80,
-      targets: [service],
+      targets: [serviceNginx],
       healthCheck: {
         protocol: elbv2.Protocol.HTTP,
         port: "80",
@@ -217,8 +324,8 @@ export class MyBlogStack2 extends cdk.Stack {
         enabled: true,
         healthyHttpCodes: "200",
         healthyThresholdCount: 2,
-        unhealthyThresholdCount: 2,
-        interval: cdk.Duration.seconds(20),
+        unhealthyThresholdCount: 3,
+        interval: cdk.Duration.seconds(60),
         timeout: cdk.Duration.seconds(5),
       },
       stickinessCookieDuration: Duration.days(1),
@@ -328,7 +435,7 @@ export class MyBlogStack2 extends cdk.Stack {
         name: param.Glue.CloudFrontTableName,
         tableType: "EXTERNAL_TABLE",
         parameters: {
-          "skip.header.line.count": "2"
+          "skip.header.line.count": "2",
         },
         storageDescriptor: {
           columns: [
@@ -364,15 +471,15 @@ export class MyBlogStack2 extends cdk.Stack {
             { name: "sc_content_type", type: "STRING" },
             { name: "sc_content_len", type: "BIGINT" },
             { name: "sc_range_start", type: "BIGINT" },
-            { name: "sc_range_end", type: "BIGINT" }
+            { name: "sc_range_end", type: "BIGINT" },
           ],
           location: param.Glue.CloudFrontS3BucketURILog,
           inputFormat: "org.apache.hadoop.mapred.TextInputFormat",
           outputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
           serdeInfo: {
-            serializationLibrary: 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe',
+            serializationLibrary: "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe",
             parameters: {
-              "serialization.format": "\t"
+              "serialization.format": "\t",
             },
           },
         },

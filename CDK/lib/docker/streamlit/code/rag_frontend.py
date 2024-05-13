@@ -43,8 +43,19 @@ class Frontend:
                 if file_type == "html":
                     response = requests.get(file)
                     if response.status_code == 200:
-                        with open(file_path, "w", encoding="utf-8") as f:
-                            f.write(response.text)
+                        # 文字化けするのでutf-8にする
+                        response_encoding = chardet.detect(response.content)["encoding"]
+                        print(response_encoding)
+                        if response_encoding.lower() == "shift-jis":
+                            response = response.content.decode("shift-jis").encode("utf-8")
+                            with open(file_path, "w", encoding="utf-8") as f:
+                                f.write(response)
+                        else:
+                            # with open(file_path, "w", encoding="utf-8") as f:
+                            # 文字化けしなくても一度エンコードし直す
+                            with open(file_path, "wb") as f:
+                                response = response.content.decode("utf-8").encode("utf-8")
+                                f.write(response)
                 elif file_type == "Youtube":
                     file_path = file
                 # elif file_type == "Excel":

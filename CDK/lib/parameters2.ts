@@ -12,8 +12,13 @@ export class MyBlogParam2 {
 
   ECS = {
     ClusterName: "MyBlog-ECSCluster",
-    ServiceName: "MyBlog-ECSService",
-    TaskName: "MyBlog-ECSTask",
+    NameSpace: "myblog",
+    ServiceNameNginx: "MyBlog-ECSService-Nginx",
+    ServiceNameStreamlit: "MyBlog-ECSService-Streamlit",
+    DiscoveryNameNginx: "nginx-service",
+    DiscoveryNameStreamlit: "streamlit-service",
+    TaskNameNginx: "MyBlog-ECSTask-Nginx",
+    TaskNameStreamlit: "MyBlog-ECSTask-Streamlit",
     TaskRoleName: "MyBlogECSTaskRole",
     TaskExecutionRoleName: "MyBlogECSTaskExecutionRole",
     ContainerLogsName: "MyBlogECSTaskLogs",
@@ -33,6 +38,6 @@ export class MyBlogParam2 {
     CloudFrontTableName: "cloudfront_table",
     AthenaBucketName: "alb-access-log-athena-query",
     WorkGroupName: "alb_access_log",
-    CloudFrontS3BucketURILog: "s3://myblog-cloudfront-logs/"
+    CloudFrontS3BucketURILog: "s3://myblog-cloudfront-logs/",
   };
 }

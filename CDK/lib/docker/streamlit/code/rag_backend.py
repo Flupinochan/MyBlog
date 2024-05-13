@@ -4,6 +4,7 @@ from botocore.config import Config
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_community.document_loaders.text import TextLoader
 from langchain_community.document_loaders.html import UnstructuredHTMLLoader
+from langchain_community.document_loaders.html_bs import BSHTMLLoader
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from langchain_community.document_loaders.excel import UnstructuredExcelLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -42,6 +43,7 @@ class Backend:
             loader = TextLoader(file_path, autodetect_encoding=True)
         elif file_type == "html":
             loader = UnstructuredHTMLLoader(file_path)
+            # loader = BSHTMLLoader(file_path, open_encoding="utf-8")
         elif file_type == "Youtube":
             loader = YoutubeLoader.from_youtube_url(
                 youtube_url=file_path,
