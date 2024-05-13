@@ -23,9 +23,7 @@ const Menu: React.FC = () => {
             <Link to="/genai/gentext">GenText</Link>
           </li>
           <li>
-            <a href="https://chatbot.metalmental.net/streamlit/" target="_blank" rel="noopener noreferrer">
-              Streamlit
-            </a>
+            <a href="https://www.metalmental.net/streamlit/">Streamlit</a>
           </li>
         </ul>
       </div>
