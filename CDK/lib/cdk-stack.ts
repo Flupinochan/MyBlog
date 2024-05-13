@@ -207,6 +207,12 @@ export class MyBlogStack extends cdk.Stack {
             }
           ],
         }),
+        defaultCorsPreflightOptions: {
+          allowOrigins: apigw.Cors.ALL_ORIGINS,
+          allowMethods: apigw.Cors.ALL_METHODS,
+          allowHeaders: apigw.Cors.DEFAULT_HEADERS,
+          allowCredentials: true,
+        },
       }
     );
 
