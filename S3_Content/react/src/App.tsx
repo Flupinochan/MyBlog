@@ -29,7 +29,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/genai/genimage" element={<GenImage />} />
-            <Route path="/genai/gengizi" element={<GenGizi />} />
+            {/* <Route path="/genai/gengizi" element={<GenGizi />} /> */}
             <Route path="/genai/gentext" element={<GenText />} />
             <Route path="/blog/vol1" element={<Blog20240330 />} />
             <Route path="/blog/vol2" element={<Blog20240418 />} />
