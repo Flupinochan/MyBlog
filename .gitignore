@@ -1,5 +1,6 @@
 package.json
 package-lock.json
 node_modules
-CDK/lib/lambda-code/GenAILayer/python/*
+CDK/lambda-code/GenAILayer/python/*
+*python/*
 .vscode
