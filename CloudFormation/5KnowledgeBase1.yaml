@@ -1,0 +1,245 @@
+# Create a stack with the name [knowledgebase-myblog1]
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: OpenSearch
+        Parameters:
+          - IAMUserName
+          - OpenSearchName
+          - EncryptionPolicyName
+          - DataAccessPolicyName
+          - NetworkPolicyName
+      - Label:
+          default: S3
+        Parameters:
+          - S3Name
+          - S3LambdaName
+          - S3IAMRoleName
+          - S3IAMPolicyName
+          - S3CloudWatchLogsName
+
+
+
+Parameters:
+  IAMUserName:
+    Type: String
+    Default: 'metalmental'
+  OpenSearchName:
+    Type: String
+    Default: 'myblog-knowledgebase'
+  EncryptionPolicyName:
+    Type: String
+    Default: 'myblog-encryption-polity'
+  DataAccessPolicyName:
+    Type: String
+    Default: 'myblog-data-access-policy'
+  NetworkPolicyName:
+    Type: String
+    Default: 'myblog-network-policy'
+  S3Name:
+    Type: String
+    Default: 'myblog-knowledgebase-datasource'
+  S3LambdaName:
+    Type: String
+    Default: 'delete-myblog-knowledgebase-datasource'
+  S3IAMRoleName:
+    Type: String
+    Default: 'delete-myblog-knowledgebase-datasource'
+  S3IAMPolicyName:
+    Type: String
+    Default: 'delete-myblog-knowledgebase-datasource'
+  S3CloudWatchLogsName:
+    Type: String
+    Default: 'delete-myblog-knowledgebase-datasource'
+  KnowledgeBaseIAMRoleName:
+    Type: String
+    Default: 'MyBlogKnowledgeBaseIAMRole'
+  KnowledgeBaseIAMPolicyName:
+    Type: String
+    Default: 'MyBlogKnowledgeBaseIAMPolicy'
+
+
+
+Resources:
+  OpenSearchServerless:
+    Type: 'AWS::OpenSearchServerless::Collection'
+    Properties:
+      Name: !Ref OpenSearchName
+      Type: "VECTORSEARCH"
+    DependsOn: EncryptionPolicy
+  EncryptionPolicy:
+    Type: 'AWS::OpenSearchServerless::SecurityPolicy'
+    Properties:
+      Name: !Ref EncryptionPolicyName
+      Type: encryption
+      Policy: !Sub >-
+        {"Rules":
+          [
+            {
+              "ResourceType":"collection",
+              "Resource":["collection/${OpenSearchName}"]
+            }
+          ],
+          "AWSOwnedKey":true
+        }
+  DataAccessPolicy:
+    Type: 'AWS::OpenSearchServerless::AccessPolicy'
+    Properties:
+      Name: !Ref DataAccessPolicyName
+      Type: data
+      Policy: !Sub >-
+        [{"Rules":
+          [
+            {
+              "ResourceType":"index",
+              "Resource":["index/*/*"],
+              "Permission":["aoss:*"]
+            },
+            {
+              "ResourceType":"collection",
+              "Resource":["collection/*"],
+              "Permission":["aoss:*"]
+            }
+          ],
+          "Principal":["arn:aws:iam::${AWS::AccountId}:user/${IAMUserName}", "${KnowledgeBaseIAMRole.Arn}"]
+        }]
+  NetworkPolicy:
+    Type: 'AWS::OpenSearchServerless::SecurityPolicy'
+    Properties:
+      Name: !Ref NetworkPolicyName
+      Type: network
+      Policy: !Sub >-
+        [{"Rules":
+          [
+            {
+              "ResourceType":"collection",
+              "Resource":["collection/${OpenSearchName}"]
+            }, 
+            {
+              "ResourceType":"dashboard",
+              "Resource":["collection/${OpenSearchName}"]
+            }
+          ],
+          "AllowFromPublic":true
+        }]
+
+
+  S3:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3Name
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: FALSE
+      VersioningConfiguration:
+        Status: "Suspended"
+      LifecycleConfiguration:
+        Rules:
+          - Id: "rule1"
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 1
+            Status: "Enabled"
+  S3Lambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref S3LambdaName
+      Handler: index.lambda_handler
+      Role: !GetAtt S3IAMRole.Arn
+      Runtime: python3.12
+      Timeout: 300
+      LoggingConfig:
+        LogGroup: !Ref S3CloudWatchLogs
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          def lambda_handler(event, context):
+              s3 = boto3.resource('s3')
+              try:
+                  if event['RequestType'] == 'Delete':
+                      bucket = s3.Bucket(event['ResourceProperties']['BucketName'])
+                      bucket.objects.all().delete()
+                      bucket.object_versions.all().delete()
+                      s3.Bucket(event['ResourceProperties']['BucketName']).delete()
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print("Error: ", e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+  S3LambdaInvoke:
+    Type: Custom::EmptyS3Bucket
+    Properties:
+      ServiceToken: !GetAtt S3Lambda.Arn
+      BucketName: !Ref S3
+  S3IAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref S3IAMRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Ref S3IAMPolicyName
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - logs:*
+                Resource:
+                  - !Sub ${S3.Arn}
+                  - !Sub ${S3.Arn}/*
+  S3CloudWatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref S3CloudWatchLogsName
+      LogGroupClass: INFREQUENT_ACCESS
+      RetentionInDays: 1
+
+
+  KnowledgeBaseIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref KnowledgeBaseIAMRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - bedrock.amazonaws.com
+      Policies:
+        - PolicyName: !Ref KnowledgeBaseIAMPolicyName
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "bedrock:*"
+                  - "aoss:*"
+                  - "s3:*"
+                Resource: "*"
+
+
+
+Outputs:
+  OpenSearchServerlessArn:
+    Value: !GetAtt OpenSearchServerless.Arn
+    Export:
+      Name: "knowledgebase-myblog1-OpenSearchServerlessArn"
+  S3Arn:
+    Value: !GetAtt S3.Arn
+    Export:
+      Name: "knowledgebase-myblog1-S3Arn"
+  KnowledgeBaseIAMRoleArn:
+    Value: !GetAtt KnowledgeBaseIAMRole.Arn
+    Export:
+      Name: "knowledgebase-myblog1-KnowledgeBaseIAMRole"

@@ -1,0 +1,90 @@
+# Create a stack with the name [knowledgebase-myblog2]
+# ★Caution
+# Create the OpenSearch index manually from the management console in advance.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: KnowledgeBase
+        Parameters:
+          - KnowledgeBaseName
+          - KnowledgeBaseEmbeddingModel
+          - KnowledgeBaseDataSourceName
+      - Label:
+          default: Import Parameters
+        Parameters:
+          - OpenSearchServerlessArn
+          - OpenSearchServerlessIndexName
+          - OpenSearchServerlessFieldName
+          - S3Arn
+          - KnowledgeBaseIAMRoleArn
+
+
+
+Parameters:
+  KnowledgeBaseName:
+    Type: String
+    Default: 'MyBlogKnowledgeBase'
+  KnowledgeBaseEmbeddingModel:
+    Type: String
+    Default: 'amazon.titan-embed-text-v1'
+  KnowledgeBaseDataSourceName:
+    Type: String
+    Default: 'MyBlogKnowledgeBaseDataSource'
+  OpenSearchServerlessArn:
+    Type: String
+    Default: "knowledgebase-myblog1-OpenSearchServerlessArn"
+  OpenSearchServerlessIndexName:
+    Type: String
+    Default: "vector-index"
+  OpenSearchServerlessFieldName:
+    Type: String
+    Default: "vector-field"
+  S3Arn:
+    Type: String
+    Default: "knowledgebase-myblog1-S3Arn"
+  KnowledgeBaseIAMRoleArn:
+    Type: String
+    Default: "knowledgebase-myblog1-KnowledgeBaseIAMRole"
+
+
+
+Resources:
+  KnowledgeBase:
+    Type: AWS::Bedrock::KnowledgeBase
+    Properties:
+      Name: !Ref KnowledgeBaseName
+      RoleArn: 
+        Fn::ImportValue:
+          !Ref KnowledgeBaseIAMRoleArn
+      KnowledgeBaseConfiguration: 
+        Type: "VECTOR"
+        VectorKnowledgeBaseConfiguration: 
+            EmbeddingModelArn: 
+              !Sub 
+                - "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/${Model}"
+                - Model: !Ref KnowledgeBaseEmbeddingModel
+      StorageConfiguration: 
+        Type: "OPENSEARCH_SERVERLESS"
+        OpensearchServerlessConfiguration: 
+          CollectionArn:
+            Fn::ImportValue:
+              !Ref OpenSearchServerlessArn
+          VectorIndexName: !Ref OpenSearchServerlessIndexName
+          FieldMapping: 
+            VectorField: !Ref OpenSearchServerlessFieldName
+            TextField: "text"
+            MetadataField: "metadata"
+  KnowledgeBaseDataSource:
+    Type: AWS::Bedrock::DataSource
+    Properties:
+      KnowledgeBaseId: !Ref KnowledgeBase
+      Name: !Ref KnowledgeBaseDataSourceName
+      DataDeletionPolicy: "DELETE"
+      DataSourceConfiguration:
+        Type: "S3"
+        S3Configuration:
+          BucketArn:
+            Fn::ImportValue: !Ref S3Arn
+          # InclusionPrefixes: ["aws-overview.pdf"]

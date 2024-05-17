@@ -1,0 +1,1 @@
+https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/knowledge-base-setup.html

@@ -374,14 +374,14 @@ export class MyBlogStack extends cdk.Stack {
     s3BucketImgStore.addToResourcePolicy(bucketStatement);
 
     // DynamoDB for Websocket
-    const dynamoTable = new dynamodb.TableV2(this, param.dynamodbTable.tableName, {
-      tableName: param.dynamodbTable.tableName,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      partitionKey: {
-        name: param.dynamodbTable.partitionKeyName,
-        type: dynamodb.AttributeType.STRING,
-      },
-    });
+    // const dynamoTable = new dynamodb.TableV2(this, param.dynamodbTable.tableName, {
+    //   tableName: param.dynamodbTable.tableName,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    //   partitionKey: {
+    //     name: param.dynamodbTable.partitionKeyName,
+    //     type: dynamodb.AttributeType.STRING,
+    //   },
+    // });
 
     // Lambda GenGizi
     // const elasticRepository = new ecr.Repository(

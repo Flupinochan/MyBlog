@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
+import { aws_bedrock as bedrock } from "aws-cdk-lib";
 
 import { MyBlogParam3 } from "./parameters3";
 
