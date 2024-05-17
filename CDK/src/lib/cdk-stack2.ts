@@ -9,6 +9,7 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as certmgr from "aws-cdk-lib/aws-certificatemanager";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as path from "path";
 import { Duration } from "aws-cdk-lib";
 import { aws_glue as glue } from "aws-cdk-lib";
@@ -42,10 +43,10 @@ export class MyBlogStack2 extends cdk.Stack {
       ],
     });
     const nginxRepo = new DockerImageAsset(this, param.ECS.NginxRepoName, {
-      directory: path.join(__dirname, "./docker/nginx"),
+      directory: path.join(__dirname, "../../docker/nginx"),
     });
     const streamlitRepo = new DockerImageAsset(this, param.ECS.StreamlitRepoName, {
-      directory: path.join(__dirname, "./docker/streamlit"),
+      directory: path.join(__dirname, "../../docker/streamlit"),
     });
     const cluster = new ecs.Cluster(this, param.ECS.ClusterName, {
       vpc: vpc,
@@ -66,13 +67,29 @@ export class MyBlogStack2 extends cdk.Stack {
     const taskRole = new iam.Role(this, param.ECS.TaskRoleName, {
       roleName: param.ECS.TaskRoleName,
       assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
-      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AWSXrayFullAccess")],
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AWSXrayFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy")],
       inlinePolicies: {
         inlinePolicy: new iam.PolicyDocument({
           statements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
-              actions: ["ssmmessages:*"],
+              actions: ["ssmmessages:*", "secretsmanager:*"],
+              resources: ["*"],
+            }),
+          ],
+        }),
+      },
+    });
+    const taskExecutionRole = new iam.Role(this, param.ECS.TaskExecutionRoleName, {
+      roleName: param.ECS.TaskExecutionRoleName,
+      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMReadOnlyAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy")],
+      inlinePolicies: {
+        inlinePolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["ecr:*", "logs:*"],
               resources: ["*"],
             }),
           ],
@@ -92,6 +109,11 @@ export class MyBlogStack2 extends cdk.Stack {
       memoryLimitMiB: 512,
       taskRole: taskRole,
       // executionRole: taskExecutionRole,
+      volumes: [
+        {
+          name: param.ECS.MountPointName,
+        },
+      ],
     });
     taskNginx.addContainer("nginx", {
       image: ecs.ContainerImage.fromDockerImageAsset(nginxRepo),
@@ -118,7 +140,7 @@ export class MyBlogStack2 extends cdk.Stack {
       //   streamlithost: param.ECS.DiscoveryNameStreamlit + "." + param.ECS.NameSpace,
       // },
     });
-    taskStreamlit.addContainer("streamlit", {
+    const streamlit_container = taskStreamlit.addContainer("streamlit", {
       image: ecs.ContainerImage.fromDockerImageAsset(streamlitRepo),
       portMappings: [
         {
@@ -139,6 +161,25 @@ export class MyBlogStack2 extends cdk.Stack {
         streamPrefix: "streamlit",
         logGroup: ecsLogs,
       }),
+      environment: {
+        PYTHONPATH: "/otel-auto-instrumentation-python/opentelemetry/instrumentation/auto_instrumentation:/app/code/:/otel-auto-instrumentation-python",
+        OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf",
+        OTEL_TRACES_SAMPLER: "xray",
+        OTEL_TRACES_SAMPLER_ARG: "endpoint=http://localhost:2000",
+        OTEL_LOGS_EXPORTER: "none",
+        OTEL_PYTHON_DISTRO: "aws_distro",
+        OTEL_PYTHON_CONFIGURATOR: "aws_configurator",
+        OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://localhost:4316/v1/traces",
+        OTEL_AWS_APP_SIGNALS_EXPORTER_ENDPOINT: "http://localhost:4316/v1/metrics",
+        OTEL_METRICS_EXPORTER: "none",
+        OTEL_AWS_APP_SIGNALS_ENABLED: "true",
+        OTEL_RESOURCE_ATTRIBUTES: "aws.hostedin.environment=streamlit-service,service.name=streamlit",
+      },
+    });
+    streamlit_container.addMountPoints({
+      readOnly: false,
+      sourceVolume: param.ECS.MountPointName,
+      containerPath: "/otel-auto-instrumentation-python",
     });
     taskNginx.addContainer("xray-daemon", {
       containerName: "xray-daemon",
@@ -187,6 +228,47 @@ export class MyBlogStack2 extends cdk.Stack {
         streamPrefix: "xray",
         logGroup: ecsLogs,
       }),
+    });
+    const secret = new secretsmanager.Secret(this, param.ECS.SecretName, {
+      secretName: param.ECS.SecretName,
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({
+          traces: {
+            traces_collected: {
+              app_signals: {},
+            },
+          },
+          logs: {
+            metrics_collected: {
+              app_signals: {},
+            },
+          },
+        }),
+        generateStringKey: "unused-key",
+      },
+    });
+    taskStreamlit.addContainer("ecs-cwagent", {
+      containerName: "ecs-cwagent",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest"),
+      secrets: {
+        CW_CONFIG_CONTENT: ecs.Secret.fromSecretsManager(secret),
+      },
+      logging: ecs.LogDriver.awsLogs({
+        streamPrefix: "ecs-cwagent",
+        logGroup: ecsLogs,
+      }),
+    });
+    // https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/CloudWatch-Application-Signals-Enable-ECS.html
+    const init_container = taskStreamlit.addContainer("init", {
+      containerName: "init",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/aws-observability/adot-autoinstrumentation-python:v0.1.1"),
+      command: ["cp", "-a", "/autoinstrumentation/.", "/otel-auto-instrumentation-python"],
+      essential: false,
+    });
+    init_container.addMountPoints({
+      readOnly: false,
+      sourceVolume: param.ECS.MountPointName,
+      containerPath: "/otel-auto-instrumentation-python",
     });
     const serviceNginx = new ecs.FargateService(this, param.ECS.ServiceNameNginx, {
       cluster: cluster,

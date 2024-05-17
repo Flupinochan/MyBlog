@@ -17,6 +17,8 @@ export class MyBlogParam2 {
     ServiceNameStreamlit: "MyBlog-ECSService-Streamlit",
     DiscoveryNameNginx: "nginx-service",
     DiscoveryNameStreamlit: "streamlit-service",
+    SecretName: "ecs-cwagent",
+    MountPointName: "opentelemetry-auto-instrumentation-python",
     TaskNameNginx: "MyBlog-ECSTask-Nginx",
     TaskNameStreamlit: "MyBlog-ECSTask-Streamlit",
     TaskRoleName: "MyBlogECSTaskRole",
