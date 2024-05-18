@@ -50,6 +50,8 @@ const GetKB: React.FC = () => {
       .post(url, postData, postConfig)
       .then((response: Response) => {
         const presignedUrl = response.data.presignedUrl!;
+        console.log(presignedUrl);
+        console.log(uploadFile);
         return axios.put(presignedUrl, uploadFile);
       })
       .then((response) => {

@@ -1,5 +1,6 @@
 import os
 import boto3
+import mimetypes
 
 from typing_extensions import TypedDict
 from botocore.config import Config
@@ -31,10 +32,11 @@ try:
         read_timeout=900,
         connect_timeout=900,
     )
+    s3_config = Config(retries={"max_attempts": 5, "mode": "standard"}, signature_version="s3v4")
     bedrock_service_client = boto3.client("bedrock", config=config)
     bedrock_client = boto3.client("bedrock-runtime", config=config)
     bedrock_agent_client = boto3.client("bedrock-agent-runtime", config=config)
-    s3_client = boto3.client("s3", config=config)
+    s3_client = boto3.client("s3", config=s3_config)
 except Exception as error:
     raise Exception("Boto3 client error" + str(error))
 
@@ -70,16 +72,19 @@ def main(event):
 # ----------------------------------------------------------------------
 def get_presigned_url(event):
     try:
+        # https://kakehashi-dev.hatenablog.com/entry/2022/03/15/101500
+        file_name = event["input_prompt"]
+        content_type, _ = mimetypes.guess_type(file_name)
+        log.debug(content_type)
         presigned_url = s3_client.generate_presigned_url(
             "put_object",
             Params={
                 "Bucket": S3_BUCKET_NAME,
                 "Key": event["input_prompt"],
+                "ContentType": content_type,
             },
             ExpiresIn=900,
         )
-        log.info(f"Pre-Signed URL: {presigned_url}")
-        log.info(f"File Name: {event['input_prompt']}")
         response_body = {"statusCode": 200, "presignedUrl": presigned_url}
         log.info(f"responseBody: {response_body}")
         return response_body
@@ -138,6 +143,7 @@ def get_knowledge(event):
 # ----------------------------------------------------------------------
 class HTMLRequest(TypedDict):
     input_prompt: str
+    operation: str
 
 
 @xray_recorder.capture("lambda_handler")
