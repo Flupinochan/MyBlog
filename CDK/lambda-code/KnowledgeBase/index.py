@@ -74,14 +74,14 @@ def get_presigned_url(event):
     try:
         # https://kakehashi-dev.hatenablog.com/entry/2022/03/15/101500
         file_name = event["input_prompt"]
-        content_type, _ = mimetypes.guess_type(file_name)
-        log.debug(content_type)
+        mime_type = event["mime_type"]
+        log.debug(mime_type)
         presigned_url = s3_client.generate_presigned_url(
             "put_object",
             Params={
                 "Bucket": S3_BUCKET_NAME,
                 "Key": event["input_prompt"],
-                "ContentType": content_type,
+                "ContentType": mime_type,
             },
             ExpiresIn=900,
         )

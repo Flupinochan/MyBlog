@@ -6,6 +6,7 @@ import PositivePrompt from "./tool/PositivePrompt";
 import UploadButton from "./tool/UploadButton";
 import { Upload } from "@mui/icons-material";
 import { getRum } from "../CloudWatchRUM";
+import { upload } from "@testing-library/user-event/dist/upload";
 
 const GetKB: React.FC = () => {
   const location = useLocation();
@@ -23,6 +24,7 @@ const GetKB: React.FC = () => {
   interface Request {
     input_prompt: string;
     operation: string;
+    mime_type: string;
   }
   interface Response {
     data: {
@@ -38,6 +40,7 @@ const GetKB: React.FC = () => {
     const postData: Request = {
       input_prompt: inputFile.name,
       operation: "get_presigned_url",
+      mime_type: uploadFile.type,
     };
     const postConfig = {
       headers: {
@@ -45,19 +48,24 @@ const GetKB: React.FC = () => {
       },
     };
     const url = "https://www.metalmental.net/api/getkb";
+    console.log(uploadFile);
     axios
       .post(url, postData, postConfig)
       .then((response: Response) => {
         const presignedUrl = response.data.presignedUrl!;
         console.log(presignedUrl);
         console.log(uploadFile);
-        return axios.put(presignedUrl, uploadFile);
+        // content-typeを指定しないと403エラーになる
+        return axios.put(presignedUrl, uploadFile, {
+          headers: {
+            "Content-Type": uploadFile.type,
+          },
+        });
       })
       .then((response) => {
         setUploadFileName(inputFile.name);
       });
   };
-
   // getKnowledge
   const handleSubmit = (prompt: string) => {
     const postData: Request = {

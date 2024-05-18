@@ -379,6 +379,7 @@ export class MyBlogStack extends cdk.Stack {
         properties: {
           input_prompt: { type: apigw.JsonSchemaType.STRING },
           operation: { type: apigw.JsonSchemaType.STRING },
+          mime_type: { type: apigw.JsonSchemaType.STRING },
         },
       },
     });
