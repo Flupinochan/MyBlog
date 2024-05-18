@@ -25,6 +25,9 @@ const Menu: React.FC = () => {
           <li>
             <a href="https://www.metalmental.net/streamlit/">Streamlit</a>
           </li>
+          <li>
+            <Link to="/genai/getkb">KB</Link>
+          </li>
         </ul>
       </div>
       <div id="drop-menu">

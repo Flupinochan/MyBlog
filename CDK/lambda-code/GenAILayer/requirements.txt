@@ -3,3 +3,4 @@ langchain==0.1.16
 fastapi==0.110.2
 mangum==0.17.0
 aws-xray-sdk==2.13.0
+typing-extensions==4.11.0

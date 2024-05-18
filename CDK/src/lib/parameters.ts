@@ -9,7 +9,7 @@ export class MyBlogParam {
     logGroupName: "Lambda-GenIMG-CloudWatchLogs",
     layerName: "Lambda-GenIMG-Layer",
     modelNameRequest: "lambdagenimgrequest",
-    modelNameResponse: "lambdagenimgresponse"
+    modelNameResponse: "lambdagenimgresponse",
   };
 
   apiGateway = {
@@ -45,11 +45,19 @@ export class MyBlogParam {
     roleName: "Lambda-GenGiziUpload-IAMRole",
     logGroupName: "Lambda-GenGiziUpload-CloudWatchLogs",
   };
-  lambdaGenText= {
+  lambdaGenText = {
     functionName: "GenText",
     roleName: "Lambda-GenText-IAMRole",
     logGroupName: "Lambda-GenText-CloudWatchLogs",
     modelNameRequest: "lambdagentextrequest",
-    modelNameResponse: "lambdagentextresponse"
+    modelNameResponse: "lambdagentextresponse",
+  };
+  lambdaGetKb = {
+    functionName: "GetKB",
+    logGroupName: "Lambda-GetKB-CloudWatchLogs",
+    modelNameRequest: "lambdagetkbrequest",
+    modelNameResponse: "lambdagetkbresponse",
+    knowledgeBaseId: "YPZJ9NBDQN",
+    modelArn: "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
   };
 }

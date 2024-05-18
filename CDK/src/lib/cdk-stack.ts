@@ -346,6 +346,80 @@ export class MyBlogStack extends cdk.Stack {
       }
     );
 
+    // GetKnowledgeBase
+    const lambdaLogGroupGetKb = new logs.LogGroup(this, param.lambdaGetKb.logGroupName, {
+      logGroupName: param.lambdaGetKb.logGroupName,
+      retention: logs.RetentionDays.ONE_DAY,
+      logGroupClass: logs.LogGroupClass.STANDARD,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+    const lambdaGetKb = new lambda.Function(this, param.lambdaGetKb.functionName, {
+      functionName: param.lambdaGetKb.functionName,
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: "index.lambda_handler",
+      role: lambdaRoleGenAI,
+      code: lambda.Code.fromAsset(path.join(__dirname, "../../lambda-code/KnowledgeBase/")),
+      timeout: Duration.minutes(15),
+      logGroup: lambdaLogGroupGetKb,
+      layers: [lambdaLayerGenAI],
+      environment: {
+        BUCKET_NAME: param.s3BucketImgStore.bucketName,
+        KNOWLEDGE_BASE_ID: param.lambdaGetKb.knowledgeBaseId,
+        MODEL_ARN: param.lambdaGetKb.modelArn,
+      },
+      tracing: lambda.Tracing.ACTIVE,
+    });
+    const requestModelGetKb = apigwGenAi.addModel(param.lambdaGetKb.modelNameRequest, {
+      contentType: "application/json",
+      modelName: param.lambdaGetKb.modelNameRequest,
+      schema: {
+        schema: apigw.JsonSchemaVersion.DRAFT4,
+        title: param.lambdaGetKb.modelNameRequest,
+        type: apigw.JsonSchemaType.OBJECT,
+        properties: {
+          input_prompt: { type: apigw.JsonSchemaType.STRING },
+        },
+      },
+    });
+    const responseModelGetKb = apigwGenAi.addModel(param.lambdaGetKb.modelNameResponse, {
+      contentType: "application/json",
+      modelName: param.lambdaGetKb.modelNameResponse,
+      schema: {
+        schema: apigw.JsonSchemaVersion.DRAFT4,
+        title: param.lambdaGetKb.modelNameResponse,
+        type: apigw.JsonSchemaType.OBJECT,
+        properties: {
+          statusCode: { type: apigw.JsonSchemaType.NUMBER },
+          text: { type: apigw.JsonSchemaType.STRING },
+          s3FileName: { type: apigw.JsonSchemaType.STRING },
+        },
+      },
+    });
+    const apiGetKb = apigwGenAi.root.addResource("getkb");
+    apiGetKb.addMethod(
+      "POST",
+      new apigw.LambdaIntegration(lambdaGetKb, {
+        proxy: false,
+        passthroughBehavior: apigw.PassthroughBehavior.WHEN_NO_TEMPLATES,
+        integrationResponses: [{ statusCode: "200" }],
+      }),
+      {
+        requestModels: {
+          "application/json": requestModelGetKb,
+        },
+        requestValidator: validatorPost,
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseModels: { "application/json": responseModelGetKb },
+          },
+        ],
+      }
+    );
+
+    ///////////////
+    // Websocket //
+    ///////////////
     // S3 for Generating Image
     const s3BucketImgStore = new s3.Bucket(this, param.s3BucketImgStore.bucketName, {
       bucketName: param.s3BucketImgStore.bucketName,
