@@ -22,6 +22,7 @@ const GetKB: React.FC = () => {
       setKb(response.data.text);
       setSubmitted(true);
       setS3File(response.data.s3_file_name);
+      console.log(response.data);
     });
   };
 
