@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import ReactLoading from "react-loading";
 import axios from "axios";
 
 import PositivePrompt from "./tool/PositivePrompt";
@@ -20,6 +21,7 @@ const GetKB: React.FC = () => {
   const [s3File, setS3File] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState<true | false>(false);
   const [uploadFileName, setUploadFileName] = useState<string | null>(null);
+  const [spinner, setSpinner] = useState<true | false>(false);
 
   interface Request {
     input_prompt: string;
@@ -48,6 +50,7 @@ const GetKB: React.FC = () => {
       },
     };
     const url = "https://www.metalmental.net/api/getkb";
+    setSpinner(true);
     axios
       .post(url, postData, postConfig)
       .then((response: Response) => {
@@ -60,7 +63,12 @@ const GetKB: React.FC = () => {
         });
       })
       .then((response) => {
+        setSpinner(false);
         setUploadFileName(inputFile.name);
+      })
+      .catch((error) => {
+        setSpinner(false);
+        console.log(error);
       });
   };
   // getKnowledge
@@ -76,12 +84,20 @@ const GetKB: React.FC = () => {
       },
     };
     const url = "https://www.metalmental.net/api/getkb";
-    axios.post(url, postData, postConfig).then((response: Response) => {
-      setKb(response.data.text!);
-      setSubmitted(true);
-      setS3File(response.data.s3FileName!);
-      console.log(response.data);
-    });
+    setSpinner(true);
+    axios
+      .post(url, postData, postConfig)
+      .then((response: Response) => {
+        setSpinner(false);
+        setKb(response.data.text!);
+        setSubmitted(true);
+        setS3File(response.data.s3FileName!);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        setSpinner(false);
+        console.log(error);
+      });
   };
 
   return (
@@ -89,6 +105,7 @@ const GetKB: React.FC = () => {
       <h2>Knowledge Base</h2>
       <div className="blogContentBackColor">
         <br />
+        {spinner && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
         <UploadButton onChange={handleUploadButton} />
         {uploadFileName && <p>Upload Completed: {uploadFileName}</p>}
         <p>{kb}</p>

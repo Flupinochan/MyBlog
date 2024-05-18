@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
+import ReactLoading from "react-loading";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -37,7 +38,9 @@ const GenText: React.FC = () => {
     console.log("logging pageview to cwr: " + location.pathname);
     cwr.recordPageView(location.pathname);
   }, [location]);
+
   const [text, setText] = useState("");
+  const [spinner, setSpinner] = useState<true | false>(false);
 
   const handleSubmit = (positivePromptValue: string) => {
     const postData = {
@@ -50,12 +53,15 @@ const GenText: React.FC = () => {
       },
     };
     const url = "https://www.metalmental.net/api/textgen";
+    setSpinner(true);
     axios
       .post(url, postData, postConfig)
       .then((response: AxiosResponse<ApiResponse>) => {
+        setSpinner(false);
         setText(response.data.text);
       })
       .catch((error) => {
+        setSpinner(false);
         console.log(error);
       });
   };
@@ -65,6 +71,8 @@ const GenText: React.FC = () => {
     <div>
       <h2>Generate Text (Cohere)</h2>
       <div className="blogContentBackColor">
+        <br />
+        {spinner && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}

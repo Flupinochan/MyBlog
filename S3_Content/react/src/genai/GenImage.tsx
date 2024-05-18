@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import ReactLoading from "react-loading";
 // import TextareaAutosize from "react-textarea-autosize";
 import styled from "styled-components";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -42,6 +43,7 @@ const GenImage: React.FC = () => {
   const sizeValueRef = useRef<number>(512);
   const stepsValueRef = useRef<number>(100);
   const cfgScaleValueRef = useRef<number>(10);
+  const [spinner, setSpinner] = useState<true | false>(false);
 
   interface ApiResponse {
     statusCode: number;
@@ -80,6 +82,7 @@ const GenImage: React.FC = () => {
       },
     };
     const url = "https://www.metalmental.net/api/imagegen";
+    setSpinner(true);
     axios
       // .get(
       //   `https://www.metalmental.net/api/imagegen?positive_prompt=${value}&negative_prompt=none`
@@ -88,8 +91,10 @@ const GenImage: React.FC = () => {
       .then((response: AxiosResponse<ApiResponse>) => {
         setDownload(response.data.downloadURL);
         setImage(response.data.image);
+        setSpinner(false);
       })
       .catch((error) => {
+        setSpinner(false);
         console.log(error);
       });
   };
@@ -111,6 +116,7 @@ const GenImage: React.FC = () => {
       <div className="blogContentBackColor">
         <div className="wrap">
           <div className="left">
+            {spinner && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
             {submitted && image && <img src={`data:image/png;base64,${image}`} alt="createdImage" />}
             <br />
             {submitted && download && (
