@@ -38,7 +38,7 @@ const GetKB: React.FC = () => {
   const handleUploadButton = (inputFile: File) => {
     const uploadFile = inputFile;
     const postData: Request = {
-      input_prompt: inputFile.name,
+      input_prompt: uploadFile.name,
       operation: "get_presigned_url",
       mime_type: uploadFile.type,
     };
@@ -71,6 +71,7 @@ const GetKB: React.FC = () => {
     const postData: Request = {
       input_prompt: prompt,
       operation: "get_knowledge",
+      mime_type: "nothing",
     };
     const postConfig = {
       headers: {

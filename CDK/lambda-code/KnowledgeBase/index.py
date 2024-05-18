@@ -144,6 +144,7 @@ def get_knowledge(event):
 class HTMLRequest(TypedDict):
     input_prompt: str
     operation: str
+    mime_type: str
 
 
 @xray_recorder.capture("lambda_handler")
@@ -153,6 +154,7 @@ def lambda_handler(event: HTMLRequest, context):
         #     byProvider="anthropic",
         # )
         # log.debug(response)
+        log.debug(event)
         response = main(event)
         log.debug(response)
         return response
