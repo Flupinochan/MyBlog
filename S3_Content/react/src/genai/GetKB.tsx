@@ -18,7 +18,6 @@ const GetKB: React.FC = () => {
   const [kb, setKb] = useState<string | null>(null);
   const [s3File, setS3File] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState<true | false>(false);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadFileName, setUploadFileName] = useState<string | null>(null);
 
   interface Request {
@@ -35,7 +34,7 @@ const GetKB: React.FC = () => {
 
   // fileUpload
   const handleUploadButton = (inputFile: File) => {
-    setUploadFile(inputFile);
+    const uploadFile = inputFile;
     const postData: Request = {
       input_prompt: inputFile.name,
       operation: "get_presigned_url",
@@ -84,7 +83,7 @@ const GetKB: React.FC = () => {
       <h2>Knowledge Base</h2>
       <div className="blogContentBackColor">
         <br />
-        <UploadButton onChange={handleUploadButton}></UploadButton>
+        <UploadButton onChange={handleUploadButton} />
         {uploadFileName && <span>Upload Completed: {s3File}</span>}
         <p>{kb}</p>
         {submitted && s3File && <p>Referenced file: {s3File}</p>}

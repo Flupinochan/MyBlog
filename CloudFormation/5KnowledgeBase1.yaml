@@ -141,6 +141,18 @@ Resources:
             NoncurrentVersionExpiration:
               NoncurrentDays: 1
             Status: "Enabled"
+      CorsConfiguration:
+        CorsRules: 
+          - Id: corsRule1
+            MaxAge: 0
+            AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - POST
+            AllowedOrigins:
+              - 'https://www.metalmental.net'
+
   S3Lambda:
     Type: AWS::Lambda::Function
     Properties:

@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
+import { log } from "console";
 
 interface Props {
   onChange: (file: File) => void;
