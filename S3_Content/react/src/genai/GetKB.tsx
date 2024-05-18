@@ -21,7 +21,7 @@ const GetKB: React.FC = () => {
     axios.post(url, postData, postConfig).then((response) => {
       setKb(response.data.text);
       setSubmitted(true);
-      setS3File(response.data.s3_file_name);
+      setS3File(response.data.s3FileName);
       console.log(response.data);
     });
   };
