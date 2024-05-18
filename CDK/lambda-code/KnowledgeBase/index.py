@@ -15,7 +15,7 @@ patch_all()
 # Environment Variable Setting
 # ----------------------------------------------------------------------
 try:
-    # S3_BUCKET = os.environ["BUCKET_NAME"]
+    S3_BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
     KNOWLEDGE_BASE_ID = os.environ["KNOWLEDGE_BASE_ID"]
     MODEL_ARN = os.environ["MODEL_ARN"]
     # "arn:aws:bedrock:us-west-2::foundation-model/" + MODEL_ID
@@ -34,6 +34,7 @@ try:
     bedrock_service_client = boto3.client("bedrock", config=config)
     bedrock_client = boto3.client("bedrock-runtime", config=config)
     bedrock_agent_client = boto3.client("bedrock-agent-runtime", config=config)
+    s3_client = boto3.client("s3", config=config)
 except Exception as error:
     raise Exception("Boto3 client error" + str(error))
 
@@ -53,7 +54,11 @@ except Exception:
 @xray_recorder.capture("main")
 def main(event):
     try:
-        response = execute_bedrock(event)
+        operation_type = event["operation"]
+        if operation_type == "get_knowledge":
+            response = get_knowledge(event)
+        elif operation_type == "get_presigned_url":
+            response = get_presigned_url(event)
         return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
@@ -63,6 +68,25 @@ def main(event):
 # ----------------------------------------------------------------------
 # File Upload
 # ----------------------------------------------------------------------
+def get_presigned_url(event):
+    try:
+        presigned_url = s3_client.generate_presigned_url(
+            "put_object",
+            Params={
+                "Bucket": S3_BUCKET_NAME,
+                "Key": event["input_prompt"],
+            },
+            ExpiresIn=900,
+        )
+        log.info(f"Pre-Signed URL: {presigned_url}")
+        log.info(f"File Name: {event['input_prompt']}")
+        response_body = {"statusCode": 200, "presignedUrl": presigned_url}
+        log.info(f"responseBody: {response_body}")
+        return response_body
+    except Exception as e:
+        log.error(f"エラーが発生しました: {e}")
+        raise
+
 
 # ----------------------------------------------------------------------
 # File Delete
@@ -76,8 +100,8 @@ def main(event):
 # ----------------------------------------------------------------------
 # Execute Bedrock
 # ----------------------------------------------------------------------
-@xray_recorder.capture("execute_bedrock")
-def execute_bedrock(event):
+@xray_recorder.capture("get_knowledge")
+def get_knowledge(event):
     try:
         user_prompt = event["input_prompt"]
         log.debug(f"user_prompt: {user_prompt}")
@@ -101,6 +125,7 @@ def execute_bedrock(event):
         # response_quoted_part= response["citations"][0]["generatedResponsePart"]["textResponsePart"]
         # log.debug(f"s3_file_name: {s3_file_name}")
         response_body = {"statusCode": 200, "text": response_text, "s3FileName": s3_file_name}
+        log.info(f"responseBody: {response_body}")
         return response_body
 
     except Exception as e:

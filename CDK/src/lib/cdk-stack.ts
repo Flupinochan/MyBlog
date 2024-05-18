@@ -363,7 +363,7 @@ export class MyBlogStack extends cdk.Stack {
       logGroup: lambdaLogGroupGetKb,
       layers: [lambdaLayerGenAI],
       environment: {
-        BUCKET_NAME: param.s3BucketImgStore.bucketName,
+        S3_BUCKET_NAME: param.lambdaGetKb.s3BucketName,
         KNOWLEDGE_BASE_ID: param.lambdaGetKb.knowledgeBaseId,
         MODEL_ARN: param.lambdaGetKb.modelArn,
       },
@@ -378,6 +378,7 @@ export class MyBlogStack extends cdk.Stack {
         type: apigw.JsonSchemaType.OBJECT,
         properties: {
           input_prompt: { type: apigw.JsonSchemaType.STRING },
+          operation: { type: apigw.JsonSchemaType.STRING },
         },
       },
     });
