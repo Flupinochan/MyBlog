@@ -48,13 +48,10 @@ const GetKB: React.FC = () => {
       },
     };
     const url = "https://www.metalmental.net/api/getkb";
-    console.log(uploadFile);
     axios
       .post(url, postData, postConfig)
       .then((response: Response) => {
         const presignedUrl = response.data.presignedUrl!;
-        console.log(presignedUrl);
-        console.log(uploadFile);
         // content-typeを指定しないと403エラーになる
         return axios.put(presignedUrl, uploadFile, {
           headers: {
@@ -93,7 +90,7 @@ const GetKB: React.FC = () => {
       <div className="blogContentBackColor">
         <br />
         <UploadButton onChange={handleUploadButton} />
-        {uploadFileName && <span>Upload Completed: {s3File}</span>}
+        {uploadFileName && <p>Upload Completed: {uploadFileName}</p>}
         <p>{kb}</p>
         {submitted && s3File && <p>Referenced file: {s3File}</p>}
         <br />
