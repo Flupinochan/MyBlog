@@ -156,8 +156,13 @@ def get_knowledge(event):
             },
         )
         response_text = response["output"]["text"]
-        response_s3_uri = response["citations"][0]["retrievedReferences"][0]["location"]["s3Location"]["uri"]
-        s3_file_name = response_s3_uri.split("/")[-1]
+        s3_file_name = ""
+        try:
+            response_s3_uri = response["citations"][0]["retrievedReferences"][0]["location"]["s3Location"]["uri"]
+            s3_file_name = response_s3_uri.split("/")[-1]
+        except:
+            s3_file_name = "Nothing"
+            log.info("Not found S3 URI")
         # response_quoted_part= response["citations"][0]["generatedResponsePart"]["textResponsePart"]
         # log.debug(f"s3_file_name: {s3_file_name}")
         response_body = {"statusCode": 200, "text": response_text, "s3FileName": s3_file_name}
