@@ -107,6 +107,7 @@ const GetKB: React.FC = () => {
       .post(url1, postData1, postConfig)
       .then((response: Response) => {
         console.log(response);
+        console.log();
         const postData2: Request = {
           executionArn: response.data.executionArn!,
         };
@@ -135,7 +136,7 @@ const GetKB: React.FC = () => {
           }
         };
         checkSync();
-        setSpinner2(false);
+        // setSpinner2(false); 非同期だからNG
       })
       .catch((error) => {
         setSpinner2(false);

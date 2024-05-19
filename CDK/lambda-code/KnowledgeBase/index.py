@@ -110,11 +110,11 @@ def get_presigned_url(event):
 def sync_kb(event):
     try:
         log.info("KnowledgeBase Synchronisation in progress")
-        # response = bedrock_agent_client.start_ingestion_job(
-        #     knowledgeBaseId=KNOWLEDGE_BASE_ID,
-        #     dataSourceId=DATASOURCE_ID,
-        # )
-        time.sleep(60)
+        response = bedrock_agent_client.start_ingestion_job(
+            knowledgeBaseId=KNOWLEDGE_BASE_ID,
+            dataSourceId=DATASOURCE_ID,
+        )
+        # time.sleep(60)
         response_body = {"statusCode": 200, "text": "KnowledgeBase synchronisation is complete"}
         return response_body
     except Exception as e:

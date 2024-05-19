@@ -464,13 +464,20 @@ export class MyBlogStack extends cdk.Stack {
       managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AWSStepFunctionsFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2")],
     });
     // マッピングは、jsonを直接渡す "input":"$util.escapeJavaScript($input.json('$'))"
-    // もしくは、jsonの各paramを渡す operation: "$input.params('operation')",
+    // もしくは、jsonの各paramを渡す "$util.escapeJavaScript($input.path('$.executionArn'))"
+    // $がjsonオブジェクト全体を示し、ドット「.」を使用して配下にアクセスできる
     const sfnExecOption: apigw.StepFunctionsExecutionIntegrationOptions = {
       credentialsRole: apigatewaySfnRole,
+      // requestTemplates: {
+      //   "application/json": JSON.stringify({
+      //     input: "$util.escapeJavaScript($input.json('$'))",
+      //     stateMachineArn: stepFunctionsKB.stateMachineArn,
+      //   }),
+      // },
       requestTemplates: {
         "application/json": JSON.stringify({
           input: "$util.escapeJavaScript($input.json('$'))",
-          stateMachineArn: stepFunctionsKB.stateMachineArn,
+          stateMachineArn: "",
         }),
       },
     };
@@ -478,7 +485,7 @@ export class MyBlogStack extends cdk.Stack {
       credentialsRole: apigatewaySfnRole,
       requestTemplates: {
         "application/json": JSON.stringify({
-          executionArn: "$util.escapeJavaScript($input.json('$'))",
+          executionArn: "$util.escapeJavaScript($input.path('$.executionArn'))"
         }),
       },
     };
