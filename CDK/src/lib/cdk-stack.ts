@@ -9,6 +9,8 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as sfntask from "aws-cdk-lib/aws-stepfunctions-tasks";
 import { WebSocketLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import path = require("path");
 import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
@@ -16,6 +18,7 @@ import { Duration } from "aws-cdk-lib";
 
 import { MyBlogParam } from "./parameters";
 import { LambdaVersion } from "aws-cdk-lib/aws-cognito";
+import { CfnTask } from "aws-cdk-lib/aws-datasync";
 
 const param = new MyBlogParam();
 
@@ -115,7 +118,9 @@ export class MyBlogStack extends cdk.Stack {
       tracing: lambda.Tracing.ACTIVE,
     });
 
-    // API Gateway
+    /////////////////
+    // API Gateway //
+    /////////////////
     const apigwLogs = new logs.LogGroup(this, param.apiGateway.logGroupName, {
       logGroupName: param.apiGateway.logGroupName,
       retention: logs.RetentionDays.ONE_DAY,
@@ -418,6 +423,61 @@ export class MyBlogStack extends cdk.Stack {
         ],
       }
     );
+    //////////////////////////////////////
+    // StepFunctions KnowledgeBase Sync //
+    //////////////////////////////////////
+    const stepFunctionsRole = new iam.Role(this, param.stepFunctions.stepfunctionsRole, {
+      roleName: param.stepFunctions.stepfunctionsRole,
+      assumedBy: new iam.ServicePrincipal("states.amazonaws.com"),
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AWSLambda_FullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2")],
+    });
+    const stepFunctionsLogGroup = new logs.LogGroup(this, param.stepFunctions.logGroupName, {
+      logGroupName: param.stepFunctions.logGroupName,
+      retention: logs.RetentionDays.ONE_DAY,
+      logGroupClass: logs.LogGroupClass.STANDARD,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+    // commentを入れると上手く渡せないので注意
+    const firstTaskLambda = new sfntask.LambdaInvoke(this, "syncKnowledgeBase", {
+      lambdaFunction: lambdaGetKb,
+    });
+    const definition = firstTaskLambda;
+    const stepFunctionsKB = new sfn.StateMachine(this, param.stepFunctions.stepFunctionsName, {
+      stateMachineName: param.stepFunctions.stepFunctionsName,
+      tracingEnabled: true,
+      timeout: Duration.minutes(15),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      logs: {
+        level: sfn.LogLevel.ALL,
+        destination: stepFunctionsLogGroup,
+      },
+      role: stepFunctionsRole,
+      stateMachineType: sfn.StateMachineType.EXPRESS,
+      definitionBody: sfn.DefinitionBody.fromChainable(definition),
+    });
+
+    // API Gateway Setting for StepFunctions
+    const apigatewaySfnRole = new iam.Role(this, param.stepFunctions.apigatewayRole, {
+      roleName: param.stepFunctions.apigatewayRole,
+      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AWSStepFunctionsFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2")],
+    });
+    // マッピングは、jsonを直接渡す "input":"$util.escapeJavaScript($input.json('$'))"
+    // もしくは、jsonの各paramを渡す operation: "$input.params('operation')",
+    const sfnOption: apigw.StepFunctionsExecutionIntegrationOptions = {
+      credentialsRole: apigatewaySfnRole,
+      requestTemplates: {
+        "application/json": JSON.stringify({
+          input: "$util.escapeJavaScript($input.json('$'))",
+          stateMachineArn: stepFunctionsKB.stateMachineArn,
+        }),
+      },
+    };
+    // EXPRESSだとStartSyncExecutionになってしまう
+    // STANDARDだとStartExecutionになる
+    // 手動で後から変えることは可能
+    const apiSyncKB = apigwGenAi.root.addResource("execsync");
+    apiSyncKB.addMethod("POST", apigw.StepFunctionsIntegration.startExecution(stepFunctionsKB, sfnOption));
 
     ///////////////
     // Websocket //

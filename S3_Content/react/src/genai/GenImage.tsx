@@ -137,7 +137,7 @@ const GenImage: React.FC = () => {
             </ThemeProvider>
           </div>
         </div>
-        <PositivePrompt onChange={handleSubmit} />
+        <PositivePrompt onChange={handleSubmit} buttonDisabled={spinner} />
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+import { log } from "console";
+
 export class MyBlogParam {
   env = {
     region: "us-west-2",
@@ -60,5 +62,11 @@ export class MyBlogParam {
     s3BucketName: "myblog-knowledgebase-datasource",
     knowledgeBaseId: "YPZJ9NBDQN",
     modelArn: "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
+  };
+  stepFunctions = {
+    stepFunctionsName: "Sync-KnowledgeBase",
+    logGroupName: "Sync-KnowledgeBase-CloudWatchLogs",
+    stepfunctionsRole: "Sync-GetKB-StepFunctions",
+    apigatewayRole: "Sync-GetKB-ApiGateway",
   };
 }

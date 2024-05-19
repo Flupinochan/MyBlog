@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import TextareaAutosize from "react-textarea-autosize";
 import styled from "styled-components";
@@ -26,7 +26,7 @@ const StyledTextarea = styled(TextareaAutosize)`
   align-items: flex-start;
   width: 100%;
   padding: 13px;
-  padding-right: 75px;
+  padding-right: 95px;
   font-size: 18px;
   color: #4c54c0;
   background-color: #f7f7f7;
@@ -51,10 +51,16 @@ const StyledUploadButton = styled(Button)`
 
 interface Props {
   onChange: (value: string) => void;
+  buttonDisabled: boolean;
 }
 
 const PositivePrompt: React.FC<Props> = (Props) => {
   const [value, setValue] = useState("");
+  const [spinner, setSpinner] = useState<true | false>(false);
+  // setSpinner(Props.buttonDisabled);
+  useEffect(() => {
+    setSpinner(Props.buttonDisabled);
+  }, [Props.buttonDisabled]);
 
   const handleChangeValue = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(evt.target.value);
@@ -66,18 +72,12 @@ const PositivePrompt: React.FC<Props> = (Props) => {
     <div>
       <ThemeProvider theme={theme}>
         <Container>
-          <StyledTextarea
-            ref={posiPromptRef}
-            value={value}
-            onChange={handleChangeValue}
-            placeholder="Input Prompt..."
-          />
-          <StyledUploadButton variant="contained">
-            <ArrowCircleUpIcon
-              onClick={() => Props.onChange(value)}
-              fontSize="small"
-            />
+          <StyledTextarea ref={posiPromptRef} value={value} onChange={handleChangeValue} placeholder="Input Prompt..." />
+          <StyledUploadButton variant="contained" startIcon={<ArrowCircleUpIcon onClick={() => Props.onChange(value)} />} disabled={spinner}>
+            exe
           </StyledUploadButton>
+          {/* <ArrowCircleUpIcon onClick={() => Props.onChange(value)} fontSize="small" /> */}
+          {/* </StyledUploadButton> */}
         </Container>
       </ThemeProvider>
     </div>

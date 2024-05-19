@@ -1,6 +1,7 @@
 import os
 import boto3
 import mimetypes
+import time
 
 from typing_extensions import TypedDict
 from botocore.config import Config
@@ -61,6 +62,8 @@ def main(event):
             response = get_knowledge(event)
         elif operation_type == "get_presigned_url":
             response = get_presigned_url(event)
+        elif operation_type == "sync_kb":
+            response = sync_kb(event)
         return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
@@ -70,6 +73,7 @@ def main(event):
 # ----------------------------------------------------------------------
 # File Upload
 # ----------------------------------------------------------------------
+@xray_recorder.capture("get_presigned_url")
 def get_presigned_url(event):
     try:
         # https://kakehashi-dev.hatenablog.com/entry/2022/03/15/101500
@@ -97,9 +101,19 @@ def get_presigned_url(event):
 # File Delete
 # ----------------------------------------------------------------------
 
+
 # ----------------------------------------------------------------------
-# Sync OpenSearch
+# Sync KnowledgeBase
 # ----------------------------------------------------------------------
+@xray_recorder.capture("sync_kb")
+def sync_kb(event):
+    try:
+        time.sleep(120)
+        response_body = {"statusCode": 200, "test": "execution succeed"}
+        return response_body
+    except Exception as e:
+        log.error(f"エラーが発生しました: {e}")
+        raise
 
 
 # ----------------------------------------------------------------------

@@ -92,7 +92,7 @@ const GenText: React.FC = () => {
           }}
         />
         <br />
-        <PositivePrompt onChange={handleSubmit} />
+        <PositivePrompt onChange={handleSubmit} buttonDisabled={spinner} />
       </div>
     </div>
   );
