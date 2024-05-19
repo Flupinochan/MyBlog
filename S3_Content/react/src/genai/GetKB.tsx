@@ -134,6 +134,7 @@ const GetKB: React.FC = () => {
             console.log(error);
           }
         };
+        checkSync();
         setSpinner2(false);
       })
       .catch((error) => {
