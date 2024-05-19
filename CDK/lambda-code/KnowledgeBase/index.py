@@ -20,6 +20,7 @@ try:
     S3_BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
     KNOWLEDGE_BASE_ID = os.environ["KNOWLEDGE_BASE_ID"]
     MODEL_ARN = os.environ["MODEL_ARN"]
+    DATASOURCE_ID = os.environ["DATASOURCE_ID"]
     # "arn:aws:bedrock:us-west-2::foundation-model/" + MODEL_ID
 except KeyError:
     raise Exception("Environment variable is not defined.")
@@ -35,7 +36,7 @@ try:
     )
     s3_config = Config(retries={"max_attempts": 5, "mode": "standard"}, signature_version="s3v4")
     bedrock_service_client = boto3.client("bedrock", config=config)
-    bedrock_client = boto3.client("bedrock-runtime", config=config)
+    bedrock_runtime_client = boto3.client("bedrock-runtime", config=config)
     bedrock_agent_client = boto3.client("bedrock-agent-runtime", config=config)
     s3_client = boto3.client("s3", config=s3_config)
 except Exception as error:
@@ -108,8 +109,12 @@ def get_presigned_url(event):
 @xray_recorder.capture("sync_kb")
 def sync_kb(event):
     try:
+        # response = bedrock_agent_client.start_ingestion_job(
+        #     knowledgeBaseId=KNOWLEDGE_BASE_ID,
+        #     dataSourceId=DATASOURCE_ID,
+        # )
         time.sleep(120)
-        response_body = {"statusCode": 200, "test": "execution succeed"}
+        response_body = {"statusCode": 200, "text": "KnowledgeBase synchronisation is complete"}
         return response_body
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
@@ -117,7 +122,7 @@ def sync_kb(event):
 
 
 # ----------------------------------------------------------------------
-# Execute Bedrock
+# Search KnowledgeBase
 # ----------------------------------------------------------------------
 @xray_recorder.capture("get_knowledge")
 def get_knowledge(event):

@@ -371,6 +371,7 @@ export class MyBlogStack extends cdk.Stack {
         S3_BUCKET_NAME: param.lambdaGetKb.s3BucketName,
         KNOWLEDGE_BASE_ID: param.lambdaGetKb.knowledgeBaseId,
         MODEL_ARN: param.lambdaGetKb.modelArn,
+        DATASOURCE_ID: param.lambdaGetKb.datasourceId,
       },
       tracing: lambda.Tracing.ACTIVE,
     });
@@ -464,7 +465,7 @@ export class MyBlogStack extends cdk.Stack {
     });
     // マッピングは、jsonを直接渡す "input":"$util.escapeJavaScript($input.json('$'))"
     // もしくは、jsonの各paramを渡す operation: "$input.params('operation')",
-    const sfnOption: apigw.StepFunctionsExecutionIntegrationOptions = {
+    const sfnExecOption: apigw.StepFunctionsExecutionIntegrationOptions = {
       credentialsRole: apigatewaySfnRole,
       requestTemplates: {
         "application/json": JSON.stringify({
@@ -473,11 +474,23 @@ export class MyBlogStack extends cdk.Stack {
         }),
       },
     };
+    const sfnDescribeOption: apigw.StepFunctionsExecutionIntegrationOptions = {
+      credentialsRole: apigatewaySfnRole,
+      requestTemplates: {
+        "application/json": JSON.stringify({
+          executionArn: "$util.escapeJavaScript($input.json('$'))",
+        }),
+      },
+    };
     // EXPRESSだとStartSyncExecutionになってしまう
     // STANDARDだとStartExecutionになる
     // 手動で後から変えることは可能
+    // execute用
     const apiSyncKB = apigwGenAi.root.addResource("execsync");
-    apiSyncKB.addMethod("POST", apigw.StepFunctionsIntegration.startExecution(stepFunctionsKB, sfnOption));
+    apiSyncKB.addMethod("POST", apigw.StepFunctionsIntegration.startExecution(stepFunctionsKB, sfnExecOption));
+    // describe用
+    const apidescribeKB = apigwGenAi.root.addResource("checksync");
+    apidescribeKB.addMethod("POST", apigw.StepFunctionsIntegration.startExecution(stepFunctionsKB, sfnDescribeOption));
 
     ///////////////
     // Websocket //

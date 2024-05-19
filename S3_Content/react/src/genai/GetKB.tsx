@@ -31,20 +31,23 @@ const GetKB: React.FC = () => {
   const [s3File, setS3File] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState<true | false>(false);
   const [uploadFileName, setUploadFileName] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [spinner1, setSpinner1] = useState<true | false>(false);
   const [spinner2, setSpinner2] = useState<true | false>(false);
   const [spinner3, setSpinner3] = useState<true | false>(false);
 
   interface Request {
-    input_prompt: string;
-    operation: string;
-    mime_type: string;
+    input_prompt?: string;
+    operation?: string;
+    mime_type?: string;
+    executionArn?: string;
   }
   interface Response {
     data: {
       text?: string;
       s3FileName?: string;
       presignedUrl?: string;
+      executionArn?: string;
     };
   }
 
@@ -86,7 +89,7 @@ const GetKB: React.FC = () => {
 
   // Sync Knowledge
   const handleSync = () => {
-    const postData: Request = {
+    const postData1: Request = {
       input_prompt: "nothing",
       operation: "sync_kb",
       mime_type: "nothing",
@@ -96,14 +99,40 @@ const GetKB: React.FC = () => {
         "Content-Type": "application/json",
       },
     };
-    const url = "https://www.metalmental.net/api/execsync";
+    const url1 = "https://www.metalmental.net/api/execsync";
+    const url2 = "https://www.metalmental.net/api/checksync";
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     setSpinner2(true);
     axios
-      .post(url, postData, postConfig)
+      .post(url1, postData1, postConfig)
       .then((response: Response) => {
-        setSpinner2(false);
-        setKb(response.data.text!);
         console.log(response.data);
+        const postData2: Request = {
+          executionArn: response.data.executionArn!,
+        };
+        const checkSync = async () => {
+          try {
+            while (true) {
+              const response = await axios.post(url2, postData2, postConfig);
+              if (response.data.status === "SUCCEEDED") {
+                setSyncStatus(response.data.status);
+                console.log(response);
+                setSpinner2(false);
+                break;
+              } else if (response.data.status === "FAILED" || response.data.status === "TIMED_OUT") {
+                setSyncStatus(response.data.status);
+                console.log(response);
+                setSpinner2(false);
+                throw new Error("Sync Failed");
+              }
+              setSyncStatus(response.data.status);
+              await delay(10000);
+            }
+          } catch (error) {
+            setSpinner2(false);
+            console.log(error);
+          }
+        };
       })
       .catch((error) => {
         setSpinner2(false);
@@ -149,13 +178,13 @@ const GetKB: React.FC = () => {
           {(spinner1 || spinner2 || spinner3) && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
           {spinner1 ? <UploadButtonDisabled /> : <UploadButton onChange={handleUploadButton} />}
           {uploadFileName && <p>Upload Completed: {uploadFileName}</p>}
-          <p>{kb}</p>
           {submitted && s3File && <p>Referenced file: {s3File}</p>}
-          <br />
           <Button variant="contained" startIcon={<SyncIcon />} onClick={handleSync} disabled={spinner2}>
             Sync KnowledgeBase
           </Button>
+          {syncStatus && <p>Sync Status: {syncStatus}</p>}
           <br />
+          <p>{kb}</p>
           <br />
           <PositivePrompt onChange={handleSubmit} buttonDisabled={spinner3} />
         </ThemeProvider>
