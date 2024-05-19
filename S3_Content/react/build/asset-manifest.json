@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.95350af4.css",
-    "main.js": "/static/js/main.23179fc5.js",
+    "main.js": "/static/js/main.76cc19ea.js",
     "static/media/sample.png": "/static/media/sample.044fa866b58b718b675e.png",
     "static/media/cloudwatch_ram.png": "/static/media/cloudwatch_ram.474d53f2f334399e5224.png",
     "static/media/cloudwatch_ram_f12.png": "/static/media/cloudwatch_ram_f12.231a191046a2771ecc28.png",
@@ -19,10 +19,10 @@
     "static/media/cloudwatch_ram_page2.png": "/static/media/cloudwatch_ram_page2.2cde9bafd5d3a264431d.png",
     "index.html": "/index.html",
     "main.95350af4.css.map": "/static/css/main.95350af4.css.map",
-    "main.23179fc5.js.map": "/static/js/main.23179fc5.js.map"
+    "main.76cc19ea.js.map": "/static/js/main.76cc19ea.js.map"
   },
   "entrypoints": [
     "static/css/main.95350af4.css",
-    "static/js/main.23179fc5.js"
+    "static/js/main.76cc19ea.js"
   ]
 }

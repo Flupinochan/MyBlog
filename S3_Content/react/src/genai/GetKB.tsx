@@ -106,7 +106,7 @@ const GetKB: React.FC = () => {
     axios
       .post(url1, postData1, postConfig)
       .then((response: Response) => {
-        console.log(response.data);
+        console.log(response);
         const postData2: Request = {
           executionArn: response.data.executionArn!,
         };
@@ -114,6 +114,7 @@ const GetKB: React.FC = () => {
           try {
             while (true) {
               const response = await axios.post(url2, postData2, postConfig);
+              console.log(response);
               if (response.data.status === "SUCCEEDED") {
                 setSyncStatus(response.data.status);
                 console.log(response);
