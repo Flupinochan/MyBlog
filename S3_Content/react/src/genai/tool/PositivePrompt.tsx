@@ -73,7 +73,7 @@ const PositivePrompt: React.FC<Props> = (Props) => {
       <ThemeProvider theme={theme}>
         <Container>
           <StyledTextarea ref={posiPromptRef} value={value} onChange={handleChangeValue} placeholder="Input Prompt..." />
-          <StyledUploadButton variant="contained" startIcon={<ArrowCircleUpIcon onClick={() => Props.onChange(value)} />} disabled={spinner}>
+          <StyledUploadButton onClick={() => Props.onChange(value)} variant="contained" startIcon={<ArrowCircleUpIcon />} disabled={spinner}>
             exe
           </StyledUploadButton>
           {/* <ArrowCircleUpIcon onClick={() => Props.onChange(value)} fontSize="small" /> */}
