@@ -61,8 +61,8 @@ export class MyBlogParam {
     modelNameResponse: "lambdagetkbresponse",
     s3BucketName: "myblog-knowledgebase-datasource",
     modelArn: "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
-    knowledgeBaseId: "",
-    datasourceId: "",
+    knowledgeBaseId: "6W86Q1DMNT",
+    datasourceId: "NIPMIAQAYI",
   };
   stepFunctions = {
     stepFunctionsName: "Sync-KnowledgeBase",

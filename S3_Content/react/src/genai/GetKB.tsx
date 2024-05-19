@@ -133,6 +133,7 @@ const GetKB: React.FC = () => {
             console.log(error);
           }
         };
+        setSpinner2(false);
       })
       .catch((error) => {
         setSpinner2(false);
