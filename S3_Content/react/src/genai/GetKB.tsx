@@ -182,13 +182,13 @@ const GetKB: React.FC = () => {
           {(spinner1 || spinner2 || spinner3) && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
           {spinner1 ? <UploadButtonDisabled /> : <UploadButton onChange={handleUploadButton} />}
           {uploadFileName && <p>Upload Completed: {uploadFileName}</p>}
-          {submitted && s3File && <p>Referenced file: {s3File}</p>}
           <Button variant="contained" startIcon={<SyncIcon />} onClick={handleSync} disabled={spinner2}>
             Sync KnowledgeBase
           </Button>
           {syncStatus && <p>Sync Status: {syncStatus}</p>}
           <br />
           <p>{kb}</p>
+          {submitted && s3File && <p>Referenced file: {s3File}</p>}
           <br />
           <PositivePrompt onChange={handleSubmit} buttonDisabled={spinner3} />
         </ThemeProvider>

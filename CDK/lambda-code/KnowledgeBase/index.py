@@ -37,7 +37,8 @@ try:
     s3_config = Config(retries={"max_attempts": 5, "mode": "standard"}, signature_version="s3v4")
     bedrock_service_client = boto3.client("bedrock", config=config)
     bedrock_runtime_client = boto3.client("bedrock-runtime", config=config)
-    bedrock_agent_client = boto3.client("bedrock-agent-runtime", config=config)
+    bedrock_agent_client = boto3.client("bedrock-agent", config=config)
+    bedrock_agent_runtime_client = boto3.client("bedrock-agent-runtime", config=config)
     s3_client = boto3.client("s3", config=s3_config)
 except Exception as error:
     raise Exception("Boto3 client error" + str(error))
@@ -111,10 +112,20 @@ def sync_kb(event):
     try:
         log.info("KnowledgeBase Synchronisation in progress")
         response = bedrock_agent_client.start_ingestion_job(
-            knowledgeBaseId=KNOWLEDGE_BASE_ID,
             dataSourceId=DATASOURCE_ID,
+            knowledgeBaseId=KNOWLEDGE_BASE_ID,
         )
-        # time.sleep(60)
+        job_id = response["ingestionJob"]["ingestionJobId"]
+        while True:
+            response = bedrock_agent_client.get_ingestion_job(
+                dataSourceId=DATASOURCE_ID,
+                knowledgeBaseId=KNOWLEDGE_BASE_ID,
+                ingestionJobId=job_id,
+            )
+            status = response["ingestionJob"]["status"]
+            if status == "COMPLETE":
+                break
+            time.sleep(15)
         response_body = {"statusCode": 200, "text": "KnowledgeBase synchronisation is complete"}
         return response_body
     except Exception as e:
@@ -131,7 +142,7 @@ def get_knowledge(event):
         user_prompt = event["input_prompt"]
         log.debug(f"user_prompt: {user_prompt}")
 
-        response = bedrock_agent_client.retrieve_and_generate(
+        response = bedrock_agent_runtime_client.retrieve_and_generate(
             # sessionId='string', # for creating chatbot
             input={
                 "text": user_prompt,
