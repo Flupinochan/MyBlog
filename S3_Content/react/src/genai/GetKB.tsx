@@ -90,9 +90,7 @@ const GetKB: React.FC = () => {
   // Sync Knowledge
   const handleSync = () => {
     const postData1: Request = {
-      input_prompt: "nothing",
-      operation: "sync_kb",
-      mime_type: "nothing",
+      operation: "sync_kb_start",
     };
     const postConfig = {
       headers: {
@@ -110,6 +108,8 @@ const GetKB: React.FC = () => {
         console.log();
         const postData2: Request = {
           executionArn: response.data.executionArn!,
+          input_prompt: response.data.text!,
+          operation: "sync_kb_describe",
         };
         const checkSync = async () => {
           try {

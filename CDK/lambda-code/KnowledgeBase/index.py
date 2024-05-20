@@ -2,6 +2,7 @@ import os
 import boto3
 import mimetypes
 import time
+from enum import Enum
 
 from typing_extensions import TypedDict
 from botocore.config import Config
@@ -10,7 +11,7 @@ from aws_xray_sdk.core import patch_all
 
 from LoggingClass import LoggingClass
 
-xray_recorder.configure(service="Get KnowledgeBase")
+xray_recorder.configure(service="KnowledgeBase")
 patch_all()
 
 # ----------------------------------------------------------------------
@@ -64,8 +65,10 @@ def main(event):
             response = get_knowledge(event)
         elif operation_type == "get_presigned_url":
             response = get_presigned_url(event)
-        elif operation_type == "sync_kb":
-            response = sync_kb(event)
+        elif operation_type == "sync_kb_start":
+            response = sync_kb_start(event)
+        elif operation_type == "sync_kb_describe":
+            response = sync_kb_describe(event)
         return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
@@ -105,32 +108,63 @@ def get_presigned_url(event):
 
 
 # ----------------------------------------------------------------------
-# Sync KnowledgeBase
+# Sync KnowledgeBase Start
 # ----------------------------------------------------------------------
-@xray_recorder.capture("sync_kb")
-def sync_kb(event):
+@xray_recorder.capture("sync_kb_start")
+def sync_kb_start(event):
     try:
-        log.info("KnowledgeBase Synchronisation in progress")
+        log.info("KnowledgeBase Synchronisation Start")
         response = bedrock_agent_client.start_ingestion_job(
             dataSourceId=DATASOURCE_ID,
             knowledgeBaseId=KNOWLEDGE_BASE_ID,
         )
         job_id = response["ingestionJob"]["ingestionJobId"]
-        while True:
-            response = bedrock_agent_client.get_ingestion_job(
-                dataSourceId=DATASOURCE_ID,
-                knowledgeBaseId=KNOWLEDGE_BASE_ID,
-                ingestionJobId=job_id,
-            )
-            status = response["ingestionJob"]["status"]
-            if status == "COMPLETE":
-                break
-            time.sleep(15)
-        response_body = {"statusCode": 200, "text": "KnowledgeBase synchronisation is complete"}
+        response_body = {"statusCode": 200, "text": job_id}
         return response_body
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
         raise
+
+
+# ----------------------------------------------------------------------
+# Sync KnowledgeBase Describe
+# ----------------------------------------------------------------------
+class Sfn_Status(Enum):
+    IN_PROGRESS = "IN_PROGRESS"
+
+
+@xray_recorder.capture("sync_kb_describe")
+def sync_kb_describe(event):
+    try:
+        log.info("KnowledgeBase Synchronisation Status Ckeck")
+        response = bedrock_agent_client.list_ingestion_jobs(
+            dataSourceId=DATASOURCE_ID,
+            knowledgeBaseId=KNOWLEDGE_BASE_ID,
+            filters=[
+                {
+                    "attribute": "STATUS",
+                    "operator": "EQ",
+                    "values": [
+                        "IN_PROGRESS",
+                    ],
+                },
+            ],
+            maxResults=1,
+            sortBy={
+                "attribute": "STARTED_AT",
+                "order": "DESCENDING",
+            },
+        )
+        if len(response["ingestionJobSummaries"]) == 0:
+            response_body = {"status": "COMPLETE"}
+            return response_body
+        in_progress_job: Sfn_Status = response["ingestionJobSummaries"][0]["status"]
+        response_body = {"status": in_progress_job}
+        return response_body
+    except Exception as e:
+        log.error(f"エラーが発生しました: {e}")
+        response_body = {"status": "FAIL"}
+        return response_body
 
 
 # ----------------------------------------------------------------------

@@ -441,8 +441,18 @@ export class MyBlogStack extends cdk.Stack {
     // commentを入れると上手く渡せないので注意
     const firstTaskLambda = new sfntask.LambdaInvoke(this, "syncKnowledgeBase", {
       lambdaFunction: lambdaGetKb,
+      outputPath: "$.Payload",
     });
-    const definition = firstTaskLambda;
+    const waitTask = new sfn.Wait(this, 'Wait For Trigger Time', {
+      time: sfn.WaitTime.duration(Duration.seconds(15))
+    });
+    const success = new sfn.Succeed(this, "Success");
+    const fail = new sfn.Fail(this, "Fail");
+    const choice = new sfn.Choice(this, "Choice");
+    choice.when(sfn.Condition.stringEquals("$.status", "COMPLETE"), success);
+    choice.when(sfn.Condition.stringEquals("$.status", "FAIL"), fail);
+    choice.when(sfn.Condition.stringEquals("$.status", "IN_PROGRESS"), waitTask.next(firstTaskLambda));
+    const definition = firstTaskLambda.next(choice);
     const stepFunctionsKB = new sfn.StateMachine(this, param.stepFunctions.stepFunctionsName, {
       stateMachineName: param.stepFunctions.stepFunctionsName,
       tracingEnabled: true,
@@ -453,7 +463,7 @@ export class MyBlogStack extends cdk.Stack {
         destination: stepFunctionsLogGroup,
       },
       role: stepFunctionsRole,
-      stateMachineType: sfn.StateMachineType.EXPRESS,
+      stateMachineType: sfn.StateMachineType.STANDARD,
       definitionBody: sfn.DefinitionBody.fromChainable(definition),
     });
 
@@ -466,38 +476,84 @@ export class MyBlogStack extends cdk.Stack {
     // マッピングは、jsonを直接渡す "input":"$util.escapeJavaScript($input.json('$'))"
     // もしくは、jsonの各paramを渡す "$util.escapeJavaScript($input.path('$.executionArn'))"
     // $がjsonオブジェクト全体を示し、ドット「.」を使用して配下にアクセスできる
-    const sfnExecOption: apigw.StepFunctionsExecutionIntegrationOptions = {
-      credentialsRole: apigatewaySfnRole,
-      // requestTemplates: {
-      //   "application/json": JSON.stringify({
-      //     input: "$util.escapeJavaScript($input.json('$'))",
-      //     stateMachineArn: stepFunctionsKB.stateMachineArn,
-      //   }),
-      // },
-      requestTemplates: {
-        "application/json": JSON.stringify({
-          input: "$util.escapeJavaScript($input.json('$'))",
-          stateMachineArn: "",
-        }),
+    // ※class StepFunctionsIntegration は、EXPRESSタイプになってしまうので以下を使用する
+    // API Gateway内でのStepFunctionsの指定は、requestTemplatesにStepFunctionsArnを設定することで指定できる
+    const sfnStart = new apigw.AwsIntegration({
+      service: "states",
+      action: "StartExecution",
+      integrationHttpMethod: "POST",
+      options: {
+        credentialsRole: apigatewaySfnRole,
+        requestTemplates: {
+          "application/json": JSON.stringify({
+            input: "$util.escapeJavaScript($input.json('$'))",
+            stateMachineArn: stepFunctionsKB.stateMachineArn,
+          }),
+        },
+        passthroughBehavior: apigw.PassthroughBehavior.WHEN_NO_TEMPLATES,
+        integrationResponses: [{ statusCode: "200" }],
       },
-    };
-    const sfnDescribeOption: apigw.StepFunctionsExecutionIntegrationOptions = {
-      credentialsRole: apigatewaySfnRole,
-      requestTemplates: {
-        "application/json": JSON.stringify({
-          executionArn: "$util.escapeJavaScript($input.path('$.executionArn'))"
-        }),
+    });
+    const sfnDescribe = new apigw.AwsIntegration({
+      service: "states",
+      action: "DescribeExecution",
+      integrationHttpMethod: "POST",
+      options: {
+        credentialsRole: apigatewaySfnRole,
+        requestTemplates: {
+          "application/json": JSON.stringify({
+            input: "$util.escapeJavaScript($input.json('$'))",
+            executionArn: "$util.escapeJavaScript($input.path('$.executionArn'))",
+          }),
+        },
+        passthroughBehavior: apigw.PassthroughBehavior.WHEN_NO_TEMPLATES,
+        integrationResponses: [{ statusCode: "200" }],
       },
-    };
-    // EXPRESSだとStartSyncExecutionになってしまう
-    // STANDARDだとStartExecutionになる
-    // 手動で後から変えることは可能
-    // execute用
+    });
+    // const responseModelSfnStart = apigwGenAi.addModel(param.stepFunctions.modelNameResponseStart, {
+    //   contentType: "application/json",
+    //   modelName: param.stepFunctions.modelNameResponseStart,
+    //   schema: {
+    //     schema: apigw.JsonSchemaVersion.DRAFT4,
+    //     title: param.stepFunctions.modelNameResponseStart,
+    //     type: apigw.JsonSchemaType.OBJECT,
+    //     properties: {
+    //       statusCode: { type: apigw.JsonSchemaType.NUMBER },
+    //       text: { type: apigw.JsonSchemaType.STRING },
+    //     },
+    //   },
+    // });
+    // const responseModelSfnDescribe = apigwGenAi.addModel(param.stepFunctions.modelNameResponseDescribe, {
+    //   contentType: "application/json",
+    //   modelName: param.stepFunctions.modelNameResponseDescribe,
+    //   schema: {
+    //     schema: apigw.JsonSchemaVersion.DRAFT4,
+    //     title: param.stepFunctions.modelNameResponseDescribe,
+    //     type: apigw.JsonSchemaType.OBJECT,
+    //     properties: {
+    //       statusCode: { type: apigw.JsonSchemaType.NUMBER },
+    //       text: { type: apigw.JsonSchemaType.STRING },
+    //     },
+    //   },
+    // });
     const apiSyncKB = apigwGenAi.root.addResource("execsync");
-    apiSyncKB.addMethod("POST", apigw.StepFunctionsIntegration.startExecution(stepFunctionsKB, sfnExecOption));
-    // describe用
+    apiSyncKB.addMethod("POST", sfnStart, {
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseModels: { "application/json": apigw.Model.EMPTY_MODEL},
+        },
+      ],
+    });
     const apidescribeKB = apigwGenAi.root.addResource("checksync");
-    apidescribeKB.addMethod("POST", apigw.StepFunctionsIntegration.startExecution(stepFunctionsKB, sfnDescribeOption));
+    apidescribeKB.addMethod("POST", sfnDescribe, {
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseModels: { "application/json": apigw.Model.EMPTY_MODEL},
+        },
+      ],
+    });
 
     ///////////////
     // Websocket //

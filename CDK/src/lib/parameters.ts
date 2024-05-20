@@ -65,9 +65,11 @@ export class MyBlogParam {
     datasourceId: "NIPMIAQAYI",
   };
   stepFunctions = {
-    stepFunctionsName: "Sync-KnowledgeBase",
+    stepFunctionsName: "Sync-KnowledgeBase-Standard",
     logGroupName: "Sync-KnowledgeBase-CloudWatchLogs",
     stepfunctionsRole: "Sync-GetKB-StepFunctions",
     apigatewayRole: "Sync-GetKB-ApiGateway",
+    modelNameResponseStart: "stepfunctionsstart",
+    modelNameResponseDescribe: "stepfunctionsdescribe",
   };
 }
