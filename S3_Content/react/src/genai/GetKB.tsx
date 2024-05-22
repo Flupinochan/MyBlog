@@ -105,7 +105,6 @@ const GetKB: React.FC = () => {
       .post(url1, postData1, postConfig)
       .then((response: Response) => {
         console.log(response);
-        console.log();
         const postData2: Request = {
           executionArn: response.data.executionArn!,
           input_prompt: response.data.text!,
@@ -186,7 +185,6 @@ const GetKB: React.FC = () => {
             Sync KnowledgeBase
           </Button>
           {syncStatus && <p>Sync Status: {syncStatus}</p>}
-          <br />
           <p>{kb}</p>
           {submitted && s3File && <p>Referenced file: {s3File}</p>}
           <br />

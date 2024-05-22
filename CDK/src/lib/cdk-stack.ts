@@ -439,9 +439,27 @@ export class MyBlogStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
     // commentを入れると上手く渡せないので注意
-    const firstTaskLambda = new sfntask.LambdaInvoke(this, "syncKnowledgeBase", {
+    // input/outputは、入力/出力するデータを決める
+    // outputの形式は、以下で固定
+    // Lambdaが return {"hoge": "hello", "fuga": "ok"} の場合
+    // StepFunctionsは、以下を受け取り、必ずPayloadの要素としてreturnのstring or jsonが格納される
+    //                  {
+    //                    "Payload": {
+    //                      "hoge": "hello",
+    //                      "fuga": "ok"
+    //                    }
+    //                  }
+    // outputPathに、$.Payloadとすれば、return文がそのまま次のステートに渡されるし、$.Payload.hogeとすれば一部のデータのみが渡せる
+    // ※★Payloadに格納されることを覚えておく!!
+    const firstTaskLambda = new sfntask.LambdaInvoke(this, "startSyncKnowledgeBase", {
       lambdaFunction: lambdaGetKb,
-      outputPath: "$.Payload",
+    });
+    const secondTaskLambda = new sfntask.LambdaInvoke(this, "describeSyncKnowledgeBase", {
+      lambdaFunction: lambdaGetKb,
+      payload: sfn.TaskInput.fromObject({
+        operation: "sync_kb_describe"
+      }),
+      outputPath: "$", // {"status": xxx} がPayloadに格納されるため、$.Payload.statusでアクセス可能
     });
     const waitTask = new sfn.Wait(this, 'Wait For Trigger Time', {
       time: sfn.WaitTime.duration(Duration.seconds(15))
@@ -449,14 +467,16 @@ export class MyBlogStack extends cdk.Stack {
     const success = new sfn.Succeed(this, "Success");
     const fail = new sfn.Fail(this, "Fail");
     const choice = new sfn.Choice(this, "Choice");
-    choice.when(sfn.Condition.stringEquals("$.status", "COMPLETE"), success);
-    choice.when(sfn.Condition.stringEquals("$.status", "FAIL"), fail);
-    choice.when(sfn.Condition.stringEquals("$.status", "IN_PROGRESS"), waitTask.next(firstTaskLambda));
-    const definition = firstTaskLambda.next(choice);
+    choice.when(sfn.Condition.stringEquals("$.Payload.status", "COMPLETE"), success);
+    choice.when(sfn.Condition.stringEquals("$.Payload.status", "FAIL"), fail);
+    choice.when(sfn.Condition.stringEquals("$.Payload.status", "IN_PROGRESS"), waitTask.next(secondTaskLambda));
+    const definition = firstTaskLambda
+      .next(secondTaskLambda)
+      .next(choice);
     const stepFunctionsKB = new sfn.StateMachine(this, param.stepFunctions.stepFunctionsName, {
       stateMachineName: param.stepFunctions.stepFunctionsName,
       tracingEnabled: true,
-      timeout: Duration.minutes(15),
+      timeout: Duration.minutes(30),
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       logs: {
         level: sfn.LogLevel.ALL,

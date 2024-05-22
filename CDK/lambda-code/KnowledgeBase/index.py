@@ -84,18 +84,21 @@ def get_presigned_url(event):
         # https://kakehashi-dev.hatenablog.com/entry/2022/03/15/101500
         file_name = event["input_prompt"]
         mime_type = event["mime_type"]
+        log.debug(file_name)
         log.debug(mime_type)
+        log.debug(S3_BUCKET_NAME)
+        # ACL設定は不要、API Gatewayで(CORSなどの)ヘッダーを付与しないこと!!
         presigned_url = s3_client.generate_presigned_url(
             "put_object",
             Params={
                 "Bucket": S3_BUCKET_NAME,
-                "Key": event["input_prompt"],
+                "Key": file_name,
                 "ContentType": mime_type,
             },
+            HttpMethod="PUT",
             ExpiresIn=900,
         )
         response_body = {"statusCode": 200, "presignedUrl": presigned_url}
-        log.info(f"responseBody: {response_body}")
         return response_body
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
