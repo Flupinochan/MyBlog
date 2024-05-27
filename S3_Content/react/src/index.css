@@ -1,80 +1,136 @@
-body {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", "sans-serif";
+  color: #4c54c0;
   background: repeating-linear-gradient(-45deg, #f3f9f9, #f3f9f9 25%, #eef7f7 25%, #eef7f7 50%);
   background-size: 65px 65px;
+  padding: 4px;
   overflow: hidden;
 }
 
-.normalImage {
-  width: 100%;
-  height: auto;
+p {
+  display: block;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 0;
+  margin-right: 0;
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
+.group:hover .group-hover\:visible {
+  visibility: visible;
 }
 
-.blogContentBackColor {
-  background-color: white;
-  font-family: "メイリオ", "Meiryo", serif;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 1000px;
-  padding: 0px 20px 10px 15px;
-  border: 1px solid rgba(76, 84, 192, 0.1);
-  opacity: 0;
-  animation: fadeIn 0.6s;
-  animation-delay: 1.4s;
-  animation-fill-mode: forwards;
+.group:hover .group-hover\:invisible {
+  visibility: hidden;
+}
+
+.custom-h2 {
+  @apply py-3 px-6 my-5 ml-2 mr-3 text-2xl font-bold text-font-color1 bg-font-color3 relative opacity-0 z-0;
+  box-shadow: 5px -5px #4c54c0;
+}
+
+.custom-h3 {
+  @apply text-font-color1 text-lg font-bold bg-font-color3 border-l-4 border-l-font-color1 relative p-3 my-4;
+}
+
+.custom-h4 {
+  @apply text-font-color1 text-lg font-bold border-b-3 border-b-font-color1 relative p-3;
+}
+
+.custom-content-box {
+  @apply bg-white 
+  box-border border-line-color border-opacity-10 border-solid border-1
+  max-w-screen-lg mx-auto
+  pb-10 pt-3 px-3
+  mt-0 mb-20 ml-2 mr-2;
 }
 
 .blogDay {
-  display: flex;
-  align-items: center;
-  margin-top: 11px;
+  @apply flex items-center;
 }
 
 .dayIcon {
-  width: 20px;
-  height: auto;
+  @apply w-5 h-auto;
 }
 
 .blogyyyymmdd {
-  margin-top: 2px;
-  margin-left: 5px;
-  font-family: "メイリオ", "Meiryo", sans-serif;
-  color: #979797;
+  @apply text-day-color pl-1;
 }
 
-ul,
+.custom-link {
+  @apply text-link-color underline;
+}
+
+.custom-link:hover {
+  @apply text-cyan-400 underline;
+}
+
+.custom-button {
+  @apply bg-font-color2 hover:bg-font-color1 hover:text-font-color2 transition-all duration-300;
+}
+
+.custom-2img-mas {
+  @apply flex flex-wrap;
+}
+
+.custom-2img-sub {
+  @apply md:w-1/2 pr-2;
+}
+
+.pace {
+  -webkit-pointer-events: none;
+  pointer-events: none;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.pace-inactive {
+  display: none;
+}
+
+.pace .pace-progress {
+  background: #4c54c0;
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  right: 100%;
+  width: 100%;
+  height: 2px;
+}
+
+.simplebar-scrollbar::before {
+  background: linear-gradient(darkblue, skyblue);
+}
+
+/* ul,
 li {
   color: #4c54c0;
-}
+} */
 
-ol {
+/* ol {
   counter-reset: number; /*数字をリセット*/
-  list-style-type: none !important; /*数字を一旦消す*/
-  padding: 0.3em 0.8em;
-  border: solid 2px #4c54c0;
-}
-ol li {
+/* list-style-type: none !important; /*数字を一旦消す*/
+/* padding: 0.3em 0.8em;
+  border: solid 2px #4c54c0; */
+/* } */
+/* ol li {
   border-bottom: dashed 1px #4c54c0;
   position: relative;
   padding: 0.5em 0.5em 0.5em 30px;
   line-height: 1.5em;
-}
-ol li:before {
-  /* 以下数字をつける */
-  position: absolute;
+} */
+/* ol li:before { */
+/* 以下数字をつける */
+/* position: absolute;
   counter-increment: number;
-  content: counter(number);
-  /*数字のデザイン変える*/
-  display: inline-block;
+  content: counter(number); */
+/*数字のデザイン変える*/
+/* display: inline-block;
   background: #4c54c0;
   color: white;
   font-family: "Avenir", "Arial Black", "Arial", sans-serif;
@@ -84,24 +140,17 @@ ol li:before {
   width: 20px;
   height: 20px;
   line-height: 20px;
-  text-align: center;
-  /*以下 上下中央寄せのため*/
-  /* top: 50%;
+  text-align: center; */
+/*以下 上下中央寄せのため*/
+/* top: 50%;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%); */
-}
-ol li:last-of-type {
-  border-bottom: none; /*最後のliの線だけ消す*/
-}
+/* } */
+/* ol li:last-of-type { */
+/* border-bottom: none; 最後のliの線だけ消す */
+/* } */
 
-a:link,
-a:visited {
-  color: dodgerblue;
-}
-
-a:hover {
-  color: turquoise;
-}
+/*
 h1 {
   text-align: center;
   position: relative;
@@ -113,7 +162,7 @@ h1 {
   outline-offset: 10px;
   color: #4c54c0;
   background-color: #e1e4f5;
-}
+} */
 
 /* h1:before {
   position: absolute;
@@ -125,45 +174,3 @@ h1 {
   content: "";
   border: 4px dotted #4c54c0;
 } */
-
-h2 {
-  font-family: "Meiryo", "メイリオ", sans-serif;
-  opacity: 0;
-  padding: 0.5em 1em;
-  color: #4c54c0;
-  background-color: #e1e4f5;
-  box-shadow: 5px -5px #4c54c0;
-  position: relative;
-  animation: slideFadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
-  animation-delay: 1.2s;
-  animation-fill-mode: forwards;
-  z-index: 1;
-}
-
-h3 {
-  font-family: "Meiryo", "メイリオ", sans-serif;
-  padding: 0.7em 0.7em;
-  color: #4c54c0;
-  background-color: #e1e4f5;
-  border-left: solid 5px #516ab6;
-  position: relative;
-}
-
-h4 {
-  font-size: large;
-  font-family: "Meiryo", "メイリオ", sans-serif;
-  padding: 0.4em 0.4em;
-  color: #4c54c0;
-  border-bottom: solid 3px #516ab6;
-  position: relative;
-}
-
-P {
-  font-family: "メイリオ", "Meiryo", serif;
-  color: #4c54c0;
-}
-
-b {
-  font-family: "メイリオ", "Meiryo", serif;
-  color: #4c54c0;
-}

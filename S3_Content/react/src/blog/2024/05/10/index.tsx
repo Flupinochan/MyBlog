@@ -11,7 +11,6 @@ import CloudWatchRAMPage1 from "./cloudwatch_ram_page1.png";
 import CloudWatchRAMPage2 from "./cloudwatch_ram_page2.png";
 import CloudWatchRAMf12 from "./cloudwatch_ram_f12.png";
 import { getRum } from "../../../../CloudWatchRUM";
-import "./index.css";
 
 const Blog20240510: React.FC = () => {
   const location = useLocation();
@@ -23,13 +22,13 @@ const Blog20240510: React.FC = () => {
   }, [location]);
   return (
     <div id="blog0510">
-      <h2>AWS CloudWatch RUMによるユーザ視点からの監視 (*╹▽╹*)</h2>
-      <div className="blogContentBackColor">
+      <h2 className="custom-h2 animate-slidelefth2">AWS CloudWatch RUMによるユーザ視点からの監視 (*╹▽╹*)</h2>
+      <div className="custom-content-box opacity-0 animate-fadeincontent">
         <div className="blogDay">
           <img src="/images/dayIcon.png" alt="dayIcon" className="dayIcon" />
           <span className="blogyyyymmdd">2024-05-10</span>
         </div>
-        <h3>はじめに</h3>
+        <h3 className="custom-h3">はじめに</h3>
         <p>こんにちは、MetalMentalです (*ﾟ▽ﾟ)ﾉ</p>
         <p>
           少し前に、AWSアカウントで、<b>Developerサポートプラン</b>を購入してみました
@@ -54,12 +53,12 @@ const Blog20240510: React.FC = () => {
         <p>
           今回は、その新機能の1つである<b>CloudWatch RUM(Real User Monitoring)</b>について、解説いたします (　-`ω-)
         </p>
-        <h3>本題</h3>
-        <h4>CloudWatch RUM(Real User Monitoring)とは</h4>
+        <h3 className="custom-h3">本題</h3>
+        <h4 className="custom-h4">CloudWatch RUM(Real User Monitoring)とは</h4>
         <p>実際にWebページを訪れたユーザに、Webページにアクセスした際のパフォーマンス情報やエラーログをCloudWatchに送信させる機能です</p>
         <img className="normalImage CloudWatchRAM" src={CloudWatchRAM} alt="CloudWatchRAM" />
         <p>訪れたWebページ(Reactの場合はRoute)や、ロード時間、エラー情報などが確認できます!</p>
-        <h4>実装方法</h4>
+        <h4 className="custom-h4">実装方法</h4>
         <p>仕組みはシンプルで、以下2手順になります</p>
         <p>コードのサンプルは、CloudWatch RUMコンソール画面で設定完了時に表示されます</p>
         <ol>
@@ -78,7 +77,7 @@ const Blog20240510: React.FC = () => {
         <img className="normalImage CloudWatchRAMCode" src={CloudWatchRAMCode} alt="CloudWatchRAMCode" />
         <p>
           また、<b>npm install aws-rum-web</b>でインストールする方法もありますが、
-          <a href="https://github.com/aws-observability/aws-rum-web/blob/main/docs/cdn_installation.md" target="_blank" rel="noopener noreferrer">
+          <a className="custom-link" href="https://github.com/aws-observability/aws-rum-web/blob/main/docs/cdn_installation.md" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
           にもあるとおり、CDNを利用して、HTMLにスクリプトを埋め込む設定も可能です
@@ -92,7 +91,7 @@ const Blog20240510: React.FC = () => {
         <p>データを送信したいWebページで、以下のようにuseEffectとrecordPageViewを使用して、Webページがレンダリングされた際に、データを送信するようにします</p>
         <p>useLocationを使用して、React Route情報を送信していることが分かりますね!</p>
         <p>
-          <a href="https://aws.amazon.com/jp/blogs/mt/using-amazon-cloudwatch-rum-with-a-react-web-application-in-five-steps/" target="_blank" rel="noopener noreferrer">
+          <a className="custom-link" href="https://aws.amazon.com/jp/blogs/mt/using-amazon-cloudwatch-rum-with-a-react-web-application-in-five-steps/" target="_blank" rel="noopener noreferrer">
             ※参考 AWS Blog
           </a>
         </p>
@@ -101,7 +100,7 @@ const Blog20240510: React.FC = () => {
         <img className="normalImage CloudWatchRAMPage2" src={CloudWatchRAMPage2} alt="CloudWatchPage2" />
         <p>Webページを訪れて、f12キーを押し、以下のようにPOSTでデータが送信されていれば設定完了です(v´∀`*)</p>
         <img className="normalImage CloudWatchRAMf12" src={CloudWatchRAMf12} alt="CloudWatchf12" />
-        <h3>終わりに</h3>
+        <h3 className="custom-h3">終わりに</h3>
         <p>GWは、X-RayやGrafanaについても学びました</p>
         <p>Observabilityについての知見を深めたかったからです</p>
         <p>Observerになれるよう頑張ります ( ㅍ_ㅍ)</p>

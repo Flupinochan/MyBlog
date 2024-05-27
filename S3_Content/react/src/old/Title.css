@@ -11,6 +11,8 @@
 }
 
 #title {
+  max-width: 100%;
+  height: auto;
   opacity: 0;
   display: flex;
   justify-content: center;
@@ -18,9 +20,4 @@
   animation: slidedown 0.5s cubic-bezier(0, 0, 0.01, 1);
   animation-delay: 0.5s;
   animation-fill-mode: forwards;
-}
-
-#title img {
-  max-width: 100%;
-  height: auto;
 }

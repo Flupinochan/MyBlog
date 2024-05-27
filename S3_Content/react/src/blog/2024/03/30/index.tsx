@@ -14,13 +14,13 @@ const Blog20240330: React.FC = () => {
   }, [location]);
   return (
     <div id="blog0330">
-      <h2>ブログ初投稿(≧∇≦*)</h2>
-      <div className="blogContentBackColor">
+      <h2 className="custom-h2 animate-slidelefth2">ブログ初投稿(≧∇≦*)</h2>
+      <div className="custom-content-box opacity-0 animate-fadeincontent">
         <div className="blogDay">
           <img src="/images/dayIcon.png" alt="dayIcon" className="dayIcon" />
           <span className="blogyyyymmdd">2024-03-30</span>
         </div>
-        <h3>はじめに</h3>
+        <h3 className="custom-h3">はじめに</h3>
         <p>こんにちは、MetalMentalです (*ﾟ▽ﾟ)ﾉ</p>
         <p>
           ブログを投稿するのは、1年ぶりになります
@@ -32,8 +32,8 @@ const Blog20240330: React.FC = () => {
           そのため、今後は<b>「HTMLやTypeScriptを使用したブログ」</b>
           にチャレンジしていきたいと思います!!
         </p>
-        <h3>本題</h3>
-        <h4>本ブログについて</h4>
+        <h3 className="custom-h3">本題</h3>
+        <h4 className="custom-h4">本ブログについて</h4>
         <p>
           本ブログは、エンジニアが投稿するブログです
           <br />
@@ -42,7 +42,7 @@ const Blog20240330: React.FC = () => {
         </p>
         <p>
           勉強・検証する上で作成したコードは、
-          <a href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">
+          <a className="custom-link" href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
           にアップロードします!!
@@ -55,11 +55,11 @@ const Blog20240330: React.FC = () => {
           興味がある方は、以下をご覧ください
         </p>
         <p>
-          <a href="https://github.com/Flupinochan/MyBlog" target="_blank" rel="noopener noreferrer">
+          <a className="custom-link" href="https://github.com/Flupinochan/MyBlog" target="_blank" rel="noopener noreferrer">
             MyBlog
           </a>
         </p>
-        <h4>生成AIを勉強する理由</h4>
+        <h4 className="custom-h4">生成AIを勉強する理由</h4>
         <p>
           シンプルに、便利で感銘を受けたからですw
           <br />
@@ -72,7 +72,7 @@ const Blog20240330: React.FC = () => {
           を導入予定ですので、楽しみにしていてください!!
         </p>
         <p>お金がかかりそうで怖いですが… ((((；ﾟДﾟ))))</p>
-        <h4>ブロックチェーンを勉強する理由</h4>
+        <h4 className="custom-h4">ブロックチェーンを勉強する理由</h4>
         <p>
           先日、仮想通貨1ビットコインが、1000万円を超えました
           <br />
@@ -81,7 +81,7 @@ const Blog20240330: React.FC = () => {
           金融の非中央集権化・民主化が来ると思います
         </p>
         <p>少しでもブロックチェーンを勉強し、金融関係の仕事に携わることで、食いっぱぐれないようにしたいです (｡-∀-)</p>
-        <h3>おわりに</h3>
+        <h3 className="custom-h3">おわりに</h3>
         <p>
           少し前に、自分のクレジットカードが不正利用されました Σ( ºωº )<br />
           以下のように、APPLE COM BILLというご利用名で、いくつも請求されていました
@@ -92,7 +92,7 @@ const Blog20240330: React.FC = () => {
           心当たりが…あるんですよねぇw
           <br />
           先日、中華サイトで、原神の
-          <a href="https://ascii.jp/elem/000/004/188/4188575/" target="_blank" rel="noopener noreferrer">
+          <a className="custom-link" href="https://ascii.jp/elem/000/004/188/4188575/" target="_blank" rel="noopener noreferrer">
             コラボスマホ(刻晴)
           </a>
           を購入しようとしました

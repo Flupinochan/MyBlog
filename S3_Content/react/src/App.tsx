@@ -3,12 +3,12 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "simplebar-react/dist/simplebar.min.css";
 import SimpleBar from "simplebar-react";
 
-import "./App.css";
 import Progressbar from "./components/Progressbar";
 import Head from "./components/Head";
 import Title from "./components/Title";
 import Menu from "./components/Menu";
 import Home from "./components/Home";
+import Profile from "./components/Profile";
 // import GenAiHome from "./genai/GenAiHome";
 import GenImage from "./genai/GenImage";
 import GenGizi from "./genai/GenGizi";
@@ -26,9 +26,10 @@ const App: React.FC = () => {
         <Head />
         <Title />
         <Menu />
-        <SimpleBar style={{ maxHeight: "84vh" }}>
+        <SimpleBar className="simplebar-scrollbar" style={{ maxHeight: "84vh" }}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/genai/genimage" element={<GenImage />} />
             {/* <Route path="/genai/gengizi" element={<GenGizi />} /> */}
             <Route path="/genai/gentext" element={<GenText />} />
