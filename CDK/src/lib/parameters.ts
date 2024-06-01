@@ -64,6 +64,12 @@ export class MyBlogParam {
     knowledgeBaseId: "BRHZWBWVBN",
     datasourceId: "8BXFRITJGP",
   };
+  lambdaSES = {
+    functionName: "SES",
+    logGroupName: "Lambda-SES-CloudWatchLogs",
+    modelNameRequest: "lambdases",
+    modelNameResponse: "lambdases",
+  }
   stepFunctions = {
     stepFunctionsName: "Sync-KnowledgeBase-Standard",
     logGroupName: "Sync-KnowledgeBase-CloudWatchLogs",

@@ -10,6 +10,9 @@ module.exports = {
         33: "8.25rem",
         44: "11rem",
         55: "13.75rem",
+        384: "24rem",
+        512: "32rem",
+        1024: "64rem",
         "genai-custom": "6.25rem",
       },
       colors: {
@@ -71,6 +74,7 @@ module.exports = {
         slidelefth2: "slideleft 0.3s cubic-bezier(0, 0, 0.2, 1) 1.2s forwards",
         slideleft: "slideleft 0.3s cubic-bezier(0, 0, 0.2, 1) 1.3s forwards",
         fadeincontent: "fadein 0.6s 1.4s forwards",
+        fadeincontentProfile: "fadein 0.6s 1.2s forwards",
       },
     },
     fontFamily: {

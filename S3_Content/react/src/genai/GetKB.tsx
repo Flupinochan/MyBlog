@@ -174,8 +174,8 @@ const GetKB: React.FC = () => {
 
   return (
     <div>
-      <h2>Knowledge Base</h2>
-      <div className="blogContentBackColor">
+      <h2 className="custom-h2 animate-slidelefth2">Knowledge Base</h2>
+      <div className="custom-content-box opacity-0 animate-fadeincontent">
         <ThemeProvider theme={theme}>
           <br />
           {(spinner1 || spinner2 || spinner3) && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}

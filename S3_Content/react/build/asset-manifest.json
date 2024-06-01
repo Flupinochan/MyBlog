@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.f3f45c94.css",
-    "main.js": "/static/js/main.422d9547.js",
+    "main.css": "/static/css/main.e23cd547.css",
+    "main.js": "/static/js/main.94b46731.js",
     "static/media/sample.png": "/static/media/sample.044fa866b58b718b675e.png",
     "static/media/cloudwatch_ram.png": "/static/media/cloudwatch_ram.474d53f2f334399e5224.png",
     "static/media/cloudwatch_ram_f12.png": "/static/media/cloudwatch_ram_f12.231a191046a2771ecc28.png",
@@ -18,11 +18,11 @@
     "static/media/appleComBill.png": "/static/media/appleComBill.735af7f3bd4e2a02859a.png",
     "static/media/cloudwatch_ram_page2.png": "/static/media/cloudwatch_ram_page2.2cde9bafd5d3a264431d.png",
     "index.html": "/index.html",
-    "main.f3f45c94.css.map": "/static/css/main.f3f45c94.css.map",
-    "main.422d9547.js.map": "/static/js/main.422d9547.js.map"
+    "main.e23cd547.css.map": "/static/css/main.e23cd547.css.map",
+    "main.94b46731.js.map": "/static/js/main.94b46731.js.map"
   },
   "entrypoints": [
-    "static/css/main.f3f45c94.css",
-    "static/js/main.422d9547.js"
+    "static/css/main.e23cd547.css",
+    "static/js/main.94b46731.js"
   ]
 }

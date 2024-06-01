@@ -30,7 +30,7 @@ export class MyBlogStack extends cdk.Stack {
     const lambdaRoleGenAI = new iam.Role(this, param.lambdaGenAI.roleName, {
       roleName: param.lambdaGenAI.roleName,
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonAPIGatewayAdministrator"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonAPIGatewayInvokeFullAccess")],
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonBedrockFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonAPIGatewayAdministrator"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonAPIGatewayInvokeFullAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSESFullAccess")],
       inlinePolicies: {
         inlinePolicy: new iam.PolicyDocument({
           statements: [
@@ -420,6 +420,62 @@ export class MyBlogStack extends cdk.Stack {
           {
             statusCode: "200",
             responseModels: { "application/json": responseModelGetKb },
+          },
+        ],
+      }
+    );
+
+    // SES
+    const lambdaLogGroupSES = new logs.LogGroup(this, param.lambdaSES.logGroupName, {
+      logGroupName: param.lambdaSES.logGroupName,
+      retention: logs.RetentionDays.ONE_DAY,
+      logGroupClass: logs.LogGroupClass.STANDARD,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+    const lambdaSES = new lambda.Function(this, param.lambdaSES.functionName, {
+      functionName: param.lambdaSES.functionName,
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: "index.lambda_handler",
+      role: lambdaRoleGenAI,
+      code: lambda.Code.fromAsset(path.join(__dirname, "../../lambda-code/SES/")),
+      timeout: Duration.minutes(15),
+      logGroup: lambdaLogGroupSES,
+      layers: [lambdaLayerGenAI],
+      environment: {
+        SES: "SES",
+      },
+    });
+    const requestModelSES= apigwGenAi.addModel(param.lambdaSES.modelNameRequest, {
+      contentType: "application/json",
+      modelName: param.lambdaSES.modelNameRequest,
+      schema: {
+        schema: apigw.JsonSchemaVersion.DRAFT4,
+        title: param.lambdaSES.modelNameRequest,
+        type: apigw.JsonSchemaType.OBJECT,
+        properties: {
+          name: { type: apigw.JsonSchemaType.STRING },
+          email: { type: apigw.JsonSchemaType.STRING },
+          message: { type: apigw.JsonSchemaType.STRING },
+        },
+      },
+    });
+    const apiSES = apigwGenAi.root.addResource("ses");
+    apiSES.addMethod(
+      "POST",
+      new apigw.LambdaIntegration(lambdaSES, {
+        proxy: false,
+        passthroughBehavior: apigw.PassthroughBehavior.WHEN_NO_TEMPLATES,
+        integrationResponses: [{ statusCode: "200" }],
+      }),
+      {
+        requestValidator: validatorPost,
+        requestModels: {
+          "application/json": requestModelSES,
+        },
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseModels: { "application/json": apigw.Model.EMPTY_MODEL },
           },
         ],
       }

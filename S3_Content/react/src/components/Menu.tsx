@@ -59,11 +59,12 @@ const Menu: React.FC = () => {
           Profile
         </Link>
       </div>
-      {/* <div className={`md:hidden opacity-0 animate-slideright relative z-menulist-10 transition-transform duration-300 transform ${isOpen ? "translate-x-0" : "translate-x-full"}`}> */}
-      <div className={`md:hidden opacity-0 animate-slideright relative z-menulist-10 transition-transform duration-300 transform`}>
+      {/* <div className="md:hidden opacity-0 animate-slideright relative z-menulist-10 transition-transform duration-300 transform"> */}
+      <div className="md:hidden opacity-0 animate-slideright relative z-menulist-10 transition-transform duration-300 transform">
         <div className="flex flex-col items-end">
           <Hamburger toggled={isOpen} toggle={setOpen} />
-          <div onClick={handleClose} className={`md:hidden absolute flex flex-col text-center top-10 text-xl transition-transform duration-300 transform ${isOpen ? "animate-slideRight" : "translate-x-trans-x-120"}`}>
+          {/* <div onClick={handleClose} className={`md:hidden absolute flex flex-col text-center top-10 text-xl transition-transform duration-300 transform ${isOpen ? "animate-slideRight" : "translate-x-trans-x-120"}`}> */}
+          <div onClick={handleClose} className={`absolute flex flex-col text-center top-10 text-xl transition-transform duration-300 transform ${isOpen ? "animate-slideRight" : "translate-x-trans-x-120"}`}>
             <Link className="py-2 px-5 mb-1 custom-button" to="/">
               Home
             </Link>

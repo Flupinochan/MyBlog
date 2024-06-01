@@ -19,6 +19,24 @@ p {
   margin-right: 0;
 }
 
+.img-grid {
+  @apply grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6;
+}
+
+.img-text {
+  @apply object-cover cursor-pointer
+  w-full h-36 lg:h-72 rounded-md;
+}
+
+.input-textarea {
+  @apply text-font-color1 bg-slate-50 border-2 border-slate-300
+  w-full p-2 rounded-md resize-none overflow-hidden;
+}
+
+.input-textarea:focus {
+  @apply !outline-none !border-font-color1 bg-white;
+}
+
 .link {
   @apply absolute
   invisible

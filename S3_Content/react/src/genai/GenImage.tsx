@@ -112,8 +112,8 @@ const GenImage: React.FC = () => {
 
   return (
     <div>
-      <h2>Generate Image</h2>
-      <div className="blogContentBackColor">
+      <h2 className="animate-slidelefth2 custom-h2">Generate Image</h2>
+      <div className="custom-content-box opacity-0 animate-fadeincontent">
         <div className="wrap">
           <div className="left">
             {spinner && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}

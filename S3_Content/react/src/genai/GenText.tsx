@@ -69,8 +69,8 @@ const GenText: React.FC = () => {
   // https://github.com/react-syntax-highlighter/react-syntax-highlighter
   return (
     <div>
-      <h2>Generate Text (Cohere)</h2>
-      <div className="blogContentBackColor">
+      <h2 className="custom-h2 animate-slidelefth2">Generate Text (Cohere)</h2>
+      <div className="custom-content-box opacity-0 animate-fadeincontent">
         <br />
         {spinner && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
         <ReactMarkdown
