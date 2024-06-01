@@ -19,16 +19,40 @@ p {
   margin-right: 0;
 }
 
-.group:hover .group-hover\:visible {
-  visibility: visible;
+.link {
+  @apply absolute
+  invisible
+  right-0 w-full h-full
+  flex justify-center items-center
+  text-font-color1 bg-font-color2
+  group-hover:bg-font-color1 group-hover:text-font-color2 group-hover:visible
+  z-menulist-10
+  transition-all duration-300
+  border-b-white;
 }
 
-.group:hover .group-hover\:invisible {
-  visibility: hidden;
+.link:hover {
+  @apply !text-link-color;
+}
+
+.link2 {
+  @apply absolute
+  invisible
+  right-0 w-full h-full
+  flex justify-center items-center
+  text-font-color1 bg-font-color2
+  group-hover:bg-font-color1 group-hover:text-font-color2 group-hover:visible group-hover:right-genai-custom
+  z-menulist--10
+  transition-all duration-300
+  border-b-white;
+}
+
+.link2:hover {
+  @apply !text-link-color;
 }
 
 .custom-h2 {
-  @apply py-3 px-6 my-5 ml-2 mr-3 text-2xl font-bold text-font-color1 bg-font-color3 relative opacity-0 z-0;
+  @apply relative py-3 px-6 my-5 ml-2 mr-3 text-2xl font-bold text-font-color1 bg-font-color3 opacity-0 z-h2-0;
   box-shadow: 5px -5px #4c54c0;
 }
 
@@ -94,9 +118,9 @@ p {
 }
 
 .pace .pace-progress {
+  @apply z-progressbar-200;
   background: #4c54c0;
   position: fixed;
-  z-index: 2000;
   top: 0;
   right: 100%;
   width: 100%;

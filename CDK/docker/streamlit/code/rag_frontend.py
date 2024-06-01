@@ -9,23 +9,26 @@ from rag_backend import Backend
 from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core import patch_all
 
-# xray_recorder.configure(
-#     plugins=("EC2Plugin", "ECSPlugin"),
-#     daemon_address="127.0.0.1:2000",
-#     service="rag-frontend",
-# )
-# patch_all()
+xray_recorder.configure(
+    plugins=("EC2Plugin", "ECSPlugin"),
+    daemon_address="127.0.0.1:2000",
+    service="streamlit-rag",
+)
+patch_all()
 
 bk = Backend()
 
 
 class Frontend:
     def __init__(self):
+        xray_recorder.begin_segment("streamlit-rag")
+        xray_recorder.begin_subsegment("set-up")
         llm = bk.llm_setting()
         title = '<h1 style="font-family:sans-serif; font-size: 42px;">Amazon Titan2 RAG</h1>'
         st.markdown(body=title, unsafe_allow_html=True)
         file_type = st.selectbox("Select file type", ("pdf", "txt", "html", "Youtube", "Excel"))
         file = ""
+        xray_recorder.end_subsegment()
         if file_type == "pdf":
             file = st.file_uploader("Upload pdf file", type=["pdf"])
         elif file_type == "txt":
@@ -37,6 +40,7 @@ class Frontend:
         elif file_type == "Excel":
             file = st.file_uploader("Upload Excel file", type=["xlsx", "xls"])
 
+        xray_recorder.begin_subsegment("create-index")
         if st.button("Create Index", type="primary"):
             with st.spinner("Creating vector index..."):
                 file_path = f"tmp.{file_type}"
@@ -68,8 +72,10 @@ class Frontend:
                 st.session_state.vector_index = bk.create_embedded_index(file_path, file_type)
                 if os.path.exists(file_path):
                     os.remove(file_path)
+        xray_recorder.end_subsegment()
         input_question = st.text_area("Input Question")
 
+        xray_recorder.begin_subsegment("search-index")
         if st.button("Search Index", type="primary"):
             with st.spinner("Searching..."):
                 response = bk.rag_query(
@@ -78,6 +84,8 @@ class Frontend:
                     question=input_question,
                 )
                 st.write(response)
+        xray_recorder.end_subsegment()
+        xray_recorder.end_segment()
 
 
 # Frontend()

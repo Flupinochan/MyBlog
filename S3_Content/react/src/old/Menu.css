@@ -1,0 +1,108 @@
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY();
+    opacity: 1;
+  }
+}
+#menu {
+  display: flex;
+  justify-content: center;
+}
+
+#menu > #drop-menu {
+  opacity: 0;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  width: 50px;
+  /* background-color: #e5deff; */
+  /* border-bottom: 3px solid #e9ecef; */
+  /* padding: 10px; */
+  animation: slideUp 0.5s cubic-bezier(0, 0, 0.01, 1);
+  animation-delay: 0.8s;
+  animation-fill-mode: forwards;
+  position: relative;
+  z-index: 2;
+}
+
+#drop-menu {
+  cursor: pointer;
+  height: 40px;
+  line-height: 40px;
+  margin: 1px;
+  flex: 1 1;
+  width: 100%;
+  font-family: "Meiryo", "メイリオ", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  color: #4c54c0;
+  background-color: #e5deff;
+  font-size: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+#drop-menu a {
+  display: block;
+  text-decoration: none;
+  color: #4c54c0;
+}
+
+#drop-menu:hover,
+#drop-menu:hover a {
+  background-color: #4c54c0;
+  color: #e5deff;
+}
+
+/* #drop-menu a img {
+  opacity: 1;
+  height: 1em;
+  position: relative;
+  top: 2px;
+  right: 5px;
+  z-index: 2;
+} */
+
+#drop-menu ul {
+  visibility: hidden;
+  list-style-type: none;
+  position: absolute;
+  top: 22px;
+  left: -40px;
+  width: 100%;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#drop-menu:hover ul {
+  visibility: visible;
+  opacity: 1;
+}
+
+#drop-menu ul li:first-child {
+  border-top: 1.5px solid #e5deff;
+}
+
+#drop-menu ul li:not(:last-child) {
+  border-bottom: 1.5px solid #e5deff;
+}
+
+#drop-menu ul li a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+#drop-menu ul li a:not(:hover) {
+  background-color: #4c54c0;
+}
+
+#drop-menu ul li a:hover {
+  background-color: #4125e0;
+}

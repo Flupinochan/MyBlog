@@ -30,7 +30,7 @@ class Backend:
         connect_timeout=900,
     )
 
-    @xray_recorder.capture("llm_setting")
+    # @xray_recorder.capture("llm_setting")
     def llm_setting(self):
         try:
             model_id = "anthropic.claude-3-opus-20240229-v1:0"
@@ -48,9 +48,9 @@ class Backend:
             return llm
         except Exception as e:
             self.log.error(f"エラーが発生しました: {e}")
-        raise
+            return e
 
-    @xray_recorder.capture("llm_memory")
+    # @xray_recorder.capture("llm_memory")
     def llm_memory(self, llm):
         try:
             memory = ConversationBufferMemory(
@@ -60,14 +60,16 @@ class Backend:
             return memory
         except Exception as e:
             self.log.error(f"エラーが発生しました: {e}")
+            return e
 
-    @xray_recorder.capture("llm_chain")
+    # @xray_recorder.capture("llm_chain")
     def llm_chain(self, llm, memory):
         try:
             chain = ConversationChain(llm=llm, memory=memory)
             return chain
         except Exception as e:
             self.log.error(f"エラーが発生しました: {e}")
+            return e
 
     # def llm_chat(chain, text):
     #     stream_response = chain.stream(text)

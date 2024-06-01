@@ -11,8 +11,8 @@ import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as sfntask from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as path from 'path';
 import { WebSocketLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
-import path = require("path");
 import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
 import { Duration } from "aws-cdk-lib";
 
