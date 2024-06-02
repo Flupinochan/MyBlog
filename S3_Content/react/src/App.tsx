@@ -9,7 +9,7 @@ import Title from "./components/Title";
 import Menu from "./components/Menu";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
-// import GenAiHome from "./genai/GenAiHome";
+import GenAiHome from "./genai/GenAiHome";
 import GenImage from "./genai/GenImage";
 import GenGizi from "./genai/GenGizi";
 import GenText from "./genai/GenText";
@@ -30,6 +30,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/genaihome" element={<GenAiHome />} />
             <Route path="/genai/genimage" element={<GenImage />} />
             {/* <Route path="/genai/gengizi" element={<GenGizi />} /> */}
             <Route path="/genai/gentext" element={<GenText />} />

@@ -44,7 +44,7 @@ const Profile: React.FC = () => {
     }
   };
   return (
-    <div className="opacity-0 animate-fadeincontentProfile">
+    <div className="opacity-0 animate-fadeincontentProfile mb-40">
       <div className="flex flex-wrap md:flex-nowrap items-center justify-center">
         <div className="text-center w-1024 py-10">
           <h1
@@ -100,20 +100,19 @@ const Profile: React.FC = () => {
           </div>
         </div>
         <div className="md:justify-self-start">
-          <div className="mt-10 space-x-10">
+          <div className="mt-10 space-x-10 text-3xl">
             <a href="mailto:flupino@metalmental.net">
-              <i className="text-3xl fa-solid fa-envelope" />
+              <i className="text-3xl fa-solid fa-envelope lg:text-5xl md:text-4xl" />
             </a>
             <a href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">
-              <i className="text-3xl fa-brands fa-github" />
+              <i className="text-3xl fa-brands fa-github lg:text-5xl md:text-4xl" />
             </a>
             <a href="https://www.youtube.com/@Flupinochan" target="_blank" rel="noopener noreferrer">
-              <i className="text-3xl fa-brands fa-youtube" />
+              <i className="text-3xl fa-brands fa-youtube lg:text-5xl md:text-4xl" />
             </a>
           </div>
         </div>
       </div>
-      <div className="pb-48"></div>
     </div>
   );
 };

@@ -1,0 +1,343 @@
+# Create a [s3-myblog] in advance
+# Create a stack with the name [codepipeline-myblog]
+# ★Caution
+# After creating the CloudFormation Stack, please authenticate the connection for CodeStar Connection.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: My Blog Configuration
+        Parameters:
+          - S3NameForCodePipeline
+          - S3NameForMyBlog
+          - CodeStarConnectionName
+          - GitHubRepositoryName
+          - MainBranchName
+          - CloudFrontID
+          - CodePipelineName
+          - CodePipelineIAMRoleName
+          - CodePipelineIAMPolicyName
+          - CodeBuildProjectName
+          - CodeBuildIAMRoleName
+          - CodeBuildIAMPolicyName
+          - CodeBuildCloudWatchLogsName
+      - Label:
+          default: For Deleting S3 Bucket Configuration
+        Parameters:
+          - LambdaName
+          - CloudWatchLogsName
+          - IAMRoleName
+          - IAMPolicyName
+
+Parameters:
+  LambdaName:
+    Type: String
+    Default: "ForDeletingS3Object2"
+  CloudWatchLogsName:
+    Type: String
+    Default: "ForDeletingS3Object2"
+  IAMRoleName:
+    Type: String
+    Default: "ForDeletingS3Object2"
+  IAMPolicyName:
+    Type: String
+    Default: "ForDeletingS3Object2"
+
+  S3NameForCodePipeline:
+    Type: String
+    Default: "metalmental-myblog-codepipeline-s3"
+  S3NameForMyBlog:
+    Type: String
+    Default: "metalmental-myblog"
+  CodeStarConnectionName:
+    Type: String
+    Default: "metalmental-myblog"
+  GitHubRepositoryName:
+    Type: String
+    Default: "Flupinochan/MyBlog"
+  MainBranchName:
+    Type: String
+    Default: "master"
+  CloudFrontID:
+    Type: String
+    Default: "E392B62NFG9IBQ"
+
+  CodePipelineName:
+    Type: String
+    Default: "metalmental-myblog"
+  CodePipelineIAMRoleName:
+    Type: String
+    Default: "metalmental-myblog-CodePipelineIAMRole"
+  CodePipelineIAMPolicyName:
+    Type: String
+    Default: "metalmental-myblog-CodePipelineIAMPolicy"
+
+  CodeBuildCloudWatchLogsName:
+    Type: String
+    Default: "metalmental-myblog-CodeDeployBuild"
+  CodeBuildProjectName:
+    Type: String
+    Default: "metalmental-myblog"
+  CodeBuildIAMRoleName:
+    Type: String
+    Default: "metalmental-myblog-CodeBuildIAMRole"
+  CodeBuildIAMPolicyName:
+    Type: String
+    Default: "metalmental-myblog-CodeBuildIAMPolicy"
+
+Resources:
+  CodeStarConnection:
+    Type: AWS::CodeStarConnections::Connection
+    Properties:
+      ConnectionName: !Ref CodeStarConnectionName
+      ProviderType: "GitHub"
+
+  S3:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3NameForCodePipeline
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: FALSE
+      IntelligentTieringConfigurations:
+        - Id: "IntelligentTieringConfigurations"
+          Status: "Enabled"
+          Tierings:
+            - Days: 90
+              AccessTier: "ARCHIVE_ACCESS"
+            - Days: 180
+              AccessTier: "DEEP_ARCHIVE_ACCESS"
+
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref CodePipelineName
+      ExecutionMode: "QUEUED"
+      PipelineType: "V2"
+      ArtifactStore:
+        Type: "S3"
+        Location: !Ref S3
+      RoleArn: !GetAtt CodePipelineIAMRole.Arn
+      Stages:
+        - Name: "Source" # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-example
+          Actions:
+            - Name: "Source"
+              RunOrder: 1
+              ActionTypeId:
+                Category: "Source"
+                Owner: "AWS"
+                Provider: "CodeStarSourceConnection"
+                Version: "1"
+              Configuration:
+                FullRepositoryId: !Ref GitHubRepositoryName
+                ConnectionArn: !Ref CodeStarConnection
+                BranchName: !Ref MainBranchName
+              OutputArtifacts:
+                - Name: "SourceArtifacts"
+        - Name: "Build"
+          Actions:
+            - Name: "Build"
+              ActionTypeId:
+                Category: "Build"
+                Owner: "AWS"
+                Provider: "CodeBuild"
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref CodeBuild
+              InputArtifacts:
+                - Name: "SourceArtifacts"
+  CodePipelineIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CodePipelineIAMRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+      Policies:
+        - PolicyName: !Ref CodePipelineIAMPolicyName
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codestar-connections:*
+                  - "codecommit:*"
+                  - "codebuild:*"
+                  - "codedeploy:*"
+                  - "logs:*"
+                  - "s3:*"
+                  - "cloudwatch:*"
+                  - "sns:*"
+                  - "iam:PassRole"
+                Resource: "*"
+        # - Name: "Deploy" # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-S3Deploy.html
+        #   Actions:
+        #     - Name: "Deploy"
+        #       ActionTypeId:
+        #         Category: "Deploy"
+        #         Owner: "AWS"
+        #         Provider: "S3"
+        #         Version: "1"
+        #       Configuration:
+        #         BucketName: !Ref S3NameForMyBlog
+        #         Extract: 'true'
+        #       InputArtifacts:
+        #         - Name: "SourceArtifacts"
+
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref CodeBuildProjectName
+      ServiceRole: !Ref CodeBuildIAMRole
+      Artifacts:
+        Type: "NO_ARTIFACTS"
+      Environment:
+        Type: "LINUX_CONTAINER"
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: "aws/codebuild/amazonlinux2-x86_64-standard:5.0"
+        PrivilegedMode: True
+        EnvironmentVariables:
+          - Name: "MyBlogS3BucketName"
+            Value: !Ref S3NameForMyBlog
+            Type: "PLAINTEXT"
+          - Name: "StackName"
+            Value: "SAM-generativeAI"
+            Type: "PLAINTEXT"
+          - Name: "S3BucketName"
+            Value: "us-east-1-for-generativeai-sam-bucket"
+            Type: "PLAINTEXT"
+          - Name: "CloudFrontID"
+            Value: !Ref CloudFrontID
+            Type: "PLAINTEXT"
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName: !Ref CodeBuildClousWatchLogs
+          Status: "ENABLED"
+      Source:
+        Type: "NO_SOURCE"
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                python: 3.12
+            pre_build:
+              commands:
+                - echo "S3 Sync"
+                - aws s3 sync ./S3_Content/react/build/ s3://${MyBlogS3BucketName} --delete
+                - echo "Clearing CloudFront Cache"
+                - aws cloudfront create-invalidation --distribution-id ${CloudFrontID} --paths "/*"
+            build:
+              commands:
+                - cd S3_Content/generative_ai/
+                - python -m venv myenv
+                - source myenv/bin/activate
+                - mkdir -p lambda_layer/python
+                - mv requirements.txt lambda_layer/
+                - pip install -r lambda_layer/requirements.txt -t lambda_layer/python
+            post_build:
+              commands:
+                - echo "Deploy Lambda generativeAI"
+                - sam build --template-file template.yaml
+                - sam package --template-file .aws-sam/build/template.yaml --output-template-file package.yml --s3-bucket ${S3BucketName} --region 'us-east-1'
+                - sam deploy --template-file package.yml --stack-name ${StackName} --capabilities CAPABILITY_NAMED_IAM --region 'us-east-1'
+  CodeBuildClousWatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref CodeBuildCloudWatchLogsName
+      RetentionInDays: 1
+  CodeBuildIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CodeBuildIAMRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+      Policies:
+        - PolicyName: !Ref CodeBuildIAMPolicyName
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "codebuild:*"
+                  - "logs:*"
+                  - "s3:*"
+                  - "cloudformation:*"
+                  - "iam:*"
+                  - "lambda:*"
+                  - "cloudfront:*"
+                Resource: "*"
+
+  LambdaForDeletingS3Object:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaName
+      Handler: index.lambda_handler
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Runtime: python3.12
+      Timeout: 300
+      LoggingConfig:
+        LogGroup: !Ref CloudWatchLogs
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          def lambda_handler(event, context):
+              s3 = boto3.resource('s3')
+              try:
+                  if event['RequestType'] == 'Delete':
+                      bucket = s3.Bucket(event['ResourceProperties']['BucketName'])
+                      bucket.objects.all().delete()
+                      bucket.object_versions.all().delete()
+                      s3.Bucket(event['ResourceProperties']['BucketName']).delete()
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print("Error: ", e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+  InvokeLambda:
+    Type: Custom::EmptyS3Bucket
+    Properties:
+      ServiceToken: !GetAtt LambdaForDeletingS3Object.Arn
+      BucketName: !Ref S3
+  IAMRoleForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref IAMRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Ref IAMPolicyName
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - logs:*
+                Resource:
+                  - !Sub ${S3.Arn}
+                  - !Sub ${S3.Arn}/*
+  CloudWatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref CloudWatchLogsName
+      LogGroupClass: INFREQUENT_ACCESS
+      RetentionInDays: 1

@@ -4,11 +4,10 @@ import { Sling as Hamburger } from "hamburger-react";
 // import { push as Hamburger } from "react-burger-menu";
 
 const Menu: React.FC = () => {
-  const [isOpen, setOpen] = useState<true | false>(false);
+  const [isOpen, setOpen] = useState<boolean>(false);
   const handleClose = () => {
     setOpen(false);
   };
-
   // Animationは、z-indexが効かないので、Animationが終わった後に削除する
   const animatedRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -24,6 +23,20 @@ const Menu: React.FC = () => {
       };
     }
   }, []);
+
+  const topMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const topMenuElement = topMenuRef.current!;
+    if (!isOpen) {
+      topMenuElement.classList.remove("animate-fadeInMenu");
+      topMenuElement.classList.add("animate-fadeOutMenu");
+      topMenuElement.classList.add("invisible");
+    } else if (isOpen) {
+      topMenuElement.classList.remove("animate-fadeOutMenu");
+      topMenuElement.classList.remove("invisible");
+      topMenuElement.classList.add("animate-fadeInMenu");
+    }
+  }, [isOpen]);
 
   return (
     <div>
@@ -59,33 +72,16 @@ const Menu: React.FC = () => {
           Profile
         </Link>
       </div>
-      {/* <div className="md:hidden opacity-0 animate-slideright relative z-menulist-10 transition-transform duration-300 transform"> */}
-      <div className="md:hidden opacity-0 animate-slideright relative z-menulist-10 transition-transform duration-300 transform">
+      <div className="md:hidden opacity-0 animate-slideright relative z-menulist-10">
         <div className="flex flex-col items-end">
           <Hamburger toggled={isOpen} toggle={setOpen} />
-          {/* <div onClick={handleClose} className={`md:hidden absolute flex flex-col text-center top-10 text-xl transition-transform duration-300 transform ${isOpen ? "animate-slideRight" : "translate-x-trans-x-120"}`}> */}
-          <div onClick={handleClose} className={`absolute flex flex-col text-center top-10 text-xl transition-transform duration-300 transform ${isOpen ? "animate-slideRight" : "translate-x-trans-x-120"}`}>
+          <div ref={topMenuRef} onClick={handleClose} className="absolute flex flex-col text-center top-10 text-xl">
             <Link className="py-2 px-5 mb-1 custom-button" to="/">
               Home
             </Link>
-            <div className="p-2 mb-1 custom-button group relative">
-              <div>GenAI</div>
-              <Link className="link2 top-0" to="/genai/genimage">
-                GenIMG
-              </Link>
-              <Link className="link2 top-12" to="/genai/gengizi">
-                GenGizi
-              </Link>
-              <Link className="link2 top-24" to="/genai/gentext">
-                GenText
-              </Link>
-              <a className="link2 top-36" href="https://www.metalmental.net/streamlit/">
-                Streamlit
-              </a>
-              <Link className="link2 top-48" to="/genai/getkb">
-                KB
-              </Link>
-            </div>
+            <Link className="p-2 mb-1 custom-button" to="/genaihome">
+              GenAI
+            </Link>
             <a className="p-2 mb-1 custom-button" href="https://github.com/Flupinochan" target="_blank" rel="noopener noreferrer">
               GitHub
             </a>

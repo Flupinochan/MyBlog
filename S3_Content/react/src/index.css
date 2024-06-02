@@ -19,6 +19,31 @@ p {
   margin-right: 0;
 }
 
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .animate-fadeInMenu {
+    animation: fadeIn 200ms ease-in-out forwards;
+  }
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  .animate-fadeOutMenu {
+    animation: fadeOut 200ms ease-in-out forwards;
+  }
+}
+
 .img-grid {
   @apply grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6;
 }
@@ -45,27 +70,10 @@ p {
   text-font-color1 bg-font-color2
   group-hover:bg-font-color1 group-hover:text-font-color2 group-hover:visible
   z-menulist-10
-  transition-all duration-300
   border-b-white;
 }
 
 .link:hover {
-  @apply !text-link-color;
-}
-
-.link2 {
-  @apply absolute
-  invisible
-  right-0 w-full h-full
-  flex justify-center items-center
-  text-font-color1 bg-font-color2
-  group-hover:bg-font-color1 group-hover:text-font-color2 group-hover:visible group-hover:right-genai-custom
-  z-menulist--10
-  transition-all duration-300
-  border-b-white;
-}
-
-.link2:hover {
   @apply !text-link-color;
 }
 

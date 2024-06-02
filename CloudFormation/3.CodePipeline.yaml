@@ -223,10 +223,14 @@ Resources:
         Type: "NO_SOURCE"
         BuildSpec: |
           version: 0.2
+          env:
+            shell: bash
           phases:
             install:
               runtime-versions:
-                python: 3.12
+                nodejs: 20
+              commands:
+                - npm install
             pre_build:
               commands:
                 - echo "S3 Sync"
@@ -235,18 +239,11 @@ Resources:
                 - aws cloudfront create-invalidation --distribution-id ${CloudFrontID} --paths "/*"
             build:
               commands:
-                - cd S3_Content/generative_ai/
-                - python -m venv myenv
-                - source myenv/bin/activate
-                - mkdir -p lambda_layer/python
-                - mv requirements.txt lambda_layer/
-                - pip install -r lambda_layer/requirements.txt -t lambda_layer/python
+                - cd CDK/
+                - npm run cdk deploy -- --require-approval never --ci true
             post_build:
               commands:
-                - echo "Deploy Lambda generativeAI"
-                - sam build --template-file template.yaml
-                - sam package --template-file .aws-sam/build/template.yaml --output-template-file package.yml --s3-bucket ${S3BucketName} --region 'us-east-1'
-                - sam deploy --template-file package.yml --stack-name ${StackName} --capabilities CAPABILITY_NAMED_IAM --region 'us-east-1'
+                - echo "nothing"
   CodeBuildClousWatchLogs:
     Type: AWS::Logs::LogGroup
     Properties:
