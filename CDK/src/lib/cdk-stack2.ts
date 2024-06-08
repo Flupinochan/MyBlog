@@ -80,22 +80,22 @@ export class MyBlogStack2 extends cdk.Stack {
         }),
       },
     });
-    const taskExecutionRole = new iam.Role(this, param.ECS.TaskExecutionRoleName, {
-      roleName: param.ECS.TaskExecutionRoleName,
-      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
-      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMReadOnlyAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy")],
-      inlinePolicies: {
-        inlinePolicy: new iam.PolicyDocument({
-          statements: [
-            new iam.PolicyStatement({
-              effect: iam.Effect.ALLOW,
-              actions: ["ecr:*", "logs:*"],
-              resources: ["*"],
-            }),
-          ],
-        }),
-      },
-    });
+    // const taskExecutionRole = new iam.Role(this, param.ECS.TaskExecutionRoleName, {
+    //   roleName: param.ECS.TaskExecutionRoleName,
+    //   assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+    //   managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMReadOnlyAccess"), iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy")],
+    //   inlinePolicies: {
+    //     inlinePolicy: new iam.PolicyDocument({
+    //       statements: [
+    //         new iam.PolicyStatement({
+    //           effect: iam.Effect.ALLOW,
+    //           actions: ["ecr:*", "logs:*"],
+    //           resources: ["*"],
+    //         }),
+    //       ],
+    //     }),
+    //   },
+    // });
     const taskNginx = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameNginx, {
       family: param.ECS.TaskNameNginx,
       cpu: 256,
@@ -376,19 +376,18 @@ export class MyBlogStack2 extends cdk.Stack {
       crossZoneEnabled: true,
       http2Enabled: true,
     });
-    const albS3Logs = new s3.Bucket(this, param.ECS.S3Name, {
-      bucketName: param.ECS.S3Name,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-      lifecycleRules: [
-        {
-          enabled: true,
-          expiration: Duration.days(1),
-        },
-      ],
-    });
-    // AccessLogs & ConnectionLogs
-    alb.logAccessLogs(albS3Logs);
+    // const albS3Logs = new s3.Bucket(this, param.ECS.S3Name, {
+    //   bucketName: param.ECS.S3Name,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    //   autoDeleteObjects: true,
+    //   lifecycleRules: [
+    //     {
+    //       enabled: true,
+    //       expiration: Duration.days(1),
+    //     },
+    //   ],
+    // });
+
     const certificateArn = "";
     const certificate = certmgr.Certificate.fromCertificateArn(this, "MyBlogCertificate", certificateArn);
     const listener443 = alb.addListener(param.ECS.ALBTargetGroupName, {
@@ -413,8 +412,10 @@ export class MyBlogStack2 extends cdk.Stack {
       stickinessCookieDuration: Duration.days(1),
     });
     // https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/APIReference/API_LoadBalancerAttribute.html
-    alb.setAttribute("connection_logs.s3.enabled", "true");
-    alb.setAttribute("connection_logs.s3.bucket", albS3Logs.bucketName);
+    // AccessLogs & ConnectionLogs
+    // alb.logAccessLogs(albS3Logs);
+    // alb.setAttribute("connection_logs.s3.enabled", "true");
+    // alb.setAttribute("connection_logs.s3.bucket", albS3Logs.bucketName);
 
     // const glueCatalog = new glue.CfnDataCatalogEncryptionSettings(
     //   this,
@@ -428,167 +429,167 @@ export class MyBlogStack2 extends cdk.Stack {
     //     },
     //   }
     // );
-    const glueDatabase = new glue.CfnDatabase(this, param.Glue.DatabaseName, {
-      catalogId: accountId,
-      databaseInput: {
-        name: param.Glue.DatabaseName,
-      },
-    });
-    const glueAlbTable = new glue.CfnTable(this, param.Glue.AlbTableName, {
-      catalogId: accountId,
-      databaseName: glueDatabase.ref,
-      tableInput: {
-        name: param.Glue.AlbTableName,
-        tableType: "EXTERNAL_TABLE",
-        parameters: {
-          "projection.enabled": "true",
-          "projection.date.type": "date",
-          "projection.date.range": "NOW-1YEARS, NOW",
-          "projection.date.format": "yyyy/MM/dd",
-          "projection.date.interval": "1",
-          "projection.date.interval.unit": "DAYS",
-          "projection.region.type": "enum",
-          "projection.region.values": "af-south-1,ap-east-1,ap-northeast-1,ap-northeast-2,ap-northeast-3,ap-south-1,ap-southeast-1,ap-southeast-2,ca-central-1,eu-central-1,eu-north-1,eu-south-1,eu-west-1,eu-west-2,eu-west-3,me-south-1,sa-east-1,us-east-1,us-east-2,us-west-1,us-west-2",
-          "storage.location.template": `s3://${param.ECS.S3Name}/AWSLogs/${accountId}/elasticloadbalancing/` + "${region}/${date}/",
-        },
-        partitionKeys: [
-          {
-            name: "date",
-            type: "string",
-          },
-          {
-            name: "region",
-            type: "string",
-          },
-        ],
-        storageDescriptor: {
-          columns: [
-            { name: "type", type: "string" },
-            { name: "time", type: "string" },
-            { name: "elb", type: "string" },
-            { name: "client_ip", type: "string" },
-            { name: "client_port", type: "int" },
-            { name: "target_ip", type: "string" },
-            { name: "target_port", type: "int" },
-            { name: "request_processing_time", type: "double" },
-            { name: "target_processing_time", type: "double" },
-            { name: "response_processing_time", type: "double" },
-            { name: "elb_status_code", type: "int" },
-            { name: "target_status_code", type: "string" },
-            { name: "received_bytes", type: "bigint" },
-            { name: "sent_bytes", type: "bigint" },
-            { name: "request_verb", type: "string" },
-            { name: "request_url", type: "string" },
-            { name: "request_proto", type: "string" },
-            { name: "user_agent", type: "string" },
-            { name: "ssl_cipher", type: "string" },
-            { name: "ssl_protocol", type: "string" },
-            { name: "target_group_arn", type: "string" },
-            { name: "trace_id", type: "string" },
-            { name: "domain_name", type: "string" },
-            { name: "chosen_cert_arn", type: "string" },
-            { name: "matched_rule_priority", type: "string" },
-            { name: "request_creation_time", type: "string" },
-            { name: "actions_executed", type: "string" },
-            { name: "redirect_url", type: "string" },
-            { name: "lambda_error_reason", type: "string" },
-            { name: "target_port_list", type: "string" },
-            { name: "target_status_code_list", type: "string" },
-            { name: "classification", type: "string" },
-            { name: "classification_reason", type: "string" },
-          ],
-          location: `s3://${param.ECS.S3Name}/AWSLogs/${accountId}/elasticloadbalancing/`,
-          inputFormat: "org.apache.hadoop.mapred.TextInputFormat",
-          outputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
-          serdeInfo: {
-            serializationLibrary: "org.apache.hadoop.hive.serde2.RegexSerDe",
-            parameters: {
-              "serialization.format": "1",
-              "input.regex": '([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) "([^ ]*) (.*) (- |[^ ]*)" "([^"]*)" ([A-Z0-9-_]+) ([A-Za-z0-9.-]*) ([^ ]*) "([^"]*)" "([^"]*)" "([^"]*)" ([-.0-9]*) ([^ ]*) "([^"]*)" "([^"]*)" "([^ ]*)" "([^s]+?)" "([^s]+)" "([^ ]*)" "([^ ]*)"',
-            },
-          },
-        },
-      },
-    });
-    const glueCloudFrontTable = new glue.CfnTable(this, param.Glue.CloudFrontTableName, {
-      catalogId: accountId,
-      databaseName: glueDatabase.ref,
-      tableInput: {
-        name: param.Glue.CloudFrontTableName,
-        tableType: "EXTERNAL_TABLE",
-        parameters: {
-          "skip.header.line.count": "2",
-        },
-        storageDescriptor: {
-          columns: [
-            { name: "date", type: "DATE" },
-            { name: "time", type: "STRING" },
-            { name: "x_edge_location", type: "STRING" },
-            { name: "sc_bytes", type: "BIGINT" },
-            { name: "c_ip", type: "STRING" },
-            { name: "cs_method", type: "STRING" },
-            { name: "cs_host", type: "STRING" },
-            { name: "cs_uri_stem", type: "STRING" },
-            { name: "sc_status", type: "INT" },
-            { name: "cs_referrer", type: "STRING" },
-            { name: "cs_user_agent", type: "STRING" },
-            { name: "cs_uri_query", type: "STRING" },
-            { name: "cs_cookie", type: "STRING" },
-            { name: "x_edge_result_type", type: "STRING" },
-            { name: "x_edge_request_id", type: "STRING" },
-            { name: "x_host_header", type: "STRING" },
-            { name: "cs_protocol", type: "STRING" },
-            { name: "cs_bytes", type: "BIGINT" },
-            { name: "time_taken", type: "FLOAT" },
-            { name: "x_forwarded_for", type: "STRING" },
-            { name: "ssl_protocol", type: "STRING" },
-            { name: "ssl_cipher", type: "STRING" },
-            { name: "x_edge_response_result_type", type: "STRING" },
-            { name: "cs_protocol_version", type: "STRING" },
-            { name: "fle_status", type: "STRING" },
-            { name: "fle_encrypted_fields", type: "INT" },
-            { name: "c_port", type: "INT" },
-            { name: "time_to_first_byte", type: "FLOAT" },
-            { name: "x_edge_detailed_result_type", type: "STRING" },
-            { name: "sc_content_type", type: "STRING" },
-            { name: "sc_content_len", type: "BIGINT" },
-            { name: "sc_range_start", type: "BIGINT" },
-            { name: "sc_range_end", type: "BIGINT" },
-          ],
-          location: param.Glue.CloudFrontS3BucketURILog,
-          inputFormat: "org.apache.hadoop.mapred.TextInputFormat",
-          outputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
-          serdeInfo: {
-            serializationLibrary: "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe",
-            parameters: {
-              "serialization.format": "\t",
-            },
-          },
-        },
-      },
-    });
-    const athenaS3Logs = new s3.Bucket(this, param.Glue.AthenaBucketName, {
-      bucketName: param.Glue.AthenaBucketName,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-      lifecycleRules: [
-        {
-          enabled: true,
-          expiration: Duration.days(1),
-        },
-      ],
-    });
-    const workGroup = new athena.CfnWorkGroup(this, param.Glue.WorkGroupName, {
-      name: param.Glue.WorkGroupName,
-      recursiveDeleteOption: true,
-      state: "ENABLED",
-      workGroupConfiguration: {
-        bytesScannedCutoffPerQuery: 100000000000,
-        resultConfiguration: {
-          expectedBucketOwner: accountId,
-          outputLocation: `s3://${param.Glue.AthenaBucketName}/`,
-        },
-      },
-    });
+    // const glueDatabase = new glue.CfnDatabase(this, param.Glue.DatabaseName, {
+    //   catalogId: accountId,
+    //   databaseInput: {
+    //     name: param.Glue.DatabaseName,
+    //   },
+    // });
+    // const glueAlbTable = new glue.CfnTable(this, param.Glue.AlbTableName, {
+    //   catalogId: accountId,
+    //   databaseName: glueDatabase.ref,
+    //   tableInput: {
+    //     name: param.Glue.AlbTableName,
+    //     tableType: "EXTERNAL_TABLE",
+    //     parameters: {
+    //       "projection.enabled": "true",
+    //       "projection.date.type": "date",
+    //       "projection.date.range": "NOW-1YEARS, NOW",
+    //       "projection.date.format": "yyyy/MM/dd",
+    //       "projection.date.interval": "1",
+    //       "projection.date.interval.unit": "DAYS",
+    //       "projection.region.type": "enum",
+    //       "projection.region.values": "af-south-1,ap-east-1,ap-northeast-1,ap-northeast-2,ap-northeast-3,ap-south-1,ap-southeast-1,ap-southeast-2,ca-central-1,eu-central-1,eu-north-1,eu-south-1,eu-west-1,eu-west-2,eu-west-3,me-south-1,sa-east-1,us-east-1,us-east-2,us-west-1,us-west-2",
+    //       "storage.location.template": `s3://${param.ECS.S3Name}/AWSLogs/${accountId}/elasticloadbalancing/` + "${region}/${date}/",
+    //     },
+    //     partitionKeys: [
+    //       {
+    //         name: "date",
+    //         type: "string",
+    //       },
+    //       {
+    //         name: "region",
+    //         type: "string",
+    //       },
+    //     ],
+    //     storageDescriptor: {
+    //       columns: [
+    //         { name: "type", type: "string" },
+    //         { name: "time", type: "string" },
+    //         { name: "elb", type: "string" },
+    //         { name: "client_ip", type: "string" },
+    //         { name: "client_port", type: "int" },
+    //         { name: "target_ip", type: "string" },
+    //         { name: "target_port", type: "int" },
+    //         { name: "request_processing_time", type: "double" },
+    //         { name: "target_processing_time", type: "double" },
+    //         { name: "response_processing_time", type: "double" },
+    //         { name: "elb_status_code", type: "int" },
+    //         { name: "target_status_code", type: "string" },
+    //         { name: "received_bytes", type: "bigint" },
+    //         { name: "sent_bytes", type: "bigint" },
+    //         { name: "request_verb", type: "string" },
+    //         { name: "request_url", type: "string" },
+    //         { name: "request_proto", type: "string" },
+    //         { name: "user_agent", type: "string" },
+    //         { name: "ssl_cipher", type: "string" },
+    //         { name: "ssl_protocol", type: "string" },
+    //         { name: "target_group_arn", type: "string" },
+    //         { name: "trace_id", type: "string" },
+    //         { name: "domain_name", type: "string" },
+    //         { name: "chosen_cert_arn", type: "string" },
+    //         { name: "matched_rule_priority", type: "string" },
+    //         { name: "request_creation_time", type: "string" },
+    //         { name: "actions_executed", type: "string" },
+    //         { name: "redirect_url", type: "string" },
+    //         { name: "lambda_error_reason", type: "string" },
+    //         { name: "target_port_list", type: "string" },
+    //         { name: "target_status_code_list", type: "string" },
+    //         { name: "classification", type: "string" },
+    //         { name: "classification_reason", type: "string" },
+    //       ],
+    //       location: `s3://${param.ECS.S3Name}/AWSLogs/${accountId}/elasticloadbalancing/`,
+    //       inputFormat: "org.apache.hadoop.mapred.TextInputFormat",
+    //       outputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+    //       serdeInfo: {
+    //         serializationLibrary: "org.apache.hadoop.hive.serde2.RegexSerDe",
+    //         parameters: {
+    //           "serialization.format": "1",
+    //           "input.regex": '([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) "([^ ]*) (.*) (- |[^ ]*)" "([^"]*)" ([A-Z0-9-_]+) ([A-Za-z0-9.-]*) ([^ ]*) "([^"]*)" "([^"]*)" "([^"]*)" ([-.0-9]*) ([^ ]*) "([^"]*)" "([^"]*)" "([^ ]*)" "([^s]+?)" "([^s]+)" "([^ ]*)" "([^ ]*)"',
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
+    // const glueCloudFrontTable = new glue.CfnTable(this, param.Glue.CloudFrontTableName, {
+    //   catalogId: accountId,
+    //   databaseName: glueDatabase.ref,
+    //   tableInput: {
+    //     name: param.Glue.CloudFrontTableName,
+    //     tableType: "EXTERNAL_TABLE",
+    //     parameters: {
+    //       "skip.header.line.count": "2",
+    //     },
+    //     storageDescriptor: {
+    //       columns: [
+    //         { name: "date", type: "DATE" },
+    //         { name: "time", type: "STRING" },
+    //         { name: "x_edge_location", type: "STRING" },
+    //         { name: "sc_bytes", type: "BIGINT" },
+    //         { name: "c_ip", type: "STRING" },
+    //         { name: "cs_method", type: "STRING" },
+    //         { name: "cs_host", type: "STRING" },
+    //         { name: "cs_uri_stem", type: "STRING" },
+    //         { name: "sc_status", type: "INT" },
+    //         { name: "cs_referrer", type: "STRING" },
+    //         { name: "cs_user_agent", type: "STRING" },
+    //         { name: "cs_uri_query", type: "STRING" },
+    //         { name: "cs_cookie", type: "STRING" },
+    //         { name: "x_edge_result_type", type: "STRING" },
+    //         { name: "x_edge_request_id", type: "STRING" },
+    //         { name: "x_host_header", type: "STRING" },
+    //         { name: "cs_protocol", type: "STRING" },
+    //         { name: "cs_bytes", type: "BIGINT" },
+    //         { name: "time_taken", type: "FLOAT" },
+    //         { name: "x_forwarded_for", type: "STRING" },
+    //         { name: "ssl_protocol", type: "STRING" },
+    //         { name: "ssl_cipher", type: "STRING" },
+    //         { name: "x_edge_response_result_type", type: "STRING" },
+    //         { name: "cs_protocol_version", type: "STRING" },
+    //         { name: "fle_status", type: "STRING" },
+    //         { name: "fle_encrypted_fields", type: "INT" },
+    //         { name: "c_port", type: "INT" },
+    //         { name: "time_to_first_byte", type: "FLOAT" },
+    //         { name: "x_edge_detailed_result_type", type: "STRING" },
+    //         { name: "sc_content_type", type: "STRING" },
+    //         { name: "sc_content_len", type: "BIGINT" },
+    //         { name: "sc_range_start", type: "BIGINT" },
+    //         { name: "sc_range_end", type: "BIGINT" },
+    //       ],
+    //       location: param.Glue.CloudFrontS3BucketURILog,
+    //       inputFormat: "org.apache.hadoop.mapred.TextInputFormat",
+    //       outputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+    //       serdeInfo: {
+    //         serializationLibrary: "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe",
+    //         parameters: {
+    //           "serialization.format": "\t",
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
+    // const athenaS3Logs = new s3.Bucket(this, param.Glue.AthenaBucketName, {
+    //   bucketName: param.Glue.AthenaBucketName,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    //   autoDeleteObjects: true,
+    //   lifecycleRules: [
+    //     {
+    //       enabled: true,
+    //       expiration: Duration.days(1),
+    //     },
+    //   ],
+    // });
+    // const workGroup = new athena.CfnWorkGroup(this, param.Glue.WorkGroupName, {
+    //   name: param.Glue.WorkGroupName,
+    //   recursiveDeleteOption: true,
+    //   state: "ENABLED",
+    //   workGroupConfiguration: {
+    //     bytesScannedCutoffPerQuery: 100000000000,
+    //     resultConfiguration: {
+    //       expectedBucketOwner: accountId,
+    //       outputLocation: `s3://${param.Glue.AthenaBucketName}/`,
+    //     },
+    //   },
+    // });
   }
 }

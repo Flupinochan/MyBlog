@@ -11,6 +11,8 @@ import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as sfntask from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as certmgr from "aws-cdk-lib/aws-certificatemanager";
 import * as path from 'path';
 import { WebSocketLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
@@ -171,6 +173,85 @@ export class MyBlogStack extends cdk.Stack {
         allowCredentials: true,
       },
     });
+
+    const cognitoUserPool = new cognito.UserPool(this, param.cognito.userPoolName, {
+      userPoolName: param.cognito.userPoolName,
+      accountRecovery: cognito.AccountRecovery.EMAIL_AND_PHONE_WITHOUT_MFA,
+      autoVerify: {
+        email: true,
+      },
+      selfSignUpEnabled: true,
+      signInAliases: {
+        username: false,
+        email: true,
+      },
+      standardAttributes: {
+        email: {
+          required: true,
+          mutable: true,
+        },
+      },
+      userVerification: {
+        emailStyle: cognito.VerificationEmailStyle.CODE, // CODE or LINK
+        emailSubject: 'Verify your email for MetalMental Blog!',
+        emailBody: 'Thanks for signing up to MetalMental Blog! Your verification code is {####}',
+        smsMessage: 'Thanks for signing up to MetalMental Blog! Your verification code is {####}',
+      },
+      email: cognito.UserPoolEmail.withSES({
+        sesRegion: "us-west-2",
+        fromName: "MetalMental Blog",
+        fromEmail: "flupino@metalmental.net",
+      }),
+      signInCaseSensitive: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+  // Cognitoのデフォルトドメイン
+  // cognitoUserPool.addDomain('CognitoDomain', {
+  //   cognitoDomain: {
+  //     domainPrefix: 'metalmental',
+  //   },
+  // });
+
+    // サブドメインであること? 親ドメインにはAレコードを127.0.0.1で良いので設定しておくこと
+    // ACMのリージョンはバージニアのみ
+    const certificateArn = "";
+    const certificate = certmgr.Certificate.fromCertificateArn(this, "CognitoCertificate", certificateArn);
+    cognitoUserPool.addDomain('CustomDomain', {
+      customDomain: {
+        domainName: 'auth.metalmental.net',
+        certificate: certificate,
+      },
+    });
+
+    cognitoUserPool.addClient(param.cognito.userPoolClientName, {
+      userPoolClientName: param.cognito.userPoolClientName,
+      authFlows: {
+        userSrp: true,
+      },
+      generateSecret: true,
+      preventUserExistenceErrors: true,
+      supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.COGNITO],
+      oAuth: {
+        flows: {
+          authorizationCodeGrant: true,
+        },
+        scopes: [
+          cognito.OAuthScope.OPENID,
+          cognito.OAuthScope.EMAIL,
+          cognito.OAuthScope.PROFILE,
+        ],
+        callbackUrls: ["https://chatbot.metalmental.net/"],
+        logoutUrls: ["https://www.metalmental.net/"],
+      },
+    });
+
+    // Googole Authentication
+    // const provider = new cognito.UserPoolIdentityProviderAmazon(this, 'Amazon', {
+    //   clientId: 'amzn-client-id',
+    //   clientSecret: 'amzn-client-secret',
+    //   userPool: userpool,
+    // });
 
     const validatorGet = new apigw.RequestValidator(this, "validatorGet", {
       restApi: apigwGenAi,

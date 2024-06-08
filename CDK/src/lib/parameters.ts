@@ -78,4 +78,9 @@ export class MyBlogParam {
     modelNameResponseStart: "stepfunctionsstart",
     modelNameResponseDescribe: "stepfunctionsdescribe",
   };
-}
+  cognito = {
+    userPoolName: "MyBlog-UserPool",
+    userPoolClientName: "MyBlog-UserPool-Client",
+    identityPoolName: "MyBlog-IdentityPool",
+  };
+};
