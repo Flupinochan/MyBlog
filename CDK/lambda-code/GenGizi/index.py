@@ -177,6 +177,13 @@ AWSやITに関係する用語はカタカナではなく英語やアルファベ
                 retries -= 1
 
     except Exception as e:
+        websocket_client = boto3.client(
+            "apigatewaymanagementapi",
+            endpoint_url=f"https://{DOMAIN_NAME}/{STAGE_NAME}",
+        )
+        data = "エラーが発生しました。"
+        bytes_data = data.encode()
+        websocket_client.post_to_connection(Data=bytes_data, ConnectionId=CONNECT_ID)
         log.error(f"エラーが発生しました: {e}")
         raise
 

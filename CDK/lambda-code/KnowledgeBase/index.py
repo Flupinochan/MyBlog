@@ -18,7 +18,7 @@ patch_all()
 # Environment Variable Setting
 # ----------------------------------------------------------------------
 try:
-    S3_BUCKET_NAME = "myblog-knowledgebase-datasource"
+    S3_BUCKET_NAME = "myblog-generate-image"
     MODEL_ARN = "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
     # "arn:aws:bedrock:us-west-2::foundation-model/" + MODEL_ID
 except KeyError:
@@ -110,14 +110,14 @@ def get_knowledge(event):
         s3_uri = f"s3://{S3_BUCKET_NAME}/{file_name}"
         log.debug(f"user_prompt: {user_prompt}")
 
+        # ★Caution: request parameter is externalSourcesConfiguration
         response = bedrock_agent_runtime_client.retrieve_and_generate(
-            # sessionId='string', # for creating chatbot
             input={
                 "text": user_prompt,
             },
             retrieveAndGenerateConfiguration={
                 "type": "EXTERNAL_SOURCES",
-                "knowledgeBaseConfiguration": {
+                "externalSourcesConfiguration": {
                     "modelArn": MODEL_ARN,
                     "sources": [
                         {
