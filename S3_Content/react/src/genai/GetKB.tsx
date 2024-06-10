@@ -88,67 +88,67 @@ const GetKB: React.FC = () => {
   };
 
   // Sync Knowledge
-  const handleSync = () => {
-    const postData1: Request = {
-      operation: "sync_kb_start",
-    };
-    const postConfig = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    const url1 = "https://www.metalmental.net/api/execsync";
-    const url2 = "https://www.metalmental.net/api/checksync";
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-    setSpinner2(true);
-    axios
-      .post(url1, postData1, postConfig)
-      .then((response: Response) => {
-        console.log(response);
-        const postData2: Request = {
-          executionArn: response.data.executionArn!,
-          input_prompt: response.data.text!,
-          operation: "sync_kb_describe",
-        };
-        const checkSync = async () => {
-          try {
-            while (true) {
-              const response = await axios.post(url2, postData2, postConfig);
-              console.log(response);
-              if (response.data.status === "SUCCEEDED") {
-                setSyncStatus(response.data.status);
-                console.log(response);
-                setSpinner2(false);
-                break;
-              } else if (response.data.status === "FAILED" || response.data.status === "TIMED_OUT") {
-                setSyncStatus(response.data.status);
-                console.log(response);
-                setSpinner2(false);
-                throw new Error("Sync Failed");
-              }
-              setSyncStatus(response.data.status);
-              await delay(10000);
-            }
-          } catch (error) {
-            setSpinner2(false);
-            console.log(error);
-          }
-        };
-        checkSync();
-        // setSpinner2(false); 非同期だからNG
-      })
-      .catch((error) => {
-        setSpinner2(false);
-        console.log(error);
-      });
-  };
+  // const handleSync = () => {
+  //   const postData1: Request = {
+  //     operation: "sync_kb_start",
+  //   };
+  //   const postConfig = {
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   };
+  //   const url1 = "https://www.metalmental.net/api/execsync";
+  //   const url2 = "https://www.metalmental.net/api/checksync";
+  //   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  //   setSpinner2(true);
+  //   axios
+  //     .post(url1, postData1, postConfig)
+  //     .then((response: Response) => {
+  //       console.log(response);
+  //       const postData2: Request = {
+  //         executionArn: response.data.executionArn!,
+  //         input_prompt: response.data.text!,
+  //         operation: "sync_kb_describe",
+  //       };
+  //       const checkSync = async () => {
+  //         try {
+  //           while (true) {
+  //             const response = await axios.post(url2, postData2, postConfig);
+  //             console.log(response);
+  //             if (response.data.status === "SUCCEEDED") {
+  //               setSyncStatus(response.data.status);
+  //               console.log(response);
+  //               setSpinner2(false);
+  //               break;
+  //             } else if (response.data.status === "FAILED" || response.data.status === "TIMED_OUT") {
+  //               setSyncStatus(response.data.status);
+  //               console.log(response);
+  //               setSpinner2(false);
+  //               throw new Error("Sync Failed");
+  //             }
+  //             setSyncStatus(response.data.status);
+  //             await delay(10000);
+  //           }
+  //         } catch (error) {
+  //           setSpinner2(false);
+  //           console.log(error);
+  //         }
+  //       };
+  //       checkSync();
+  //       // setSpinner2(false); 非同期だからNG
+  //     })
+  //     .catch((error) => {
+  //       setSpinner2(false);
+  //       console.log(error);
+  //     });
+  // };
 
   // getKnowledge
   const handleSubmit = (prompt: string) => {
     const postData: Request = {
       input_prompt: prompt,
       operation: "get_knowledge",
-      mime_type: "nothing",
+      mime_type: uploadFileName!,
     };
     const postConfig = {
       headers: {
@@ -181,9 +181,9 @@ const GetKB: React.FC = () => {
           {(spinner1 || spinner2 || spinner3) && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
           {spinner1 ? <UploadButtonDisabled /> : <UploadButton onChange={handleUploadButton} />}
           {uploadFileName && <p>Upload Completed: {uploadFileName}</p>}
-          <Button variant="contained" startIcon={<SyncIcon />} onClick={handleSync} disabled={spinner2}>
+          {/* <Button variant="contained" startIcon={<SyncIcon />} onClick={handleSync} disabled={spinner2}>
             Sync KnowledgeBase
-          </Button>
+          </Button> */}
           {syncStatus && <p>Sync Status: {syncStatus}</p>}
           <p>{kb}</p>
           {submitted && s3File && <p>Referenced file: {s3File}</p>}

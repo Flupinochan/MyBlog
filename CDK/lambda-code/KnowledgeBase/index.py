@@ -18,10 +18,8 @@ patch_all()
 # Environment Variable Setting
 # ----------------------------------------------------------------------
 try:
-    S3_BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
-    KNOWLEDGE_BASE_ID = os.environ["KNOWLEDGE_BASE_ID"]
-    MODEL_ARN = os.environ["MODEL_ARN"]
-    DATASOURCE_ID = os.environ["DATASOURCE_ID"]
+    S3_BUCKET_NAME = "chat-with-your-document-datasource"
+    MODEL_ARN = "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
     # "arn:aws:bedrock:us-west-2::foundation-model/" + MODEL_ID
 except KeyError:
     raise Exception("Environment variable is not defined.")
@@ -65,10 +63,6 @@ def main(event):
             response = get_knowledge(event)
         elif operation_type == "get_presigned_url":
             response = get_presigned_url(event)
-        elif operation_type == "sync_kb_start":
-            response = sync_kb_start(event)
-        elif operation_type == "sync_kb_describe":
-            response = sync_kb_describe(event)
         return response
     except Exception as e:
         log.error(f"エラーが発生しました: {e}")
@@ -106,77 +100,14 @@ def get_presigned_url(event):
 
 
 # ----------------------------------------------------------------------
-# File Delete
-# ----------------------------------------------------------------------
-
-
-# ----------------------------------------------------------------------
-# Sync KnowledgeBase Start
-# ----------------------------------------------------------------------
-@xray_recorder.capture("sync_kb_start")
-def sync_kb_start(event):
-    try:
-        log.info("KnowledgeBase Synchronisation Start")
-        response = bedrock_agent_client.start_ingestion_job(
-            dataSourceId=DATASOURCE_ID,
-            knowledgeBaseId=KNOWLEDGE_BASE_ID,
-        )
-        job_id = response["ingestionJob"]["ingestionJobId"]
-        response_body = {"statusCode": 200, "text": job_id}
-        return response_body
-    except Exception as e:
-        log.error(f"エラーが発生しました: {e}")
-        raise
-
-
-# ----------------------------------------------------------------------
-# Sync KnowledgeBase Describe
-# ----------------------------------------------------------------------
-class Sfn_Status(Enum):
-    IN_PROGRESS = "IN_PROGRESS"
-
-
-@xray_recorder.capture("sync_kb_describe")
-def sync_kb_describe(event):
-    try:
-        log.info("KnowledgeBase Synchronisation Status Ckeck")
-        response = bedrock_agent_client.list_ingestion_jobs(
-            dataSourceId=DATASOURCE_ID,
-            knowledgeBaseId=KNOWLEDGE_BASE_ID,
-            filters=[
-                {
-                    "attribute": "STATUS",
-                    "operator": "EQ",
-                    "values": [
-                        "IN_PROGRESS",
-                    ],
-                },
-            ],
-            maxResults=1,
-            sortBy={
-                "attribute": "STARTED_AT",
-                "order": "DESCENDING",
-            },
-        )
-        if len(response["ingestionJobSummaries"]) == 0:
-            response_body = {"status": "COMPLETE"}
-            return response_body
-        in_progress_job: Sfn_Status = response["ingestionJobSummaries"][0]["status"]
-        response_body = {"status": in_progress_job}
-        return response_body
-    except Exception as e:
-        log.error(f"エラーが発生しました: {e}")
-        response_body = {"status": "FAIL"}
-        return response_body
-
-
-# ----------------------------------------------------------------------
 # Search KnowledgeBase
 # ----------------------------------------------------------------------
 @xray_recorder.capture("get_knowledge")
 def get_knowledge(event):
     try:
         user_prompt = event["input_prompt"]
+        file_name = event["mime_type"]
+        s3_uri = f"s3://{S3_BUCKET_NAME}/{file_name}"
         log.debug(f"user_prompt: {user_prompt}")
 
         response = bedrock_agent_runtime_client.retrieve_and_generate(
@@ -185,10 +116,15 @@ def get_knowledge(event):
                 "text": user_prompt,
             },
             retrieveAndGenerateConfiguration={
-                "type": "KNOWLEDGE_BASE",
+                "type": "EXTERNAL_SOURCES",
                 "knowledgeBaseConfiguration": {
-                    "knowledgeBaseId": KNOWLEDGE_BASE_ID,
                     "modelArn": MODEL_ARN,
+                    "sources": [
+                        {
+                            "sourceType": "S3",
+                            "s3Location": {"uri": s3_uri},
+                        }
+                    ],
                 },
             },
         )
