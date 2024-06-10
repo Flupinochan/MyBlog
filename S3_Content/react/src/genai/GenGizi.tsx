@@ -13,6 +13,9 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { Amplify } from "aws-amplify";
+import { withAuthenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
 // https://k8shiro.github.io/ReactCompareCodeHighlighter/
 
 // import "./GenGizi.css";
@@ -137,8 +140,8 @@ const GenGizi: React.FC = () => {
 
   return (
     <div>
-      <h2>Generate Giziroku</h2>
-      <div className="blogContentBackColor">
+      <h2 className="animate-slidelefth2 custom-h2">Generate Giziroku</h2>
+      <div className="custom-content-box opacity-0 animate-fadeincontent">
         <br />
         <ThemeProvider theme={theme}>
           <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUploadIcon />}>
@@ -181,4 +184,5 @@ const GenGizi: React.FC = () => {
   );
 };
 
-export default GenGizi;
+// export default GenGizi;
+export default withAuthenticator(GenGizi);

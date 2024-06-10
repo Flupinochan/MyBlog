@@ -2,6 +2,9 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "simplebar-react/dist/simplebar.min.css";
 import SimpleBar from "simplebar-react";
+import { Amplify } from "aws-amplify";
+import { withAuthenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
 
 import Progressbar from "./components/Progressbar";
 import Head from "./components/Head";
@@ -18,6 +21,15 @@ import Blog20240330 from "./blog/2024/03/30/index";
 import Blog20240418 from "./blog/2024/04/18/index";
 import Blog20240510 from "./blog/2024/05/10/index";
 
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolId: "us-west-2_JkYb6xdpj",
+      userPoolClientId: "5l1qp4t8d0f8c6ceacer86akdp",
+    },
+  },
+});
+
 const App: React.FC = () => {
   return (
     <div className="App">
@@ -32,7 +44,7 @@ const App: React.FC = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/genaihome" element={<GenAiHome />} />
             <Route path="/genai/genimage" element={<GenImage />} />
-            {/* <Route path="/genai/gengizi" element={<GenGizi />} /> */}
+            <Route path="/genai/gengizi" element={<GenGizi />} />
             <Route path="/genai/gentext" element={<GenText />} />
             <Route path="/genai/getkb" element={<GetKB />} />
             <Route path="/blog/vol1" element={<Blog20240330 />} />
@@ -47,3 +59,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+// export default withAuthenticator(App);

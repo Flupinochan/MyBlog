@@ -229,7 +229,7 @@ export class MyBlogStack extends cdk.Stack {
       authFlows: {
         userSrp: true,
       },
-      generateSecret: true,
+      generateSecret: false,
       preventUserExistenceErrors: true,
       supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.COGNITO],
       oAuth: {
