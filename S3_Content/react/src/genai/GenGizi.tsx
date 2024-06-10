@@ -15,6 +15,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { duotoneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { Amplify } from "aws-amplify";
 import { withAuthenticator } from "@aws-amplify/ui-react";
+import ReactLoading from "react-loading";
 import "@aws-amplify/ui-react/styles.css";
 // https://k8shiro.github.io/ReactCompareCodeHighlighter/
 
@@ -52,6 +53,8 @@ const GenGizi: React.FC = () => {
   const [wsStatus, setWsStatus] = useState<WebSocket | null>(null);
   const [message, setMessage] = useState<string[]>([]);
 
+  const [spinner1, setSpinner1] = useState<true | false>(false);
+
   useEffect(() => {
     const wsURL = "wss://www.metalmental.net/websocket/";
     const initWebSocket = () => {
@@ -63,6 +66,7 @@ const GenGizi: React.FC = () => {
       ws.onmessage = (event: MessageEvent) => {
         const data = event.data;
         if (!data.includes("Endpoint request timed out")) {
+          setSpinner1(false);
           setMessage((prevMessages) => [...prevMessages, data]);
         }
       };
@@ -96,6 +100,7 @@ const GenGizi: React.FC = () => {
     if (uploadFile && wsStatus) {
       const url = `https://www.metalmental.net/api/movieupload?file_name=${uploadFileName}`;
 
+      setSpinner1(true);
       axios
         // get s3 pre signed url
         .get(url)
@@ -144,6 +149,7 @@ const GenGizi: React.FC = () => {
       <div className="custom-content-box opacity-0 animate-fadeincontent">
         <br />
         <ThemeProvider theme={theme}>
+          {spinner1 && <ReactLoading type={"spin"} color={"#4c54c0"} height={100} width={100} />}
           <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUploadIcon />}>
             Upload Movie
             <VisuallyHiddenInput type="file" accept="audio/mp4, audio/mpeg, audio/ogg, audio/wav, audio/webm, video/mp4, video/ogg, video/webm" onChange={handleFileUpload} />

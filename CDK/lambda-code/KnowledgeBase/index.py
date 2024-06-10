@@ -18,7 +18,7 @@ patch_all()
 # Environment Variable Setting
 # ----------------------------------------------------------------------
 try:
-    S3_BUCKET_NAME = "chat-with-your-document-datasource"
+    S3_BUCKET_NAME = "myblog-knowledgebase-datasource"
     MODEL_ARN = "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
     # "arn:aws:bedrock:us-west-2::foundation-model/" + MODEL_ID
 except KeyError:
