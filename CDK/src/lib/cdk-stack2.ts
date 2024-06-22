@@ -170,9 +170,9 @@ export class MyBlogStack2 extends cdk.Stack {
         OTEL_PYTHON_DISTRO: "aws_distro",
         OTEL_PYTHON_CONFIGURATOR: "aws_configurator",
         OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://localhost:4316/v1/traces",
-        OTEL_AWS_APP_SIGNALS_EXPORTER_ENDPOINT: "http://localhost:4316/v1/metrics",
+        OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: "http://localhost:4316/v1/metrics",
         OTEL_METRICS_EXPORTER: "none",
-        OTEL_AWS_APP_SIGNALS_ENABLED: "true",
+        OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true",
         OTEL_RESOURCE_ATTRIBUTES: "aws.hostedin.environment=streamlit-service,service.name=streamlit",
       },
     });
