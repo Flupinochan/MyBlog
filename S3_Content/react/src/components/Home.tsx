@@ -14,6 +14,10 @@ const Home: React.FC = () => {
 
   return (
     <div>
+      <p>こちらは古ブログであり、開発サイトです</p>
+      <a className="custom-link" href="https://www.metalmental.net/">
+        新ブログはこちら
+      </a>
       <div>
         <h2 className="animate-slidelefth2 custom-h2">Archives</h2>
       </div>

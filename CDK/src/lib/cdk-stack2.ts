@@ -96,33 +96,42 @@ export class MyBlogStack2 extends cdk.Stack {
     //     }),
     //   },
     // });
+    ////////////
+    /// Task ///
+    ////////////
     const taskNginx = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameNginx, {
       family: param.ECS.TaskNameNginx,
       cpu: 256,
       memoryLimitMiB: 512,
       taskRole: taskRole,
-      // executionRole: taskExecutionRole,
+      volumes: [
+        {
+          name: "cws-instrumentation-volume",
+        },
+      ],
     });
     const taskStreamlit = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameStreamlit, {
       family: param.ECS.TaskNameStreamlit,
       cpu: 256,
       memoryLimitMiB: 512,
       taskRole: taskRole,
-      // executionRole: taskExecutionRole,
       volumes: [
         {
-          name: param.ECS.MountPointName,
+          name: "cws-instrumentation-volume",
         },
       ],
     });
-    taskNginx.addContainer("nginx", {
+    ///////////
+    /// App ///
+    ///////////
+    const linuxParameters = new ecs.LinuxParameters(this, "linuxParameters");
+    linuxParameters.addCapabilities(ecs.Capability.SYS_PTRACE);
+    const nginx_container = taskNginx.addContainer("nginx", {
       image: ecs.ContainerImage.fromDockerImageAsset(nginxRepo),
       portMappings: [
         {
           name: "nginx",
           containerPort: 80,
-          // protocol: ecs.Protocol.TCP,
-          // appProtocol: ecs.AppProtocol.http,
         },
       ],
       containerName: "nginx",
@@ -136,11 +145,15 @@ export class MyBlogStack2 extends cdk.Stack {
         streamPrefix: "nginx",
         logGroup: ecsLogs,
       }),
-      // environment: {
-      //   streamlithost: param.ECS.DiscoveryNameStreamlit + "." + param.ECS.NameSpace,
-      // },
+      linuxParameters: linuxParameters,
+    });
+    nginx_container.addMountPoints({
+      sourceVolume: "cws-instrumentation-volume",
+      containerPath: "/cws-instrumentation-volume",
+      readOnly: true,
     });
     const streamlit_container = taskStreamlit.addContainer("streamlit", {
+      containerName: "streamlit",
       image: ecs.ContainerImage.fromDockerImageAsset(streamlitRepo),
       portMappings: [
         {
@@ -150,7 +163,6 @@ export class MyBlogStack2 extends cdk.Stack {
           // appProtocol: ecs.AppProtocol.http,
         },
       ],
-      containerName: "streamlit",
       healthCheck: {
         command: ["CMD-SHELL", "curl -f http://127.0.0.1:8501/_stcore/health >> /proc/1/fd/1 2>&1  || exit 1"],
         interval: cdk.Duration.seconds(30),
@@ -161,26 +173,106 @@ export class MyBlogStack2 extends cdk.Stack {
         streamPrefix: "streamlit",
         logGroup: ecsLogs,
       }),
-      environment: {
-        PYTHONPATH: "/otel-auto-instrumentation-python/opentelemetry/instrumentation/auto_instrumentation:/app/code/:/otel-auto-instrumentation-python",
-        OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf",
-        OTEL_TRACES_SAMPLER: "xray",
-        OTEL_TRACES_SAMPLER_ARG: "endpoint=http://localhost:2000",
-        OTEL_LOGS_EXPORTER: "none",
-        OTEL_PYTHON_DISTRO: "aws_distro",
-        OTEL_PYTHON_CONFIGURATOR: "aws_configurator",
-        OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://localhost:4316/v1/traces",
-        OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: "http://localhost:4316/v1/metrics",
-        OTEL_METRICS_EXPORTER: "none",
-        OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true",
-        OTEL_RESOURCE_ATTRIBUTES: "aws.hostedin.environment=streamlit-service,service.name=streamlit",
-      },
+      linuxParameters: linuxParameters,
     });
     streamlit_container.addMountPoints({
-      readOnly: false,
-      sourceVolume: param.ECS.MountPointName,
-      containerPath: "/otel-auto-instrumentation-python",
+      sourceVolume: "cws-instrumentation-volume",
+      containerPath: "/cws-instrumentation-volume",
+      readOnly: true,
     });
+    ///////////////
+    /// Datadog ///
+    ///////////////
+    /// Nginx Datadog
+    const datadogInit_nginx = taskNginx.addContainer("datadog-init", {
+      containerName: "cws-instrumentation-init",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/cws-instrumentation:latest"),
+      essential: false,
+      user: "0",
+      command: ["/cws-instrumentation", "setup", "--cws-volume-mount", "/cws-instrumentation-volume"],
+    });
+    datadogInit_nginx.addMountPoints({
+      sourceVolume: "cws-instrumentation-volume",
+      containerPath: "/cws-instrumentation-volume",
+      readOnly: false,
+    });
+    const datadog_nginx = taskNginx.addContainer("datadog", {
+      containerName: "datadog-agent",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/agent:latest"),
+      essential: true,
+      environment: {
+        DD_API_KEY: "",
+        DD_SITE: "ap1.datadoghq.com",
+        ECS_FARGATE: "true",
+        DD_RUNTIME_SECURITY_CONFIG_ENABLED: "true",
+        DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED: "true",
+      },
+      healthCheck: {
+        command: ["CMD-SHELL", "/probe.sh"],
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
+        retries: 2,
+        startPeriod: Duration.seconds(60),
+      },
+      logging: ecs.LogDriver.awsLogs({
+        streamPrefix: "datadog",
+        logGroup: ecsLogs,
+      }),
+    });
+    nginx_container.addContainerDependencies({
+      container: datadogInit_nginx,
+      condition: ecs.ContainerDependencyCondition.SUCCESS,
+    });
+    nginx_container.addContainerDependencies({
+      container: datadog_nginx,
+      condition: ecs.ContainerDependencyCondition.HEALTHY,
+    });
+    /// Streamlit Datadog
+    const datadogInit_streamlit = taskStreamlit.addContainer("datadog-init", {
+      containerName: "cws-instrumentation-init",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/cws-instrumentation:latest"),
+      essential: false,
+      user: "0",
+      command: ["/cws-instrumentation", "setup", "--cws-volume-mount", "/cws-instrumentation-volume"],
+    });
+    datadogInit_streamlit.addMountPoints({
+      sourceVolume: "cws-instrumentation-volume",
+      containerPath: "/cws-instrumentation-volume",
+      readOnly: false,
+    });
+    const datadog_streamlit = taskStreamlit.addContainer("datadog", {
+      containerName: "datadog-agent",
+      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/agent:latest"),
+      environment: {
+        DD_API_KEY: "",
+        DD_SITE: "ap1.datadoghq.com",
+        ECS_FARGATE: "true",
+        DD_RUNTIME_SECURITY_CONFIG_ENABLED: "true",
+        DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED: "true",
+      },
+      healthCheck: {
+        command: ["CMD-SHELL", "/probe.sh"],
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
+        retries: 2,
+        startPeriod: Duration.seconds(60),
+      },
+      logging: ecs.LogDriver.awsLogs({
+        streamPrefix: "datadog",
+        logGroup: ecsLogs,
+      }),
+    });
+    streamlit_container.addContainerDependencies({
+      container: datadogInit_streamlit,
+      condition: ecs.ContainerDependencyCondition.SUCCESS,
+    });
+    streamlit_container.addContainerDependencies({
+      container: datadog_streamlit,
+      condition: ecs.ContainerDependencyCondition.HEALTHY,
+    });
+    /////////////
+    /// X-Ray ///
+    /////////////
     taskNginx.addContainer("xray-daemon", {
       containerName: "xray-daemon",
       image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
@@ -229,47 +321,9 @@ export class MyBlogStack2 extends cdk.Stack {
         logGroup: ecsLogs,
       }),
     });
-    const secret = new secretsmanager.Secret(this, param.ECS.SecretName, {
-      secretName: param.ECS.SecretName,
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          traces: {
-            traces_collected: {
-              app_signals: {},
-            },
-          },
-          logs: {
-            metrics_collected: {
-              app_signals: {},
-            },
-          },
-        }),
-        generateStringKey: "unused-key",
-      },
-    });
-    taskStreamlit.addContainer("ecs-cwagent", {
-      containerName: "ecs-cwagent",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest"),
-      secrets: {
-        CW_CONFIG_CONTENT: ecs.Secret.fromSecretsManager(secret),
-      },
-      logging: ecs.LogDriver.awsLogs({
-        streamPrefix: "ecs-cwagent",
-        logGroup: ecsLogs,
-      }),
-    });
-    // https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/CloudWatch-Application-Signals-Enable-ECS.html
-    const init_container = taskStreamlit.addContainer("init", {
-      containerName: "init",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/aws-observability/adot-autoinstrumentation-python:v0.1.1"),
-      command: ["cp", "-a", "/autoinstrumentation/.", "/otel-auto-instrumentation-python"],
-      essential: false,
-    });
-    init_container.addMountPoints({
-      readOnly: false,
-      sourceVolume: param.ECS.MountPointName,
-      containerPath: "/otel-auto-instrumentation-python",
-    });
+    ///////////////
+    /// Service ///
+    ///////////////
     const serviceNginx = new ecs.FargateService(this, param.ECS.ServiceNameNginx, {
       cluster: cluster,
       taskDefinition: taskNginx,
