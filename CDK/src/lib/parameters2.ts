@@ -9,6 +9,9 @@ export class MyBlogParam2 {
     PublicSubnetName: "Public",
     PrivateSubnetName: "Private",
   };
+  ALB = {
+    CertificateArn: "",
+  };
 
   ECS = {
     ClusterName: "MyBlog-ECSCluster",

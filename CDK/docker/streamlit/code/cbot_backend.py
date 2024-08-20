@@ -5,20 +5,20 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains.conversation.base import ConversationChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from botocore.config import Config
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch_all
+# from aws_xray_sdk.core import xray_recorder
+# from aws_xray_sdk.core import patch_all
 
 from LoggingClass import LoggingClass
 
 # メモリについて
 # https://book.st-hakky.com/data-science/memory-of-langchain/
 
-xray_recorder.configure(
-    plugins=("EC2Plugin", "ECSPlugin"),
-    daemon_address="127.0.0.1:2000",
-    service="streamlit-backend",
-)
-patch_all()
+# xray_recorder.configure(
+#     plugins=("EC2Plugin", "ECSPlugin"),
+#     daemon_address="127.0.0.1:2000",
+#     service="streamlit-backend",
+# )
+# patch_all()
 
 
 class Backend:

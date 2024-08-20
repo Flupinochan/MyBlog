@@ -42,9 +42,9 @@ export class MyBlogStack2 extends cdk.Stack {
         },
       ],
     });
-    const nginxRepo = new DockerImageAsset(this, param.ECS.NginxRepoName, {
-      directory: path.join(__dirname, "../../docker/nginx"),
-    });
+    // const nginxRepo = new DockerImageAsset(this, param.ECS.NginxRepoName, {
+    //   directory: path.join(__dirname, "../../docker/nginx"),
+    // });
     const streamlitRepo = new DockerImageAsset(this, param.ECS.StreamlitRepoName, {
       directory: path.join(__dirname, "../../docker/streamlit"),
     });
@@ -73,7 +73,7 @@ export class MyBlogStack2 extends cdk.Stack {
           statements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
-              actions: ["ssmmessages:*", "secretsmanager:*"],
+              actions: ["ssmmessages:*", "secretsmanager:*", "comprehend:*"],
               resources: ["*"],
             }),
           ],
@@ -99,59 +99,59 @@ export class MyBlogStack2 extends cdk.Stack {
     ////////////
     /// Task ///
     ////////////
-    const taskNginx = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameNginx, {
-      family: param.ECS.TaskNameNginx,
-      cpu: 256,
-      memoryLimitMiB: 512,
-      taskRole: taskRole,
-      volumes: [
-        {
-          name: "cws-instrumentation-volume",
-        },
-      ],
-    });
+    // const taskNginx = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameNginx, {
+    //   family: param.ECS.TaskNameNginx,
+    //   cpu: 256,
+    //   memoryLimitMiB: 512,
+    //   taskRole: taskRole,
+    //   // volumes: [
+    //   //   {
+    //   //     name: "cws-instrumentation-volume",
+    //   //   },
+    //   // ],
+    // });
     const taskStreamlit = new ecs.FargateTaskDefinition(this, param.ECS.TaskNameStreamlit, {
       family: param.ECS.TaskNameStreamlit,
       cpu: 256,
       memoryLimitMiB: 512,
       taskRole: taskRole,
-      volumes: [
-        {
-          name: "cws-instrumentation-volume",
-        },
-      ],
+      // volumes: [
+      //   {
+      //     name: "cws-instrumentation-volume",
+      //   },
+      // ],
     });
     ///////////
     /// App ///
     ///////////
-    const linuxParameters = new ecs.LinuxParameters(this, "linuxParameters");
-    linuxParameters.addCapabilities(ecs.Capability.SYS_PTRACE);
-    const nginx_container = taskNginx.addContainer("nginx", {
-      image: ecs.ContainerImage.fromDockerImageAsset(nginxRepo),
-      portMappings: [
-        {
-          name: "nginx",
-          containerPort: 80,
-        },
-      ],
-      containerName: "nginx",
-      healthCheck: {
-        command: ["CMD-SHELL", "curl -f http://127.0.0.1/streamlit >> /proc/1/fd/1 2>&1 || exit 1"],
-        interval: cdk.Duration.seconds(60),
-        timeout: cdk.Duration.seconds(30),
-        retries: 3,
-      },
-      logging: ecs.LogDriver.awsLogs({
-        streamPrefix: "nginx",
-        logGroup: ecsLogs,
-      }),
-      linuxParameters: linuxParameters,
-    });
-    nginx_container.addMountPoints({
-      sourceVolume: "cws-instrumentation-volume",
-      containerPath: "/cws-instrumentation-volume",
-      readOnly: true,
-    });
+    // const linuxParameters = new ecs.LinuxParameters(this, "linuxParameters");
+    // linuxParameters.addCapabilities(ecs.Capability.SYS_PTRACE);
+    // const nginx_container = taskNginx.addContainer("nginx", {
+    //   image: ecs.ContainerImage.fromDockerImageAsset(nginxRepo),
+    //   portMappings: [
+    //     {
+    //       name: "nginx",
+    //       containerPort: 80,
+    //     },
+    //   ],
+    //   containerName: "nginx",
+    //   healthCheck: {
+    //     command: ["CMD-SHELL", "curl -f http://127.0.0.1/streamlit >> /proc/1/fd/1 2>&1 || exit 1"],
+    //     interval: cdk.Duration.seconds(60),
+    //     timeout: cdk.Duration.seconds(30),
+    //     retries: 3,
+    //   },
+    //   logging: ecs.LogDriver.awsLogs({
+    //     streamPrefix: "nginx",
+    //     logGroup: ecsLogs,
+    //   }),
+    //   // linuxParameters: linuxParameters,
+    // });
+    // nginx_container.addMountPoints({
+    //   sourceVolume: "cws-instrumentation-volume",
+    //   containerPath: "/cws-instrumentation-volume",
+    //   readOnly: true,
+    // });
     const streamlit_container = taskStreamlit.addContainer("streamlit", {
       containerName: "streamlit",
       image: ecs.ContainerImage.fromDockerImageAsset(streamlitRepo),
@@ -164,7 +164,7 @@ export class MyBlogStack2 extends cdk.Stack {
         },
       ],
       healthCheck: {
-        command: ["CMD-SHELL", "curl -f http://127.0.0.1:8501/_stcore/health >> /proc/1/fd/1 2>&1  || exit 1"],
+        command: ["CMD-SHELL", "curl -f http://127.0.0.1:8501/ >> /proc/1/fd/1 2>&1  || exit 1"],
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
@@ -173,194 +173,194 @@ export class MyBlogStack2 extends cdk.Stack {
         streamPrefix: "streamlit",
         logGroup: ecsLogs,
       }),
-      linuxParameters: linuxParameters,
+      // linuxParameters: linuxParameters,
     });
-    streamlit_container.addMountPoints({
-      sourceVolume: "cws-instrumentation-volume",
-      containerPath: "/cws-instrumentation-volume",
-      readOnly: true,
-    });
+    // streamlit_container.addMountPoints({
+    //   sourceVolume: "cws-instrumentation-volume",
+    //   containerPath: "/cws-instrumentation-volume",
+    //   readOnly: true,
+    // });
     ///////////////
     /// Datadog ///
     ///////////////
     /// Nginx Datadog
-    const datadogInit_nginx = taskNginx.addContainer("datadog-init", {
-      containerName: "cws-instrumentation-init",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/cws-instrumentation:latest"),
-      essential: false,
-      user: "0",
-      command: ["/cws-instrumentation", "setup", "--cws-volume-mount", "/cws-instrumentation-volume"],
-    });
-    datadogInit_nginx.addMountPoints({
-      sourceVolume: "cws-instrumentation-volume",
-      containerPath: "/cws-instrumentation-volume",
-      readOnly: false,
-    });
-    const datadog_nginx = taskNginx.addContainer("datadog", {
-      containerName: "datadog-agent",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/agent:latest"),
-      essential: true,
-      environment: {
-        DD_API_KEY: "",
-        DD_SITE: "ap1.datadoghq.com",
-        ECS_FARGATE: "true",
-        DD_RUNTIME_SECURITY_CONFIG_ENABLED: "true",
-        DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED: "true",
-      },
-      healthCheck: {
-        command: ["CMD-SHELL", "/probe.sh"],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 2,
-        startPeriod: Duration.seconds(60),
-      },
-      logging: ecs.LogDriver.awsLogs({
-        streamPrefix: "datadog",
-        logGroup: ecsLogs,
-      }),
-    });
-    nginx_container.addContainerDependencies({
-      container: datadogInit_nginx,
-      condition: ecs.ContainerDependencyCondition.SUCCESS,
-    });
-    nginx_container.addContainerDependencies({
-      container: datadog_nginx,
-      condition: ecs.ContainerDependencyCondition.HEALTHY,
-    });
-    /// Streamlit Datadog
-    const datadogInit_streamlit = taskStreamlit.addContainer("datadog-init", {
-      containerName: "cws-instrumentation-init",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/cws-instrumentation:latest"),
-      essential: false,
-      user: "0",
-      command: ["/cws-instrumentation", "setup", "--cws-volume-mount", "/cws-instrumentation-volume"],
-    });
-    datadogInit_streamlit.addMountPoints({
-      sourceVolume: "cws-instrumentation-volume",
-      containerPath: "/cws-instrumentation-volume",
-      readOnly: false,
-    });
-    const datadog_streamlit = taskStreamlit.addContainer("datadog", {
-      containerName: "datadog-agent",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/agent:latest"),
-      environment: {
-        DD_API_KEY: "",
-        DD_SITE: "ap1.datadoghq.com",
-        ECS_FARGATE: "true",
-        DD_RUNTIME_SECURITY_CONFIG_ENABLED: "true",
-        DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED: "true",
-      },
-      healthCheck: {
-        command: ["CMD-SHELL", "/probe.sh"],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 2,
-        startPeriod: Duration.seconds(60),
-      },
-      logging: ecs.LogDriver.awsLogs({
-        streamPrefix: "datadog",
-        logGroup: ecsLogs,
-      }),
-    });
-    streamlit_container.addContainerDependencies({
-      container: datadogInit_streamlit,
-      condition: ecs.ContainerDependencyCondition.SUCCESS,
-    });
-    streamlit_container.addContainerDependencies({
-      container: datadog_streamlit,
-      condition: ecs.ContainerDependencyCondition.HEALTHY,
-    });
+    // const datadogInit_nginx = taskNginx.addContainer("datadog-init", {
+    //   containerName: "cws-instrumentation-init",
+    //   image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/cws-instrumentation:latest"),
+    //   essential: false,
+    //   user: "0",
+    //   command: ["/cws-instrumentation", "setup", "--cws-volume-mount", "/cws-instrumentation-volume"],
+    // });
+    // datadogInit_nginx.addMountPoints({
+    //   sourceVolume: "cws-instrumentation-volume",
+    //   containerPath: "/cws-instrumentation-volume",
+    //   readOnly: false,
+    // });
+    // const datadog_nginx = taskNginx.addContainer("datadog", {
+    //   containerName: "datadog-agent",
+    //   image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/agent:latest"),
+    //   essential: true,
+    //   environment: {
+    //     DD_API_KEY: "",
+    //     DD_SITE: "ap1.datadoghq.com",
+    //     ECS_FARGATE: "true",
+    //     DD_RUNTIME_SECURITY_CONFIG_ENABLED: "true",
+    //     DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED: "true",
+    //   },
+    //   healthCheck: {
+    //     command: ["CMD-SHELL", "/probe.sh"],
+    //     interval: cdk.Duration.seconds(30),
+    //     timeout: cdk.Duration.seconds(5),
+    //     retries: 2,
+    //     startPeriod: Duration.seconds(60),
+    //   },
+    //   logging: ecs.LogDriver.awsLogs({
+    //     streamPrefix: "datadog",
+    //     logGroup: ecsLogs,
+    //   }),
+    // });
+    // nginx_container.addContainerDependencies({
+    //   container: datadogInit_nginx,
+    //   condition: ecs.ContainerDependencyCondition.SUCCESS,
+    // });
+    // nginx_container.addContainerDependencies({
+    //   container: datadog_nginx,
+    //   condition: ecs.ContainerDependencyCondition.HEALTHY,
+    // });
+    // /// Streamlit Datadog
+    // const datadogInit_streamlit = taskStreamlit.addContainer("datadog-init", {
+    //   containerName: "cws-instrumentation-init",
+    //   image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/cws-instrumentation:latest"),
+    //   essential: false,
+    //   user: "0",
+    //   command: ["/cws-instrumentation", "setup", "--cws-volume-mount", "/cws-instrumentation-volume"],
+    // });
+    // datadogInit_streamlit.addMountPoints({
+    //   sourceVolume: "cws-instrumentation-volume",
+    //   containerPath: "/cws-instrumentation-volume",
+    //   readOnly: false,
+    // });
+    // const datadog_streamlit = taskStreamlit.addContainer("datadog", {
+    //   containerName: "datadog-agent",
+    //   image: ecs.ContainerImage.fromRegistry("public.ecr.aws/datadog/agent:latest"),
+    //   environment: {
+    //     DD_API_KEY: "",
+    //     DD_SITE: "ap1.datadoghq.com",
+    //     ECS_FARGATE: "true",
+    //     DD_RUNTIME_SECURITY_CONFIG_ENABLED: "true",
+    //     DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED: "true",
+    //   },
+    //   healthCheck: {
+    //     command: ["CMD-SHELL", "/probe.sh"],
+    //     interval: cdk.Duration.seconds(30),
+    //     timeout: cdk.Duration.seconds(5),
+    //     retries: 2,
+    //     startPeriod: Duration.seconds(60),
+    //   },
+    //   logging: ecs.LogDriver.awsLogs({
+    //     streamPrefix: "datadog",
+    //     logGroup: ecsLogs,
+    //   }),
+    // });
+    // streamlit_container.addContainerDependencies({
+    //   container: datadogInit_streamlit,
+    //   condition: ecs.ContainerDependencyCondition.SUCCESS,
+    // });
+    // streamlit_container.addContainerDependencies({
+    //   container: datadog_streamlit,
+    //   condition: ecs.ContainerDependencyCondition.HEALTHY,
+    // });
     /////////////
     /// X-Ray ///
     /////////////
-    taskNginx.addContainer("xray-daemon", {
-      containerName: "xray-daemon",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
-      // image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:3.3.12"),
-      command: ["--local-mode"],
-      cpu: 32,
-      memoryReservationMiB: 256,
-      portMappings: [
-        {
-          containerPort: 2000,
-          protocol: ecs.Protocol.UDP,
-        },
-      ],
-      healthCheck: {
-        command: ["CMD", "/xray", "--version", "||", "exit 1"],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 3,
-      },
-      logging: ecs.LogDriver.awsLogs({
-        streamPrefix: "xray",
-        logGroup: ecsLogs,
-      }),
-    });
-    taskStreamlit.addContainer("xray-daemon", {
-      containerName: "xray-daemon",
-      image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
-      // image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:3.3.12"),
-      command: ["--local-mode"],
-      cpu: 32,
-      memoryReservationMiB: 256,
-      portMappings: [
-        {
-          containerPort: 2000,
-          protocol: ecs.Protocol.UDP,
-        },
-      ],
-      healthCheck: {
-        command: ["CMD", "/xray", "--version", "||", "exit 1"],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 3,
-      },
-      logging: ecs.LogDriver.awsLogs({
-        streamPrefix: "xray",
-        logGroup: ecsLogs,
-      }),
-    });
+    // taskNginx.addContainer("xray-daemon", {
+    //   containerName: "xray-daemon",
+    //   image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
+    //   // image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:3.3.12"),
+    //   command: ["--local-mode"],
+    //   cpu: 32,
+    //   memoryReservationMiB: 256,
+    //   portMappings: [
+    //     {
+    //       containerPort: 2000,
+    //       protocol: ecs.Protocol.UDP,
+    //     },
+    //   ],
+    //   healthCheck: {
+    //     command: ["CMD", "/xray", "--version", "||", "exit 1"],
+    //     interval: cdk.Duration.seconds(30),
+    //     timeout: cdk.Duration.seconds(5),
+    //     retries: 3,
+    //   },
+    //   logging: ecs.LogDriver.awsLogs({
+    //     streamPrefix: "xray",
+    //     logGroup: ecsLogs,
+    //   }),
+    // });
+    // taskStreamlit.addContainer("xray-daemon", {
+    //   containerName: "xray-daemon",
+    //   image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:latest"),
+    //   // image: ecs.ContainerImage.fromRegistry("public.ecr.aws/xray/aws-xray-daemon:3.3.12"),
+    //   command: ["--local-mode"],
+    //   cpu: 32,
+    //   memoryReservationMiB: 256,
+    //   portMappings: [
+    //     {
+    //       containerPort: 2000,
+    //       protocol: ecs.Protocol.UDP,
+    //     },
+    //   ],
+    //   healthCheck: {
+    //     command: ["CMD", "/xray", "--version", "||", "exit 1"],
+    //     interval: cdk.Duration.seconds(30),
+    //     timeout: cdk.Duration.seconds(5),
+    //     retries: 3,
+    //   },
+    //   logging: ecs.LogDriver.awsLogs({
+    //     streamPrefix: "xray",
+    //     logGroup: ecsLogs,
+    //   }),
+    // });
     ///////////////
     /// Service ///
     ///////////////
-    const serviceNginx = new ecs.FargateService(this, param.ECS.ServiceNameNginx, {
-      cluster: cluster,
-      taskDefinition: taskNginx,
-      serviceName: param.ECS.ServiceNameNginx,
-      assignPublicIp: true,
-      enableExecuteCommand: true,
-      desiredCount: 1,
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
-      capacityProviderStrategies: [
-        {
-          capacityProvider: "FARGATE_SPOT",
-          weight: 1,
-        },
-        {
-          capacityProvider: "FARGATE",
-          weight: 0,
-        },
-      ],
-      circuitBreaker: {
-        rollback: true,
-      },
-      serviceConnectConfiguration: {
-        services: [
-          {
-            portMappingName: "nginx", // portMappingのnameに合わせる
-            discoveryName: param.ECS.DiscoveryNameNginx, // このサービスにアクセスする際の名前
-            port: 80,
-            // dnsName: "ng" // alias name
-          },
-        ],
-        logDriver: ecs.LogDriver.awsLogs({
-          streamPrefix: "service-connect-nginx",
-          logGroup: ecsLogs,
-        }),
-      },
-    });
-    serviceNginx.node.addDependency(namespace); // namespaceが作成された後に作成されるよう依存関係を設定する必要がある
+    // const serviceNginx = new ecs.FargateService(this, param.ECS.ServiceNameNginx, {
+    //   cluster: cluster,
+    //   taskDefinition: taskNginx,
+    //   serviceName: param.ECS.ServiceNameNginx,
+    //   assignPublicIp: true,
+    //   enableExecuteCommand: true,
+    //   desiredCount: 1,
+    //   vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+    //   capacityProviderStrategies: [
+    //     {
+    //       capacityProvider: "FARGATE_SPOT",
+    //       weight: 1,
+    //     },
+    //     {
+    //       capacityProvider: "FARGATE",
+    //       weight: 0,
+    //     },
+    //   ],
+    //   circuitBreaker: {
+    //     rollback: true,
+    //   },
+    //   serviceConnectConfiguration: {
+    //     services: [
+    //       {
+    //         portMappingName: "nginx", // portMappingのnameに合わせる
+    //         discoveryName: param.ECS.DiscoveryNameNginx, // このサービスにアクセスする際の名前
+    //         port: 80,
+    //         // dnsName: "ng" // alias name
+    //       },
+    //     ],
+    //     logDriver: ecs.LogDriver.awsLogs({
+    //       streamPrefix: "service-connect-nginx",
+    //       logGroup: ecsLogs,
+    //     }),
+    //   },
+    // });
+    // serviceNginx.node.addDependency(namespace); // namespaceが作成された後に作成されるよう依存関係を設定する必要がある
     const serviceStreamlit = new ecs.FargateService(this, param.ECS.ServiceNameStreamlit, {
       cluster: cluster,
       taskDefinition: taskStreamlit,
@@ -397,16 +397,17 @@ export class MyBlogStack2 extends cdk.Stack {
       },
     });
     serviceStreamlit.node.addDependency(namespace);
-    serviceStreamlit.connections.allowFrom(serviceNginx, ec2.Port.tcp(8501));
-    const scalingNginx = serviceNginx.autoScaleTaskCount({
-      minCapacity: 1,
-      maxCapacity: 3,
-    });
-    scalingNginx.scaleOnCpuUtilization("CpuScalingNginx", {
-      targetUtilizationPercent: 85,
-      scaleInCooldown: cdk.Duration.seconds(60),
-      scaleOutCooldown: cdk.Duration.seconds(60),
-    });
+    serviceStreamlit.connections.allowFrom(ec2.Peer.anyIpv4(), ec2.Port.tcp(8501));
+    // serviceStreamlit.connections.allowFrom(serviceNginx, ec2.Port.tcp(8501));
+    // const scalingNginx = serviceNginx.autoScaleTaskCount({
+    //   minCapacity: 1,
+    //   maxCapacity: 3,
+    // });
+    // scalingNginx.scaleOnCpuUtilization("CpuScalingNginx", {
+    //   targetUtilizationPercent: 85,
+    //   scaleInCooldown: cdk.Duration.seconds(60),
+    //   scaleOutCooldown: cdk.Duration.seconds(60),
+    // });
     const scalingStreamlit = serviceStreamlit.autoScaleTaskCount({
       minCapacity: 1,
       maxCapacity: 3,
@@ -416,20 +417,20 @@ export class MyBlogStack2 extends cdk.Stack {
       scaleInCooldown: cdk.Duration.seconds(60),
       scaleOutCooldown: cdk.Duration.seconds(60),
     });
-    const albSG = new ec2.SecurityGroup(this, param.ECS.ALBSecurityGroupName, {
-      vpc,
-      securityGroupName: param.ECS.ALBSecurityGroupName,
-    });
-    albSG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
-    const alb = new elbv2.ApplicationLoadBalancer(this, param.ECS.ALBName, {
-      vpc: vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
-      securityGroup: albSG,
-      internetFacing: true,
-      loadBalancerName: param.ECS.ALBName,
-      crossZoneEnabled: true,
-      http2Enabled: true,
-    });
+    // const albSG = new ec2.SecurityGroup(this, param.ECS.ALBSecurityGroupName, {
+    //   vpc,
+    //   securityGroupName: param.ECS.ALBSecurityGroupName,
+    // });
+    // albSG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
+    // const alb = new elbv2.ApplicationLoadBalancer(this, param.ECS.ALBName, {
+    //   vpc: vpc,
+    //   vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+    //   securityGroup: albSG,
+    //   internetFacing: true,
+    //   loadBalancerName: param.ECS.ALBName,
+    //   crossZoneEnabled: true,
+    //   http2Enabled: true,
+    // });
     // const albS3Logs = new s3.Bucket(this, param.ECS.S3Name, {
     //   bucketName: param.ECS.S3Name,
     //   removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -442,29 +443,29 @@ export class MyBlogStack2 extends cdk.Stack {
     //   ],
     // });
 
-    const certificateArn = "";
-    const certificate = certmgr.Certificate.fromCertificateArn(this, "MyBlogCertificate", certificateArn);
-    const listener443 = alb.addListener(param.ECS.ALBTargetGroupName, {
-      port: 443,
-      certificates: [certificate],
-      sslPolicy: elbv2.SslPolicy.TLS12, // CloudFrontは最新のTLS1.3に対応していない
-    });
-    listener443.addTargets(param.ECS.ALBTargetGroupName, {
-      port: 80,
-      targets: [serviceNginx],
-      healthCheck: {
-        protocol: elbv2.Protocol.HTTP,
-        port: "80",
-        path: "/",
-        enabled: true,
-        healthyHttpCodes: "200",
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 3,
-        interval: cdk.Duration.seconds(60),
-        timeout: cdk.Duration.seconds(5),
-      },
-      stickinessCookieDuration: Duration.days(1),
-    });
+    // const certificateArn = param.ALB.CertificateArn;
+    // const certificate = certmgr.Certificate.fromCertificateArn(this, "MyBlogCertificate", certificateArn);
+    // const listener443 = alb.addListener(param.ECS.ALBTargetGroupName, {
+    //   port: 443,
+    //   certificates: [certificate],
+    //   sslPolicy: elbv2.SslPolicy.TLS12, // CloudFrontは最新のTLS1.3に対応していない
+    // });
+    // listener443.addTargets(param.ECS.ALBTargetGroupName, {
+    //   port: 80,
+    //   targets: [serviceStreamlit],
+    //   healthCheck: {
+    //     protocol: elbv2.Protocol.HTTP,
+    //     port: "80",
+    //     path: "/",
+    //     enabled: true,
+    //     healthyHttpCodes: "200",
+    //     healthyThresholdCount: 2,
+    //     unhealthyThresholdCount: 3,
+    //     interval: cdk.Duration.seconds(60),
+    //     timeout: cdk.Duration.seconds(5),
+    //   },
+    //   stickinessCookieDuration: Duration.days(1),
+    // });
     // https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/APIReference/API_LoadBalancerAttribute.html
     // AccessLogs & ConnectionLogs
     // alb.logAccessLogs(albS3Logs);

@@ -9,11 +9,12 @@ from langchain_community.document_loaders.youtube import YoutubeLoader
 from langchain_community.document_loaders.excel import UnstructuredExcelLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_aws import BedrockEmbeddings
-from langchain_aws import BedrockChat
+from langchain_aws import ChatBedrock
 from langchain_community.vectorstores import FAISS  # Facebookのベクトルストア
 from langchain.indexes import VectorstoreIndexCreator
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch_all
+
+# from aws_xray_sdk.core import xray_recorder
+# from aws_xray_sdk.core import patch_all
 
 os.environ["OPENAI_API_KEY"] = "dummy_key"
 os.environ["PROMPTLAYER_API_KEY"] = "dummy_key"
@@ -76,7 +77,7 @@ class Backend:
     # @xray_recorder.capture("llm_setting")
     def llm_setting(self):
         model_id = "anthropic.claude-3-opus-20240229-v1:0"
-        llm = BedrockChat(
+        llm = ChatBedrock(
             model_id=model_id,
             model_kwargs={
                 "max_tokens": 3800,

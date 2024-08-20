@@ -16,18 +16,14 @@ st.set_page_config(
 
 import cbot_frontend
 import rag_frontend
+import search_frontend
 
 PAGES = {
     "Chat Bot": cbot_frontend,
     "RAG": rag_frontend,
+    "Realtime Search": search_frontend,
 }
 image = base64.b64encode(open("../content/MetalMental_Blog.png", "rb").read()).decode()
 
-st.sidebar.markdown(
-    f"""<a href="https://www.metalmental.net/" target="_self">
-    <img src="data:image/png;base64,{image}" style="max-width: 100%; height: auto;">
-    </a>""",
-    unsafe_allow_html=True,
-)
-selection = st.sidebar.radio("", list(PAGES.keys()), index=list(PAGES.keys()).index("Chat Bot"))
+selection = st.sidebar.radio("メニュー", list(PAGES.keys()), index=list(PAGES.keys()).index("Chat Bot"))
 PAGES[selection].Frontend()
