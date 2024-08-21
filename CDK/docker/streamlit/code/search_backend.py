@@ -39,15 +39,15 @@ bedrock_runtime_client = boto3.client("bedrock-runtime", config=config)
 
 
 class Backend:
-    def __init__(self, st_container):
-        self.store = {}
-        self.prompt_template = ChatPromptTemplate.from_messages(
-            [
-                MessagesPlaceholder(variable_name="history"),
-                ("human", "{input}"),
-            ]
-        )
-        self.streamlit_handler = StreamlitCallbackHandler(st_container)
+    # def __init__(self, st_container):
+    #     self.store = {}
+    #     self.prompt_template = ChatPromptTemplate.from_messages(
+    #         [
+    #             MessagesPlaceholder(variable_name="history"),
+    #             ("human", "{input}"),
+    #         ]
+    #     )
+    #     self.streamlit_handler = StreamlitCallbackHandler(st_container)
 
     #############################################################
     # ユーザが入力したチャットからURLを抽出し、URLのリストを返す処理 #
@@ -149,6 +149,7 @@ class Backend:
         chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         service = Service("/app/code/chromedriver")
         driver = webdriver.Chrome(service=service, options=chrome_options)
+        # driver = webdriver.Chrome(options=chrome_options)
         driver.set_page_load_timeout(60)
         web_scraping_text_list = []
         for url in urls:
@@ -183,29 +184,29 @@ class Backend:
     #     memory = ConversationBufferMemory(return_messages=True)
     #     return memory
 
-    def get_session_history(self, session_id: str) -> BaseChatMessageHistory:
-        if session_id not in self.store:
-            self.store[session_id] = ChatMessageHistory()
-        return self.store[session_id]
+    # def get_session_history(self, session_id: str) -> BaseChatMessageHistory:
+    #     if session_id not in self.store:
+    #         self.store[session_id] = ChatMessageHistory()
+    #     return self.store[session_id]
 
-    def generate(self, session_id, llm, prompt: str):
-        runnable = self.prompt_template | llm
-        runnable_with_history = RunnableWithMessageHistory(
-            runnable=runnable,
-            get_session_history=self.get_session_history,
-            input_messages_key="input",
-            output_messages_key="output",
-            history_messages_key="history",
-        )
-        response_stream = runnable_with_history.stream(
-            {"input": prompt},
-            config={"configurable": {"session_id": session_id}},
-        )
-        full_response = ""
-        for chunk in response_stream:
-            if hasattr(chunk, "content") and chunk.content is not None:
-                full_response += chunk.content
-                yield chunk.content
-        self.get_session_history(session_id).add_user_message(prompt)
-        self.get_session_history(session_id).add_ai_message(full_response)
-        return full_response
+    # def generate(self, session_id, llm, prompt: str):
+    #     runnable = self.prompt_template | llm
+    #     runnable_with_history = RunnableWithMessageHistory(
+    #         runnable=runnable,
+    #         get_session_history=self.get_session_history,
+    #         input_messages_key="input",
+    #         output_messages_key="output",
+    #         history_messages_key="history",
+    #     )
+    #     response_stream = runnable_with_history.stream(
+    #         {"input": prompt},
+    #         config={"configurable": {"session_id": session_id}},
+    #     )
+    #     full_response = ""
+    #     for chunk in response_stream:
+    #         if hasattr(chunk, "content") and chunk.content is not None:
+    #             full_response += chunk.content
+    #             yield chunk.content
+    #     self.get_session_history(session_id).add_user_message(prompt)
+    #     self.get_session_history(session_id).add_ai_message(full_response)
+    #     return full_response
